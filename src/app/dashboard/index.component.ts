@@ -8,7 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Observable, Subject, Subscription, merge, startWith, switchMap, tap } from 'rxjs';
-import { TaskGrpcService } from '@app/tasks/services/task-grpc.service';
+import { TaskGrpcService } from '@app/tasks/services/tasks-grpc.service';
 import { TasksStatusesService } from '@app/tasks/services/task-status.service';
 import { StatusCount } from '@app/tasks/types';
 import { ActionsToolbarGroupComponent } from '@components/actions-toolbar-group.component';
@@ -28,6 +28,7 @@ import { StatusesGroupCardComponent } from './components/statuses-group-card.com
 import { DashboardIndexService } from './services/dashboard-index.service';
 import { DashboardStorageService } from './services/dashboard-storage.service';
 import { TasksStatusesGroup } from './types';
+import { UtilsService } from '@services/utils.service';
 
 @Component({
   selector: 'app-dashboard-index',
@@ -95,6 +96,7 @@ app-actions-toolbar {
     ShareUrlService,
     QueryParamsService,
     TaskGrpcService,
+    UtilsService,
     StorageService,
     DashboardStorageService,
     DashboardIndexService,

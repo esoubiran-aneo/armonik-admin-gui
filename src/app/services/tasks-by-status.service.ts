@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { TaskStatusColored } from '@app/types/dialog';
 import { StorageService } from './storage.service';
 
-type TableTasksByStatus = 'applications' | 'sessions';
+type TableTasksByStatus = 'applications' | 'sessions' | 'tasks' ;
 
 @Injectable()
 export class TasksByStatusService {

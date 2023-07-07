@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { TaskGrpcService } from '../services/task-grpc.service';
-import { TaskSummary } from '@aneoconsultingfr/armonik.api.angular';
+import { TaskGrpcService } from '../services/tasks-grpc.service';
+import { UtilsService } from '@services/utils.service';
 
 @Component({
   selector: 'app-tasks-list',
@@ -12,12 +12,13 @@ import { TaskSummary } from '@aneoconsultingfr/armonik.api.angular';
   `],
   standalone: true,
   providers: [
-    TaskGrpcService
+    TaskGrpcService,
+    UtilsService
   ],
 })
 export class TasksListComponent implements AfterViewInit, OnDestroy {
 
-  taskList: TaskSummary[] | null = null;
+  taskList: TaskRawList[] | null = null;
 
   loading = true;
 
@@ -26,7 +27,7 @@ export class TasksListComponent implements AfterViewInit, OnDestroy {
   subscriptions = new Subscription();
 
   ngAfterViewInit(): void {
-    const subscription = this.#taskGrpcService.displayTasksList$()
+    const subscription = this.#taskGrpcService.list$( options, filters)
       .subscribe((response) => {
         this.loading = false;
         this.taskList = response.tasks ?? null;
