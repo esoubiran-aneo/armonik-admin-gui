@@ -12,7 +12,7 @@ export class TasksIndexService {
   readonly tableName: string = 'tasks';
 
   readonly defaultColumns: TaskSummaryColumnKey[] = ['id', 'actions'];
-  readonly availableColumns: TaskSummaryColumnKey[] = ['sessionId', 'id','status', 'endedAt','podTtl', 'statusMessage','status', 'createdAt', 'receivedAt', 'acquiredAt', 'submittedAt', 'creationToEndDuration','processingToEndDuration','initialTaskId', 'options', 'options.options', 'options.applicationName', 'options.applicationNamespace', 'options.applicationService', 'options.applicationVersion', 'options.engineType', 'options.maxDuration', 'options.maxRetries', 'options.partitionId', 'options.priority'];
+  readonly availableColumns: TaskSummaryColumnKey[] = ['sessionId', 'id','status', 'endedAt','podTtl', 'statusMessage', 'createdAt', 'receivedAt', 'acquiredAt', 'submittedAt', 'creationToEndDuration','processingToEndDuration','initialTaskId', 'options', 'options.options', 'options.applicationName', 'options.applicationNamespace', 'options.applicationService', 'options.applicationVersion', 'options.engineType', 'options.maxDuration', 'options.maxRetries', 'options.partitionId', 'options.priority'];
 
   readonly dateColumns: TaskSummaryColumnKey[] = ['endedAt', 'createdAt', 'submittedAt', 'receivedAt', 'acquiredAt'];
   readonly durationColumns: TaskSummaryColumnKey[] = ['creationToEndDuration', 'processingToEndDuration', 'options.maxDuration'];
@@ -20,29 +20,29 @@ export class TasksIndexService {
 
   readonly columnsLabels: Record<TaskSummaryColumnKey, string> = {
     id: $localize`Task ID`,
-    ownerPodId: $localize`owner pod ID`,
-    initialTaskId: $localize`initial task ID`,
-    countDataDependencies: $localize`data dependencies`,
-    countExpectedOutputIds: $localize`expected output`,
-    statusMessage: $localize`status message`,
+    ownerPodId: $localize`Owner Pod ID`,
+    initialTaskId: $localize`Initial Task ID`,
+    countDataDependencies: $localize`Data dependencies`,
+    countExpectedOutputIds: $localize`Expected output`,
+    statusMessage: $localize`Status message`,
     submittedAt: $localize`Submitted at`,
     startedAt: $localize`Started at`,
-    podTtl: $localize`pod Ttl`,
-    podHostname: $localize`pod host name`,
-    receivedAt: $localize`received at`,
-    acquiredAt: $localize`acquired at`,
+    podTtl: $localize`Pod Ttl`,
+    podHostname: $localize`Pod host name`,
+    receivedAt: $localize`Received at`,
+    acquiredAt: $localize`Acquired at`,
     sessionId: $localize`Session ID`,
     status: $localize`Status`,
     endedAt: $localize`Cancelled at`,
     createdAt: $localize`Created at`,
     options: $localize`Options`,
-    actions: $localize`actions`,
-    count: $localize`count`,
-    countParentTaskIds: $localize `count parent task Ids`,
-    countRetryOfIds: $localize `count retry of Ids`,
-    error: $localize `error`,
-    creationToEndDuration: $localize`creation to end duration`,
-    processingToEndDuration: $localize`processing to end duration IDs`,
+    actions: $localize`Actions`,
+    count: $localize`Count`,
+    countParentTaskIds: $localize `Count parent task IDs`,
+    countRetryOfIds: $localize `Count retry of IDs`,
+    error: $localize `Error`,
+    creationToEndDuration: $localize`Creation to end duration`,
+    processingToEndDuration: $localize`Processing to end duration IDs`,
     'options.options': $localize`Options Options`,
     'options.applicationName': $localize`Options Application Name`,
     'options.applicationNamespace': $localize`Options Application Namespace`,
