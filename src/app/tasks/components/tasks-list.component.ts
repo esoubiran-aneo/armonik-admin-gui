@@ -2,6 +2,7 @@ import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TaskGrpcService } from '../services/tasks-grpc.service';
 import { UtilsService } from '@services/utils.service';
+import { TaskSummary } from '@aneoconsultingfr/armonik.api.angular';
 
 @Component({
   selector: 'app-tasks-list',
@@ -18,7 +19,7 @@ import { UtilsService } from '@services/utils.service';
 })
 export class TasksListComponent implements AfterViewInit, OnDestroy {
 
-  taskList: TaskRawList[] | null = null;
+  taskList: TaskSummary[] | null = null;
 
   loading = true;
 

@@ -37,6 +37,7 @@ import { RouterLink } from "@angular/router";
 import {  ClipboardModule } from "@angular/cdk/clipboard";
 import { DurationPipe } from "../pipes/duration.pipe";
 import { TaskStatus } from "@aneoconsultingfr/armonik.api.angular";
+import { FiltersToolbarComponent } from "../components/filters-toolbar.component";
 @Component({
     selector: 'app-tasks-index',
     template: `
@@ -60,8 +61,11 @@ import { TaskStatus } from "@aneoconsultingfr/armonik.api.angular";
                 (resetColumns)="onColumnsReset()"
                 (resetFilters)="onFiltersReset()"
                 >
-          
                 </app-table-actions-toolbar>
+            </mat-toolbar-row>
+
+            <mat-toolbar-row>
+                  <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
             </mat-toolbar-row>
         </mat-toolbar>
 
@@ -159,6 +163,11 @@ import { TaskStatus } from "@aneoconsultingfr/armonik.api.angular";
 
 
     `,
+    styles: [
+      `app-table-actions-toolbar {
+        flex-grow: 1;
+      }`
+    ], 
     standalone: true,
     providers: [
         TasksStatusesService,
@@ -202,13 +211,12 @@ import { TaskStatus } from "@aneoconsultingfr/armonik.api.angular";
         EmptyCellPipe,
         ClipboardModule,
         DurationPipe,
-        DragDropModule
+        DragDropModule,
+        FiltersToolbarComponent
     ]
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   #notificationService = inject(NotificationService);
-  #dialog = inject(MatDialog);
-
   displayedColumns: TaskSummaryColumnKey[] = [];
   availableColumns: TaskSummaryColumnKey[] = [];
 
@@ -255,8 +263,6 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     this.intervalValue = this._tasksIndexService.restoreIntervalValue();
 
     this.sharableURL = this._shareURLService.generateSharableURL(this.options, this.filters);
-
-    // this.tasksStatusesColored = this.#tasksByStatusService.restoreStatuses('Sessions');
   }
 
   ngAfterViewInit(): void {
