@@ -69,8 +69,6 @@ export class TaskGrpcService implements AppGrpcService<TaskSummary>  {
       }
     });
 
-    console.log(listTaskRequest)
-
     return this._tasksClient.listTasks(listTaskRequest);
 
   }
