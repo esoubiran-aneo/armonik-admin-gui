@@ -43,25 +43,24 @@ import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRaw
 </app-page-header>
 
 <mat-toolbar>
-  <mat-toolbar-row>
-    <app-table-actions-toolbar
-      [loading]="isLoading"
-      [refreshTooltip]="autoRefreshTooltip()"
-      [intervalValue]="intervalValue"
-      [columnsLabels]="columnsLabels()"
-      [displayedColumns]="displayedColumns"
-      [availableColumns]="availableColumns"
-      (refresh)="onRefresh()"
-      (intervalValueChange)="onIntervalValueChange($event)"
-      (displayedColumnsChange)="onColumnsChange($event)"
-      (resetColumns)="onColumnsReset()"
-      (resetFilters)="onFiltersReset()">
-    </app-table-actions-toolbar>
-  </mat-toolbar-row>
-
-  <mat-toolbar-row>
-    <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
-  </mat-toolbar-row>
+    <mat-toolbar-row>
+      <app-table-actions-toolbar
+        [loading]="isLoading"
+        [refreshTooltip]="autoRefreshTooltip()"
+        [intervalValue]="intervalValue"
+        [columnsLabels]="columnsLabels()"
+        [displayedColumns]="displayedColumns"
+        [availableColumns]="availableColumns"
+        (refresh)="onRefresh()"
+        (intervalValueChange)="onIntervalValueChange($event)"
+        (displayedColumnsChange)="onColumnsChange($event)"
+        (resetColumns)="onColumnsReset()"
+        (resetFilters)="onFiltersReset()">
+      </app-table-actions-toolbar>
+    </mat-toolbar-row>
+    <mat-toolbar-row>
+      <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    </mat-toolbar-row>
 </mat-toolbar>
 
 <app-table-container>
