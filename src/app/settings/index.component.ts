@@ -1,6 +1,6 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule} from '@angular/material/snack-bar';
+import { Key } from '@app/types/config';
 import { Sidebar, SidebarItem } from '@app/types/navigation';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { PageSectionHeaderComponent } from '@components/page-section-header.component';
@@ -232,7 +233,6 @@ app-page-section + app-page-section {
   `],
   standalone: true,
   providers: [
-    StorageService,
     ShareUrlService,
     QueryParamsService,
     NotificationService,
@@ -256,7 +256,7 @@ app-page-section + app-page-section {
 })
 export class IndexComponent implements OnInit {
   sharableURL = '';
-  keys: Set<string>;
+  keys: Set<Key> = new Set();
 
   sidebar: Sidebar[] = [];
 
@@ -264,15 +264,12 @@ export class IndexComponent implements OnInit {
   #shareURLService = inject(ShareUrlService);
   #notificationService = inject(NotificationService);
   #navigationService = inject(NavigationService);
-
-  constructor(
-    private _storageService: StorageService,
-  ) {}
+  #storageService = inject(StorageService);
 
   ngOnInit(): void {
     this.sharableURL = this.#shareURLService.generateSharableURL(null, null);
-    this.keys = this.#sortKeys(this._storageService.keys);
 
+    this.keys = this.#sortKeys(this.#storageService.restoreKeys());
     this.sidebar = this.#navigationService.restoreSidebar();
   }
 
@@ -285,11 +282,12 @@ export class IndexComponent implements OnInit {
   }
 
   onResetToDefaultSidebar(): void {
-    this.sidebar = this.#navigationService.defaultSidebar;
+    this.sidebar = Array.from(this.#navigationService.defaultSidebar);
   }
 
   onSaveSidebar(): void {
     this.#navigationService.saveSidebar(this.sidebar);
+    this.keys = this.#sortKeys(this.#storageService.restoreKeys());
   }
 
   onRemoveSidebarItem(index: number): void {
@@ -334,17 +332,17 @@ export class IndexComponent implements OnInit {
     const checkboxes = form.querySelectorAll('input[type="checkbox"]');
 
     const checkboxesArray = Array.from(checkboxes) as HTMLInputElement[];
-    const keys = [];
+    const keys: Key[] = [];
 
     for (const checkbox of checkboxesArray) {
       if (checkbox.checked) {
-        keys.push(checkbox.name);
+        keys.push(checkbox.name as Key);
       }
     }
 
     for (const key of keys) {
       this.keys.delete(key);
-      this._storageService.removeItem(key);
+      this.#storageService.removeItem(key);
     }
 
     this.#notificationService.success('Data cleared');
@@ -353,14 +351,14 @@ export class IndexComponent implements OnInit {
   clearAll(): void {
     for (const key of this.keys) {
       this.keys.delete(key);
-      this._storageService.removeItem(key);
+      this.#storageService.removeItem(key);
     }
 
     this.#notificationService.success('All data cleared');
   }
 
   exportData(): void {
-    const data = JSON.stringify(this._storageService.exportData());
+    const data = JSON.stringify(this.#storageService.exportData());
 
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -407,10 +405,10 @@ export class IndexComponent implements OnInit {
 
     reader.onload = () => {
       const data = reader.result as string;
-      this._storageService.importData(data);
-      this.keys = this.#sortKeys(this._storageService.keys);
+      this.#storageService.importData(data);
+      this.keys = this.#sortKeys(this.#storageService.restoreKeys());
 
-      const hasSidebarKey = this.keys.has(this.#navigationService.sidebarKey);
+      const hasSidebarKey = this.keys.has('navigation-sidebar');
 
       // Update sidebar
       if (hasSidebarKey) {
@@ -447,10 +445,7 @@ export class IndexComponent implements OnInit {
     moveItemInArray(this.sidebar, event.previousIndex, event.currentIndex);
   }
 
-  #sortKeys(keys: Set<string>): Set<string> {
-    const keysArray = Array.from(keys);
-    const sortedKeys = keysArray.sort();
-
-    return new Set(sortedKeys);
+  #sortKeys(keys: Set<Key>): Set<Key> {
+    return new Set([...keys].sort());
   }
 }

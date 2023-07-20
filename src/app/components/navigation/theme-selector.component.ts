@@ -4,6 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Theme } from '@app/types/themes';
+import { DefaultConfigService } from '@services/default-config.service';
 import { IconsService } from '@services/icons.service';
 import { StorageService } from '@services/storage.service';
 
@@ -47,13 +49,12 @@ import { StorageService } from '@services/storage.service';
   ],
 })
 export class ThemeSelectorComponent implements OnInit {
+  #defaultConfigService = inject(DefaultConfigService);
   #storageService = inject(StorageService);
   #iconsService = inject(IconsService);
 
-  #themeStorageKey = 'theme';
-
-  currentTheme: string | null;
-  availableThemes = [
+  currentTheme: Theme = this.#defaultConfigService.defaultTheme;
+  availableThemes: { name: Theme, displayName: string }[] = [
     { name: 'deeppurple-amber', displayName: 'Deep Purple & Amber' },
     { name: 'indigo-pink', displayName: 'Indigo & Pink' },
     { name: 'pink-bluegrey', displayName: 'Pink & Blue-grey' },
@@ -61,7 +62,7 @@ export class ThemeSelectorComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    const theme = this.#storageService.getItem<string>(this.#themeStorageKey);
+    const theme = this.#storageService.getItem<Theme>('navigation-theme') as Theme | null;
 
     if (theme) {
       this.currentTheme = theme;
@@ -73,7 +74,7 @@ export class ThemeSelectorComponent implements OnInit {
     return this.#iconsService.getIcon(iconName);
   }
 
-  updateTheme(themeName: string) {
+  updateTheme(themeName: Theme) {
     if (!themeName) {
       return;
     }
@@ -82,17 +83,17 @@ export class ThemeSelectorComponent implements OnInit {
       this.#removeTheme(this.currentTheme);
     }
 
-    if (themeName !== 'indigo-pink') {
+    if (themeName !== this.#defaultConfigService.defaultTheme) {
       this.#addTheme(themeName);
       this.currentTheme = themeName;
     } else {
-      this.currentTheme = null;
+      this.currentTheme = this.#defaultConfigService.defaultTheme;
     }
 
-    this.#storageService.setItem(this.#themeStorageKey, this.currentTheme);
+    this.#storageService.setItem('navigation-theme', this.currentTheme);
   }
 
-  #removeTheme(themeName: string) {
+  #removeTheme(themeName: Theme) {
     const theme = this.availableThemes.find(t => t.name === themeName);
     if (!theme) {
       return;
@@ -109,7 +110,7 @@ export class ThemeSelectorComponent implements OnInit {
     body.classList.remove(theme.name);
   }
 
-  #addTheme(themeName: string) {
+  #addTheme(themeName: Theme) {
     const theme = this.availableThemes.find(t => t.name === themeName);
 
     if (!theme) {

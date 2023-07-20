@@ -1,5 +1,6 @@
 import { TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
+import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { TasksStatusesService } from './tasks-status.service';
 import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFilter, TaskSummaryFilterField, TaskSummaryListOptions } from '../types';
@@ -7,11 +8,10 @@ import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFilter, TaskSummaryFilter
 @Injectable()
 export class TasksIndexService {
   #tasksStatusesService = inject(TasksStatusesService);
+  #defaultConfigService = inject(DefaultConfigService);
   #tableService = inject(TableService);
 
-  readonly tableName: string = 'tasks';
-
-  readonly defaultColumns: TaskSummaryColumnKey[] = ['id', 'status', 'submittedAt', 'actions'];
+  readonly defaultColumns: TaskSummaryColumnKey[] = this.#defaultConfigService.defaultTasks.columns;
   readonly availableColumns: TaskSummaryColumnKey[] = [
     'id', 'acquiredAt', 'actions', 'createdAt', 'creationToEndDuration', 'endedAt', 'initialTaskId', 'options', 'options.applicationName', 'options.applicationNamespace', 'options.applicationService', 'options.applicationVersion', 'options.engineType', 'options.maxDuration', 'options.maxRetries', 'options.partitionId', 'options.priority', 'ownerPodId', 'podHostname', 'podTtl', 'processingToEndDuration', 'receivedAt', 'sessionId', 'startedAt', 'status', 'statusMessage', 'submittedAt', 'countDataDependencies', 'countExpectedOutputIds', 'countParentTaskIds', 'countRetryOfIds', 'select'
   ];
@@ -57,16 +57,9 @@ export class TasksIndexService {
     select: $localize`Select`,
   };
 
-  readonly defaultOptions: TaskSummaryListOptions = {
-    pageIndex: 0,
-    pageSize: 20,
-    sort: {
-      active: 'submittedAt', // TODO: update default column according to the status
-      direction: 'desc',
-    },
-  };
+  readonly defaultOptions: TaskSummaryListOptions = this.#defaultConfigService.defaultTasks.options;
 
-  readonly defaultFilters: TaskSummaryFilter[] = [];
+  readonly defaultFilters: TaskSummaryFilter[] = this.#defaultConfigService.defaultTasks.filters;
   readonly availableFiltersFields: TaskSummaryFilterField[] = [
     // Do not filter object or array fields
     // {
@@ -94,7 +87,7 @@ export class TasksIndexService {
     }
   ];
 
-  readonly defaultIntervalValue: number = 10;
+  readonly defaultIntervalValue: number = this.#defaultConfigService.defaultTasks.interval;
 
   columnToLabel(column: TaskSummaryColumnKey): string {
     return this.columnsLabels[column];
@@ -144,11 +137,11 @@ export class TasksIndexService {
    */
 
   saveIntervalValue(value: number): void {
-    this.#tableService.saveIntervalValue(this.tableName, value);
+    this.#tableService.saveIntervalValue('tasks-interval', value);
   }
 
   restoreIntervalValue(): number {
-    return this.#tableService.restoreIntervalValue(this.tableName) ?? this.defaultIntervalValue;
+    return this.#tableService.restoreIntervalValue('tasks-interval') ?? this.defaultIntervalValue;
   }
 
   /**
@@ -156,11 +149,11 @@ export class TasksIndexService {
    */
 
   saveOptions(options: TaskSummaryListOptions): void {
-    this.#tableService.saveOptions(this.tableName, options);
+    this.#tableService.saveOptions('tasks-options', options);
   }
 
   restoreOptions(): TaskSummaryListOptions {
-    const options = this.#tableService.restoreOptions<TaskSummary>(this.tableName, this.defaultOptions);
+    const options = this.#tableService.restoreOptions<TaskSummary>('tasks-options', this.defaultOptions);
 
     return options;
   }
@@ -170,17 +163,17 @@ export class TasksIndexService {
    */
 
   saveColumns(columns: TaskSummaryColumnKey[]): void {
-    this.#tableService.saveColumns(this.tableName, columns);
+    this.#tableService.saveColumns('tasks-columns', columns);
   }
 
   restoreColumns(): TaskSummaryColumnKey[] {
-    const columns = this.#tableService.restoreColumns<TaskSummaryColumnKey[]>(this.tableName) ?? this.defaultColumns;
+    const columns = this.#tableService.restoreColumns<TaskSummaryColumnKey[]>('tasks-columns') ?? this.defaultColumns;
 
     return [...columns];
   }
 
   resetColumns(): TaskSummaryColumnKey[] {
-    this.#tableService.resetColumns(this.tableName);
+    this.#tableService.resetColumns('tasks-columns');
 
     return Array.from(this.defaultColumns);
   }
@@ -190,15 +183,15 @@ export class TasksIndexService {
    */
 
   saveFilters(filters: TaskSummaryFilter[]): void {
-    this.#tableService.saveFilters(this.tableName, filters);
+    this.#tableService.saveFilters('tasks-filters', filters);
   }
 
   restoreFilters(): TaskSummaryFilter[] {
-    return this.#tableService.restoreFilters<TaskSummary>(this.tableName, this.availableFiltersFields) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<TaskSummary>('tasks-filters', this.availableFiltersFields) ?? this.defaultFilters;
   }
 
   resetFilters(): TaskSummaryFilter[] {
-    this.#tableService.resetFilters(this.tableName);
+    this.#tableService.resetFilters('tasks-filters');
 
     return this.defaultFilters;
   }
