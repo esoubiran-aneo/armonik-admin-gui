@@ -44,7 +44,7 @@ import { CountByStatusComponent } from './components/count-by-status.component';
 import { SessionsGrpcService } from './services/sessions-grpc.service';
 import { SessionsIndexService } from './services/sessions-index.service';
 import { SessionsStatusesService } from './services/sessions-statuses.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, SessionRawFilterField, SessionRawListOptions } from './types';
+import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, SessionsFiltersDefinition, SessionRawListOptions } from './types';
 
 @Component({
   selector: 'app-sessions-index',
@@ -81,7 +81,7 @@ import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, 
   </mat-toolbar-row>
 
   <mat-toolbar-row>
-    <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -266,7 +266,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   options: SessionRawListOptions;
 
   filters: SessionRawFilter[] = [];
-  availableFiltersFields: SessionRawFilterField[] = [];
+  filtersDefinitions: SessionsFiltersDefinition[] = [];
 
   intervalValue = 0;
   sharableURL = '';
@@ -297,7 +297,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this._sessionsIndexService.restoreOptions();
 
-    this.availableFiltersFields = this._sessionsIndexService.availableFiltersFields;
+    this.filtersDefinitions = this._sessionsIndexService.filtersDefinitions;
     this.filters = this._sessionsIndexService.restoreFilters();
 
     this.intervalValue = this._sessionsIndexService.restoreIntervalValue();

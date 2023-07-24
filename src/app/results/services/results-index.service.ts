@@ -4,7 +4,7 @@ import { AppIndexService } from '@app/types/services';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { ResultsStatusesService } from './results-statuses.service';
-import { ResultRaw, ResultRawColumnKey, ResultRawFilter, ResultRawFilterField, ResultRawListOptions } from '../types';
+import { ResultRaw, ResultRawColumnKey, ResultRawFilter, ResultsFiltersDefinition, ResultRawListOptions } from '../types';
 
 @Injectable()
 export class ResultsIndexService implements AppIndexService<ResultRaw> {
@@ -30,33 +30,33 @@ export class ResultsIndexService implements AppIndexService<ResultRaw> {
   readonly defaultOptions: ResultRawListOptions = this.#defaultConfigService.defaultResults.options;
 
   readonly defaultFilters: ResultRawFilter[] = this.#defaultConfigService.defaultResults.filters;
-  readonly availableFiltersFields: ResultRawFilterField[] = [
-    {
-      field: 'name',
-      type: 'text',
-    },
-    {
-      field: 'status',
-      type: 'select',
-      options: Object.keys(this.#resultsStatusesService.statuses).map(status => {
-        return {
-          value: status,
-          label: this.#resultsStatusesService.statuses[Number(status) as ResultStatus],
-        };
-      }),
-    },
-    {
-      field: 'ownerTaskId',
-      type: 'text',
-    },
-    {
-      field: 'createdAt',
-      type: 'date',
-    },
-    {
-      field: 'sessionId',
-      type: 'text',
-    },
+  readonly filtersDefinitions: ResultsFiltersDefinition[] = [
+    // {
+    //   field: 'name',
+    //   type: 'text',
+    // },
+    // {
+    //   field: 'status',
+    //   type: 'select',
+    //   options: Object.keys(this.#resultsStatusesService.statuses).map(status => {
+    //     return {
+    //       value: status,
+    //       label: this.#resultsStatusesService.statuses[Number(status) as ResultStatus],
+    //     };
+    //   }),
+    // },
+    // {
+    //   field: 'ownerTaskId',
+    //   type: 'text',
+    // },
+    // {
+    //   field: 'createdAt',
+    //   type: 'date',
+    // },
+    // {
+    //   field: 'sessionId',
+    //   type: 'text',
+    // },
   ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultResults.interval;
@@ -148,7 +148,7 @@ export class ResultsIndexService implements AppIndexService<ResultRaw> {
   }
 
   restoreFilters(): ResultRawFilter[] {
-    return this.#tableService.restoreFilters<ResultRaw>('results-filters', this.availableFiltersFields) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<ResultRaw>('results-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): ResultRawFilter[] {

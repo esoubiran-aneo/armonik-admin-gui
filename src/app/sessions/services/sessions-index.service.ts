@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { SessionsStatusesService } from './sessions-statuses.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawFilter, SessionRawFilterField, SessionRawListOptions } from '../types';
+import { SessionRaw, SessionRawColumnKey, SessionRawFilter, SessionsFiltersDefinition, SessionRawListOptions } from '../types';
 
 @Injectable()
 export class SessionsIndexService {
@@ -43,34 +43,34 @@ export class SessionsIndexService {
   readonly defaultOptions: SessionRawListOptions = this.#defaultConfigService.defaultSessions.options;
 
   readonly defaultFilters: SessionRawFilter[] = this.#defaultConfigService.defaultSessions.filters;
-  readonly availableFiltersFields: SessionRawFilterField[] = [
+  readonly filtersDefinitions: SessionsFiltersDefinition[] = [
     // Do not filter object or array fields
-    {
-      field: 'sessionId',
-      type: 'text',
-    },
+    // {
+    //   field: 'sessionId',
+    //   type: 'text',
+    // },
     // {
     //   field: 'partitionIds',
     //   type: 'text',
     // },
-    {
-      field: 'createdAt',
-      type: 'date',
-    },
-    {
-      field: 'cancelledAt',
-      type: 'date',
-    },
-    {
-      field: 'status',
-      type: 'select',
-      options: Object.keys(this.#sessionsStatusesService.statuses).map(status => {
-        return {
-          value: status,
-          label: this.#sessionsStatusesService.statuses[Number(status) as SessionStatus],
-        };
-      }),
-    },
+    // {
+    //   field: 'createdAt',
+    //   type: 'date',
+    // },
+    // {
+    //   field: 'cancelledAt',
+    //   type: 'date',
+    // },
+    // {
+    //   field: 'status',
+    //   type: 'select',
+    //   options: Object.keys(this.#sessionsStatusesService.statuses).map(status => {
+    //     return {
+    //       value: status,
+    //       label: this.#sessionsStatusesService.statuses[Number(status) as SessionStatus],
+    //     };
+    //   }),
+    // },
     // FIXME: Not implemented yet in Core
     // {
     //   field: 'duration',
@@ -179,7 +179,7 @@ export class SessionsIndexService {
   }
 
   restoreFilters(): SessionRawFilter[] {
-    return this.#tableService.restoreFilters<SessionRaw>('sessions-filters', this.availableFiltersFields) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<SessionRaw>('sessions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): SessionRawFilter[] {

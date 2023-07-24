@@ -5,7 +5,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ColumnKey } from '@app/types/data';
-import { Filter, FilterField } from '@app/types/filters';
+import { Filter, FiltersDefinition } from '@app/types/filters';
 import { FiltersChipsComponent } from '@components/filters-chips.component';
 import { FiltersDialogComponent } from '@components/filters-dialog.component';
 import { IconsService } from '@services/icons.service';
@@ -50,7 +50,7 @@ export class FiltersToolbarComponent<T extends object> {
   #iconsService = inject(IconsService);
 
   @Input({ required: true }) filters: Filter<T>[] = [];
-  @Input({ required: true }) filtersFields: FilterField<T>[] = [];
+  @Input({ required: true }) filtersFields: FiltersDefinition<T>[] = [];
   @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null = null;
 
   @Output() filtersChange: EventEmitter<Filter<T>[]> = new EventEmitter<Filter<T>[]>();
@@ -71,7 +71,7 @@ export class FiltersToolbarComponent<T extends object> {
     const dialogRef = this._dialog.open(FiltersDialogComponent, {
       data: {
         filters: Array.from(this.filters),
-        availableFiltersFields: Array.from(this.filtersFields),
+        filtersDefinitions: Array.from(this.filtersFields),
         columnsLabels: this.columnsLabels,
       }
     });

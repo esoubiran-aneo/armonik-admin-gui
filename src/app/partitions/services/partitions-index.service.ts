@@ -29,28 +29,28 @@ export class PartitionsIndexService implements AppIndexService<PartitionRaw> {
   readonly defaultOptions: PartitionRawListOptions = this.#defaultConfigService.defaultPartitions.options;
 
   readonly defaultFilters: PartitionRawFilter[] = this.#defaultConfigService.defaultPartitions.filters;
-  readonly availableFiltersFields: PartitionRawFilterField[] = [
+  readonly filtersDefinitions: PartitionRawFilterField[] = [
     // Do not add filter on array or object fields
-    {
-      field: 'id',
-      type: 'text',
-    },
-    {
-      field: 'priority',
-      type: 'number',
-    },
-    {
-      field: 'podMax',
-      type: 'number',
-    },
-    {
-      field: 'podReserved',
-      type: 'number',
-    },
-    {
-      field: 'preemptionPercentage',
-      type: 'number',
-    },
+    // {
+    //   field: 'id',
+    //   type: 'text',
+    // },
+    // {
+    //   field: 'priority',
+    //   type: 'number',
+    // },
+    // {
+    //   field: 'podMax',
+    //   type: 'number',
+    // },
+    // {
+    //   field: 'podReserved',
+    //   type: 'number',
+    // },
+    // {
+    //   field: 'preemptionPercentage',
+    //   type: 'number',
+    // },
   ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultPartitions.interval;
@@ -137,7 +137,7 @@ export class PartitionsIndexService implements AppIndexService<PartitionRaw> {
   }
 
   restoreFilters(): PartitionRawFilter[] {
-    return this.#tableService.restoreFilters<PartitionRaw>('partitions-filters', this.availableFiltersFields) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<PartitionRaw>('partitions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): PartitionRawFilter[] {

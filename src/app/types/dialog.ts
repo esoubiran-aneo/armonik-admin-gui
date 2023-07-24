@@ -1,7 +1,7 @@
 import { TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { TaskOptions } from '@app/tasks/types';
 import { ColumnKey } from './data';
-import { Filter, FilterField } from './filters';
+import { Filter, FiltersDefinition } from './filters';
 
 export interface ColumnsModifyDialogData<T extends object, O extends object> {
   currentColumns: ColumnKey<T, O>[]
@@ -13,7 +13,7 @@ export type ColumnsModifyDialogResult<T extends object, O extends object> = Colu
 
 export interface FiltersDialogData<T extends object> {
   filters: Filter<T>[]
-  availableFiltersFields: FilterField<T>[]
+  filtersDefinitions: FiltersDefinition<T>[]
   columnsLabels: Record<ColumnKey<T>, string>
 }
 

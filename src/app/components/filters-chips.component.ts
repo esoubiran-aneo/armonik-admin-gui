@@ -2,7 +2,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { ColumnKey, FieldKey } from '@app/types/data';
-import { Filter, FilterField, FilterFieldSelect } from '@app/types/filters';
+import { Filter, FiltersDefinition, FilterInputSelect } from '@app/types/filters';
 
 @Component({
   selector: 'app-filters-chips',
@@ -10,7 +10,7 @@ import { Filter, FilterField, FilterFieldSelect } from '@app/types/filters';
 <mat-chip-listbox>
   <ng-container *ngFor="let filter of filters; let index = index; trackBy:trackByFilter">
     <mat-chip class="mat-mdc-standard-chip mat-primary mat-mdc-chip-selected">
-      <span *ngIf="filter.field;else noField"> {{ content(filter) }} </span>
+      <span *ngIf="filter.key;else noField"> {{ content(filter) }} </span>
     </mat-chip>
   </ng-container>
 </mat-chip-listbox>
@@ -30,7 +30,7 @@ import { Filter, FilterField, FilterFieldSelect } from '@app/types/filters';
 })
 export class FiltersChipsComponent<T extends object> {
   @Input({ required: true }) filters: Filter<T>[] = [];
-  @Input({ required: true }) filtersFields: FilterField<T>[] = [];
+  @Input({ required: true }) filtersFields: FiltersDefinition<T>[] = [];
   @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null = null;
 
   content(filter: Filter<T>): string {
@@ -38,17 +38,17 @@ export class FiltersChipsComponent<T extends object> {
       return $localize`No value`;
 
     if (filter.value instanceof Object)
-      return this.columnToLabel(filter.field) + '=' + $localize`from ` + filter.value.start + $localize` to ` + filter.value.end;
+      return this.columnToLabel(filter.key) + '=' + $localize`from ` + filter.value.start + $localize` to ` + filter.value.end;
 
-    if (this.#isSelectFilter(filter)) {
-      const options = (this.filtersFields.find(field => field.field === filter.field) as FilterFieldSelect<T>).options;
+    // if (this.#isSelectFilter(filter)) {
+    //   const options = (this.filtersFields.find(field => field.key === filter.key) as FilterInputSelect).options;
 
-      const option = options.find(option => option.value === filter.value);
-      return this.columnToLabel(filter.field) + '=' + option?.label ?? filter.value;
-    }
+    //   const option = options.find(option => option.value === filter.value);
+    //   return this.columnToLabel(filter.key) + '=' + option?.label ?? filter.value;
+    // }
 
 
-    return this.columnToLabel(filter.field) + '=' + filter.value;
+    return this.columnToLabel(filter.key) + '=' + filter.value;
   }
 
   columnToLabel(column: FieldKey<T> | null): string {
@@ -62,10 +62,11 @@ export class FiltersChipsComponent<T extends object> {
   }
 
   trackByFilter(_: number, filter: Filter<T>): string {
-    return (filter.field as string) ?? '';
+    return (filter.key as string) ?? '';
   }
 
   #isSelectFilter(filter: Filter<T>): boolean {
-    return this.filtersFields.find(field => field.field === filter.field)?.type === 'select';
+    return false
+    // return this.filtersFields.find(field => field.key === filter.key)?.type === 'select';
   }
 }

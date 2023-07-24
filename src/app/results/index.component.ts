@@ -35,7 +35,7 @@ import { UtilsService } from '@services/utils.service';
 import { ResultsGrpcService } from './services/results-grpc.service';
 import { ResultsIndexService } from './services/results-index.service';
 import { ResultsStatusesService } from './services/results-statuses.service';
-import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, ResultRawFilterField, ResultRawListOptions } from './types';
+import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, ResultsFiltersDefinition, ResultRawListOptions } from './types';
 
 
 @Component({
@@ -64,7 +64,7 @@ import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, Resu
   </mat-toolbar-row>
 
   <mat-toolbar-row>
-    <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -196,7 +196,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
   options: ResultRawListOptions;
 
   filters: ResultRawFilter[] = [];
-  availableFiltersFields: ResultRawFilterField[] = [];
+  filtersDefinitions: ResultsFiltersDefinition[] = [];
 
   intervalValue = 0;
   sharableURL = '';
@@ -224,7 +224,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
 
     this.options = this._resultsIndexService.restoreOptions();
 
-    this.availableFiltersFields = this._resultsIndexService.availableFiltersFields;
+    this.filtersDefinitions = this._resultsIndexService.filtersDefinitions;
     this.filters = this._resultsIndexService.restoreFilters();
 
     this.intervalValue = this._resultsIndexService.restoreIntervalValue();

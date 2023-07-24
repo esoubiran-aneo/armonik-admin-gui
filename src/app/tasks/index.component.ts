@@ -1,4 +1,4 @@
-import { TaskOptions, TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterStringOperator, TaskOptions, TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { SelectionModel } from '@angular/cdk/collections';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -31,14 +31,14 @@ import { IconsService } from '@services/icons.service';
 import { NotificationService } from '@services/notification.service';
 import { QueryParamsService } from '@services/query-params.service';
 import { ShareUrlService } from '@services/share-url.service';
-import { TableStorageService } from '@services/table-storage.service';
+import { TableStorageService } from '@services/table-storage.service'
 import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { UtilsService } from '@services/utils.service';
 import { TasksGrpcService } from './services/tasks-grpc.service';
 import { TasksIndexService } from './services/tasks-index.service';
 import { TasksStatusesService } from './services/tasks-status.service';
-import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilter, TaskSummaryFilterField, TaskSummaryListOptions} from './types';
+import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilter, TasksFiltersDefinition, TaskSummaryListOptions} from './types';
 
 @Component({
   selector: 'app-tasks-index',
@@ -72,7 +72,7 @@ import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilt
   </mat-toolbar-row>
 
   <mat-toolbar-row>
-    <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -270,7 +270,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   options: TaskSummaryListOptions;
 
   filters: TaskSummaryFilter[] = [];
-  availableFiltersFields: TaskSummaryFilterField[] = [];
+  filtersDefinitions: TasksFiltersDefinition[] = [];
 
   sharableURL = '';
 
@@ -290,7 +290,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this.#tasksIndexService.restoreOptions();
 
-    this.availableFiltersFields = this.#tasksIndexService.availableFiltersFields;
+    this.filtersDefinitions = this.#tasksIndexService.filtersDefinitions;
     this.filters = this.#tasksIndexService.restoreFilters();
 
     this.intervalValue = this.#tasksIndexService.restoreIntervalValue();
@@ -424,8 +424,9 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onRetries(task: TaskSummary): void {
     const filter: TaskSummaryFilter = {
-      field: 'initialTaskId',
+      key: 'initialTaskId',
       value: task.id,
+      operator: FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
     };
 
     this.onFiltersChange([filter]);

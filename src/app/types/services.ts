@@ -2,7 +2,7 @@ import { SortDirection as ArmoniKSortDirection } from '@aneoconsultingfr/armonik
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 import { ColumnKey, FieldKey } from './data';
-import { Filter, FilterField } from './filters';
+import { Filter, FiltersDefinition } from './filters';
 import { ListOptions } from './options';
 
 export interface AppGrpcService<T extends object> {
@@ -22,7 +22,7 @@ export interface AppIndexService<T extends object> {
   readonly defaultOptions: ListOptions<T>
 
   readonly defaultFilters: Filter<T>[]
-  readonly availableFiltersFields: FilterField<T>[]
+  readonly filtersDefinitions: FiltersDefinition<T>[]
   // TODO: add on AppGrpcService (or create a shared class for both)
   // readonly sortDirections: SortDirection
   // readonly sortFields: Record<Column<T>, number>

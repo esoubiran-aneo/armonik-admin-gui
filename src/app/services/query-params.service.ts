@@ -20,7 +20,7 @@ export class QueryParamsService<T extends object> {
     const flattenFilters: Record<string, string> = {};
 
     for (const filter of filters) {
-      const filterKey = filter.field;
+      const filterKey = filter.key;
       const filterValue = filter.value;
 
       if (!filterKey || !filterValue) {

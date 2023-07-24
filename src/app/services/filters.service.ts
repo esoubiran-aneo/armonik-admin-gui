@@ -1,40 +1,59 @@
-import { FilterStringRange, FilterNumberRange, FilterDateRange, FilterArrayRange } from "@aneoconsultingfr/armonik.api.angular";
+import { FilterArrayOperator, FilterDateOperator, FilterNumberOperator, FilterStatusOperator, FilterStringOperator } from "@aneoconsultingfr/armonik.api.angular";
 import { Injectable } from "@angular/core";
+import { FilterType } from "@app/types/filters";
 
 @Injectable()
 export class FiltersService {
-  readonly filterStringRange: Record<FilterStringRange, string> = {
-    [FilterStringRange.FILTER_STRING_RANGE_UNSPECIFIED]: $localize`unspecified`,
-    [FilterStringRange.FILTER_STRING_RANGE_EQUAL]: $localize`equal`,
-    [FilterStringRange.FILTER_STRING_RANGE_NOT_EQUAL]: $localize`not equal`,
-    [FilterStringRange.FILTER_STRING_RANGE_CONTAINS]: $localize`contains`,
-    [FilterStringRange.FILTER_STRING_RANGE_NOT_CONTAINS]: $localize`not contains`,
-    [FilterStringRange.FILTER_STRING_RANGE_STARTS_WITH]: $localize`starts with`,
-    [FilterStringRange.FILTER_STRING_RANGE_ENDS_WITH]: $localize`ends with`,
+  readonly filterStringOperators: Record<FilterStringOperator, string> = {
+    [FilterStringOperator.FILTER_STRING_OPERATOR_UNSPECIFIED]: $localize`Unspecified`,
+    [FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL]: $localize`Equal`,
+    [FilterStringOperator.FILTER_STRING_OPERATOR_NOT_EQUAL]: $localize`Not Equal`,
+    [FilterStringOperator.FILTER_STRING_OPERATOR_CONTAINS]: $localize`Contains`,
+    [FilterStringOperator.FILTER_STRING_OPERATOR_NOT_CONTAINS]: $localize`Not Contains`,
+    [FilterStringOperator.FILTER_STRING_OPERATOR_STARTS_WITH]: $localize`Starts With`,
+    [FilterStringOperator.FILTER_STRING_OPERATOR_ENDS_WITH]: $localize`Ends With`,
   }
 
-  readonly filterNumberRange: Record<FilterNumberRange, string> = {
-    [FilterNumberRange.FILTER_NUMBER_RANGE_UNSPECIFIED]: $localize`unspecified`,
-    [FilterNumberRange.FILTER_NUMBER_RANGE_LESS_THAN]: $localize`less than`,
-    [FilterNumberRange.FILTER_NUMBER_RANGE_LESS_THAN_OR_EQUAL]: $localize`less than or equal`,
-    [FilterNumberRange.FILTER_NUMBER_RANGE_EQUAL]: $localize`equal`,
-    [FilterNumberRange.FILTER_NUMBER_RANGE_NOT_EQUAL]: $localize`not equal`,
-    [FilterNumberRange.FILTER_NUMBER_RANGE_GREATER_THAN]: $localize`greater than`,
-    [FilterNumberRange.FILTER_NUMBER_RANGE_GREATER_THAN_OR_EQUAL]: $localize`greater than or equal`,
+  readonly filterNumberOperators: Record<FilterNumberOperator, string> = {
+    [FilterNumberOperator.FILTER_NUMBER_OPERATOR_UNSPECIFIED]: $localize`Unspecified`,
+    [FilterNumberOperator.FILTER_NUMBER_OPERATOR_LESS_THAN]: $localize`Less Than`,
+    [FilterNumberOperator.FILTER_NUMBER_OPERATOR_LESS_THAN_OR_EQUAL]: $localize`Less Than or Equal`,
+    [FilterNumberOperator.FILTER_NUMBER_OPERATOR_EQUAL]: $localize`Equal`,
+    [FilterNumberOperator.FILTER_NUMBER_OPERATOR_NOT_EQUAL]: $localize`Not Equal`,
+    [FilterNumberOperator.FILTER_NUMBER_OPERATOR_GREATER_THAN]: $localize`Greater Than`,
+    [FilterNumberOperator.FILTER_NUMBER_OPERATOR_GREATER_THAN_OR_EQUAL]: $localize`Greater Than or Equal`,
   }
 
-  readonly filterDateRange: Record<FilterDateRange, string> = {
-    [FilterDateRange.FILTER_DATE_RANGE_UNSPECIFIED]: $localize`unspecified`,
-    [FilterDateRange.FILTER_DATE_RANGE_BEFORE]: $localize`before`,
-    [FilterDateRange.FILTER_DATE_RANGE_BEFORE_OR_EQUAL]: $localize`before or equal`,
-    [FilterDateRange.FILTER_DATE_RANGE_EQUAL]: $localize`equal`,
-    [FilterDateRange.FILTER_DATE_RANGE_AFTER]: $localize`after`,
-    [FilterDateRange.FILTER_DATE_RANGE_AFTER_OR_EQUAL]: $localize`after or equal`,
+  readonly filterDateOperators: Record<FilterDateOperator, string> = {
+    [FilterDateOperator.FILTER_DATE_OPERATOR_UNSPECIFIED]: $localize`Unspecified`, // TODO: remove unspecified
+    [FilterDateOperator.FILTER_DATE_OPERATOR_BEFORE]: $localize`Before`,
+    [FilterDateOperator.FILTER_DATE_OPERATOR_BEFORE_OR_EQUAL]: $localize`Before or Equal`,
+    [FilterDateOperator.FILTER_DATE_OPERATOR_EQUAL]: $localize`Equal`,
+    [FilterDateOperator.FILTER_DATE_OPERATOR_AFTER]: $localize`After`,
+    [FilterDateOperator.FILTER_DATE_OPERATOR_AFTER_OR_EQUAL]: $localize`After or Equal`,
   }
 
-  readonly filterArrayRange: Record<FilterArrayRange, string> = {
-    [FilterArrayRange.FILTER_ARRAY_RANGE_UNSPECIFIED]: $localize`unspecified`,
-    [FilterArrayRange.FILTER_ARRAY_RANGE_CONTAINS]: $localize`contains`,
-    [FilterArrayRange.FILTER_ARRAY_RANGE_NOT_CONTAINS]: $localize`not contains`,
+  readonly filterArrayOperators: Record<FilterArrayOperator, string> = {
+    [FilterArrayOperator.FILTER_ARRAY_OPERATOR_UNSPECIFIED]: $localize`Unspecified`,
+    [FilterArrayOperator.FILTER_ARRAY_OPERATOR_CONTAINS]: $localize`Contains`,
+    [FilterArrayOperator.FILTER_ARRAY_OPERATOR_NOT_CONTAINS]: $localize`Not Contains`,
+  }
+
+  readonly filterStatusOperators: Record<FilterStatusOperator, string> = {
+    [FilterStatusOperator.FILTER_STATUS_OPERATOR_UNSPECIFIED]: $localize`Unspecified`,
+    [FilterStatusOperator.FILTER_STATUS_OPERATOR_EQUAL]: $localize`Equal`,
+    [FilterStatusOperator.FILTER_STATUS_OPERATOR_NOT_EQUAL]: $localize`Not Equal`,
+  }
+
+  readonly filterOperators: Record<FilterType, Record<number, string>> = {
+    'string': this.filterStringOperators,
+    'number': this.filterNumberOperators,
+    'date': this.filterDateOperators,
+    'array': this.filterArrayOperators,
+    'status': this.filterStringOperators,
+  }
+
+  findOperators(type: FilterType) {
+    return this.filterOperators[type];
   }
 }

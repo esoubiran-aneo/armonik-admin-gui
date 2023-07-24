@@ -36,7 +36,7 @@ import { UtilsService } from '@services/utils.service';
 import { CountByStatusComponent } from './components/count-by-status.component';
 import { ApplicationsGrpcService } from './services/applications-grpc.service';
 import { ApplicationsIndexService } from './services/applications-index.service';
-import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawFilterField, ApplicationRawListOptions } from './types';
+import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationsFiltersDefinition, ApplicationRawListOptions } from './types';
 
 @Component({
   selector: 'app-applications-index',
@@ -73,7 +73,7 @@ import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, Applic
   </mat-toolbar-row>
 
   <mat-toolbar-row>
-    <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -196,7 +196,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   options: ApplicationRawListOptions;
 
   filters: ApplicationRawFilter[] = [];
-  availableFiltersFields: ApplicationRawFilterField[] = [];
+  filtersDefinitions: ApplicationsFiltersDefinition[] = [];
 
 
   intervalValue = 0;
@@ -226,7 +226,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this._applicationsIndexService.restoreOptions();
 
-    this.availableFiltersFields = this._applicationsIndexService.availableFiltersFields;
+    this.filtersDefinitions = this._applicationsIndexService.filtersDefinitions;
     this.filters = this._applicationsIndexService.restoreFilters();
 
     this.intervalValue = this._applicationsIndexService.restoreIntervalValue();

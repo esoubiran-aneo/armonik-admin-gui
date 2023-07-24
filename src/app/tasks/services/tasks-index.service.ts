@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { TasksStatusesService } from './tasks-status.service';
-import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFilter, TaskSummaryFilterField, TaskSummaryListOptions } from '../types';
+import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFilter, TaskSummaryListOptions, TasksFiltersDefinition } from '../types';
 
 @Injectable()
 export class TasksIndexService {
@@ -60,31 +60,31 @@ export class TasksIndexService {
   readonly defaultOptions: TaskSummaryListOptions = this.#defaultConfigService.defaultTasks.options;
 
   readonly defaultFilters: TaskSummaryFilter[] = this.#defaultConfigService.defaultTasks.filters;
-  readonly availableFiltersFields: TaskSummaryFilterField[] = [
+  readonly filtersDefinitions: TasksFiltersDefinition[] = [
     // Do not filter object or array fields
     // {
     //   field: 'id',
     //   type: 'text',
     // },
-    {
-      field: 'status',
-      type: 'select',
-      options: Object.keys(this.#tasksStatusesService.statuses).map(status => {
-        return {
-          value: status,
-          label: this.#tasksStatusesService.statuses[Number(status) as TaskStatus],
-        };
-      }),
-    },
-    {
-      field: 'sessionId',
-      type: 'text',
-    },
-    // Need to add this filter to the API
-    {
-      field: 'initialTaskId',
-      type: 'text',
-    }
+    // {
+    //   field: 'status',
+    //   type: 'select',
+    //   options: Object.keys(this.#tasksStatusesService.statuses).map(status => {
+    //     return {
+    //       value: status,
+    //       label: this.#tasksStatusesService.statuses[Number(status) as TaskStatus],
+    //     };
+    //   }),
+    // },
+    // {
+    //   field: 'sessionId',
+    //   type: 'text',
+    // },
+    // // Need to add this filter to the API
+    // {
+    //   field: 'initialTaskId',
+    //   type: 'text',
+    // }
   ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultTasks.interval;
@@ -187,7 +187,7 @@ export class TasksIndexService {
   }
 
   restoreFilters(): TaskSummaryFilter[] {
-    return this.#tableService.restoreFilters<TaskSummary>('tasks-filters', this.availableFiltersFields) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<TaskSummary>('tasks-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): TaskSummaryFilter[] {

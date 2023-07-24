@@ -1,4 +1,4 @@
-import { NgForOf, NgIf } from '@angular/common';
+import { KeyValue, KeyValuePipe, NgForOf, NgIf } from '@angular/common';
 import { Component, Inject, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -10,10 +10,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ColumnKey, FieldKey } from '@app/types/data';
 import { FiltersDialogData } from '@app/types/dialog';
-import { Filter, FilterEvent, FilterField, FilterFieldSelect, FilterInput, FilterInputDate, FilterInputSelect, FilterInputText, FilterInputType } from '@app/types/filters';
+import { Filter, FilterInput, FilterInputDate, FilterInputOutput, FilterInputString, FilterInputType, FilterInputValue, FiltersDefinition } from '@app/types/filters';
 import { IconsService } from '@services/icons.service';
 import { FiltersDialogInputComponent } from './filters-dialog-input.component';
 import { FiltersService } from '@services/filters.service'
+import { FiltersDialogOrComponent } from './filters-dialog-or.component';
 
 @Component({
   selector: 'app-filters-dialog',
@@ -24,20 +25,51 @@ import { FiltersService } from '@services/filters.service'
       <p i18n="Dialog description">Build your filters</p>
 
       <div class="filters">
+        <ng-container *ngFor="let filtersOr of ngFilters; let index = index">
+          <app-filters-dialog-or
+            [first]="index === 0"
+            [filtersOr]="filtersOr"
+            [filtersDefinitions]="filtersDefinitions()"
+            [columnsLabels]="columnsLabels"
+            (removeChange)="onRemoveOr($event)"
+          >
+
+          </app-filters-dialog-or>
+        </ng-container>
+
+        <div>
+          <button mat-button (click)="onAdd()">
+            <mat-icon aria-hidden="true" [fontIcon]="getIcon('add')"></mat-icon>
+            <span i18n>Add an Or Filter</span>
+          </button>
+        </div>
+
+        <button (click)="save()">
+          save
+        </button>
+      </div>
+
+      <div class="filters">
         <div class="filter" *ngFor="let filter of filters; let index = index; trackBy:trackByFilter">
           <span *ngIf="index === 0" i18n="Filter condition">Where</span>
           <span *ngIf="index > 0" i18n="Filter condition">And</span>
           <mat-form-field appearance="outline"  subscriptSizing="dynamic">
             <mat-label i18n="Label input">Column</mat-label>
-            <mat-select (valueChange)="onFieldChange(index, $event)" [value]="filter.field">
-              <mat-option *ngFor="let column of availableFiltersFields(); trackBy: trackByField" [value]="column.field" [disabled]="disableField(column)">
+            <mat-select (valueChange)="onFieldChange(index, $event)" [value]="filter.key">
+              <mat-option *ngFor="let column of filtersDefinitions(); trackBy: trackByField" [value]="column.key" [disabled]="disableField(column)">
                 {{ columnToLabel(column) }}
               </mat-option>
             </mat-select>
           </mat-form-field>
 
-          <!-- Must be updated depending of filter field type -->
-          <span i18n>is</span>
+          <mat-form-field appearance="outline"  subscriptSizing="dynamic">
+            <mat-label i18n="Label input">Operator</mat-label>
+            <mat-select>
+              <mat-option *ngFor="let operator of accessFilterRange(findType(filter.key)) | keyvalue; trackBy: trackByRange" [value]="operator.key">
+                {{ operator.value }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
           <app-filters-dialog-input [input]="findInput(filter)" (valueChange)="onInputValueChange(index, $event)"></app-filters-dialog-input>
 
@@ -99,6 +131,8 @@ import { FiltersService } from '@services/filters.service'
   imports: [
     NgForOf,
     NgIf,
+    KeyValuePipe,
+    FiltersDialogOrComponent,
     FiltersDialogInputComponent,
     MatDialogModule,
     MatButtonModule,
@@ -114,7 +148,31 @@ import { FiltersService } from '@services/filters.service'
   ],
 })
 export class FiltersDialogComponent<T extends object> implements OnInit {
+
+  ngFilters: any = [
+    [
+      {
+        field: 'name',
+        operator: 3,
+        value: 'test',
+      },
+      {
+        field: 'service',
+        operator: 1,
+        value: 'super',
+      }
+    ],
+    [
+      {
+        field: 'version',
+        operator: 5,
+        value: 'test',
+      }
+    ],
+  ]
+
   #iconsService = inject(IconsService);
+  #filtersService = inject(FiltersService);
 
   filters: Filter<T>[] = [];
   columnsLabels: Record<ColumnKey<T>, string> | null = null;
@@ -132,6 +190,33 @@ export class FiltersDialogComponent<T extends object> implements OnInit {
     }
   }
 
+  save() {
+    console.log(this.ngFilters);
+  }
+
+  onAdd() {
+    this.ngFilters.push([
+      {
+        field: null,
+        operator: null,
+        value: null,
+      }
+    ]);
+  }
+
+  onRemoveOr(filters: Filter<T>[]) {
+    const index = this.ngFilters.indexOf(filters);
+    if (index > -1) {
+      this.ngFilters.splice(index, 1);
+    }
+  }
+
+  accessFilterRange(type: string) {
+    const range = this.#filtersService.findOperators(type as any);
+
+    return range;
+  }
+
   getIcon(name: string): string {
     return this.#iconsService.getIcon(name);
   }
@@ -140,29 +225,31 @@ export class FiltersDialogComponent<T extends object> implements OnInit {
    * Get the available field (all the field that can be added)
    * Sort the field alphabetically
    */
-  availableFiltersFields(): FilterField<T>[] {
-    return this.data.availableFiltersFields.sort((a, b) => (a.field as string).localeCompare(b.field as string));
+  filtersDefinitions(): FiltersDefinition<T>[] {
+    return this.data.filtersDefinitions.sort((a, b) => (a.key as string).localeCompare(b.key as string));
   }
 
-  columnToLabel(column: FilterField<T>): string {
+  columnToLabel(column: FiltersDefinition<T>): string {
     if (this.columnsLabels === null)
-      return column.field.toString();
+      return column.key.toString();
     else
-      return this.columnsLabels[column.field];
+      return this.columnsLabels[column.key];
   }
 
   addFilter(): void {
     this.filters.push({
-      field: null,
+      key: null,
+      value: null,
+      operator: null
     });
   }
 
   onFieldChange(index: number, name: FieldKey<T>): void {
-    this.filters[index].field = name;
+    this.filters[index].key = name;
   }
 
-  onInputValueChange(index: number, event: FilterEvent): void {
-    if (event.type === 'text')
+  onInputValueChange(index: number, event: FilterInputOutput): void {
+    if (event.type === 'string')
       this.filters[index].value = event.value;
     else if (event.type === 'number')
       this.filters[index].value = event.value;
@@ -180,35 +267,36 @@ export class FiltersDialogComponent<T extends object> implements OnInit {
   }
 
   onClear(filter: Filter<T>): void {
-    filter.field = null;
-    delete filter.value;
+    filter.key = null;
+    filter.value = null;
   }
 
   onRemove(index: number): void {
     this.filters.splice(index, 1);
   }
 
-  selectedField(filterName: FilterField<T>, field: FilterField<T>): boolean {
+  selectedField(filterName: FiltersDefinition<T>, field: FiltersDefinition<T>): boolean {
     return filterName === field;
   }
 
-  disableField(field: FilterField<T>): boolean {
-    const usedFields = this.filters.map(filter => filter.field);
-    return usedFields.includes(field.field);
+  disableField(field: FiltersDefinition<T>): boolean {
+    const usedFields = this.filters.map(filter => filter.key);
+    return usedFields.includes(field.key);
   }
 
   findType(field: FieldKey<T> | null): FilterInputType {
     if (!field) {
-      return 'text';
+      return 'string' as any;
     }
 
-    const filter = this.data.availableFiltersFields.find(filter => filter.field === field);
+    const filter = this.data.filtersDefinitions.find(filter => filter.key === field);
 
-    return filter?.type ?? 'text';
+    // FIXME: as any
+    return filter?.type as any ?? 'string';
   }
 
   findInput(filter: Filter<T>): FilterInput {
-    const type = this.findType(filter.field);
+    const type = this.findType(filter.key);
 
     if (type === 'number') {
       return {
@@ -224,18 +312,18 @@ export class FiltersDialogComponent<T extends object> implements OnInit {
       };
     }
 
-    if (type === 'select') {
-      const options = (this.data.availableFiltersFields.find(f => f.field === filter.field) as FilterFieldSelect<T>).options;
-      return {
-        type: 'select',
-        value: filter.value as FilterInputSelect['value'] || null,
-        options,
-      };
-    }
+    // if (type === 'select') {
+    //   const options = (this.data.filtersDefinitions.find(f => f.key === filter.key) as FilterFieldSelect<T>).options;
+    //   return {
+    //     type: 'select',
+    //     value: filter.value as FilterInputSelect['value'] || null,
+    //     options,
+    //   };
+    // }
 
     return {
-      type: 'text',
-      value: filter.value as FilterInputText['value'] || null,
+      type: 'string',
+      value: filter.value as FilterInputString['value'],
     };
   }
 
@@ -247,7 +335,11 @@ export class FiltersDialogComponent<T extends object> implements OnInit {
     return index;
   }
 
-  trackByField(_: number, field: FilterField<T>) {
-    return field.field;
+  trackByField(_: number, field: FiltersDefinition<T>) {
+    return field.key;
+  }
+
+  trackByRange(_: number, range: KeyValue<string, string>) {
+    return range.key;
   }
 }

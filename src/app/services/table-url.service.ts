@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Filter, FilterField } from '@app/types/filters';
+import { Filter, FiltersDefinition } from '@app/types/filters';
 import { QueryParamsOptionsKey } from '@app/types/query-params';
 
 /**
@@ -15,32 +15,35 @@ export class TableURLService {
     return this.getQueryParams<T>(key, false);
   }
 
-  getQueryParamsFilters<T extends object>(availableFiltersFields: FilterField<T>[]): Filter<T>[] {
+  // TODO: We need to rework this part to have a functionnal filter in the URL. (we can add a field name <key>_operator in the URL)
+  getQueryParamsFilters<T extends object>(filtersDefinitions: FiltersDefinition<T>[]): Filter<T>[] {
     const params: Filter<T>[] = [];
 
-    for (const filter of availableFiltersFields) {
-      const key = filter.field;
+    for (const definition of filtersDefinitions) {
+      const key = definition.key;
       const value = this.getQueryParams<string>(key.toString(), false);
 
       if (value) {
-        switch (filter.type) {
-        case 'text':
-          params.push({ field: key, value });
+        switch (definition.type) {
+        case 'string':
+          params.push({ key, value: String(value), operator: 0 });
           break;
         case 'number':
-          params.push({ field: key, value: Number(value) });
+          params.push({ key, value: Number(value), operator: 0 });
           break;
         case 'date':
           throw new Error('Not implemented');
-        case 'select': {
-          const isFound = filter.options.some(option => option.value === value);
-          if (isFound) {
-            params.push({ field: key, value });
-          }
-          break;
-        }
+        case 'status':
+          throw new Error('Not implemented');
+        // case 'select': {
+        //   const isFound = filter.options.some(option => option.value === value);
+        //   if (isFound) {
+        //     params.push({ field: key, value });
+        //   }
+        //   break;
+        // }
         default:
-          this.#unreachable(filter);
+          // this.#unreachable(filter);
         }
       }
     }

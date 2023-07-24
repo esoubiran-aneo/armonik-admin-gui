@@ -5,7 +5,7 @@ import { Filter } from '@app/types/filters';
 @Injectable()
 export class UtilsService<T extends object> {
   findFilter(filters: Filter<T>[], field: FieldKey<T>): Filter<T> | null {
-    const filter = filters.find(f => f.field === field);
+    const filter = filters.find(f => f.key === field);
 
     if (!filter) {
       return null;

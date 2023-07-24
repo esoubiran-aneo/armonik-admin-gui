@@ -61,7 +61,7 @@ import { TableEmptyDataComponent } from '@components/table/table-empty-data.comp
   </mat-toolbar-row>
 
   <mat-toolbar-row>
-    <app-filters-toolbar [filters]="filters" [filtersFields]="availableFiltersFields" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -180,7 +180,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
   options: PartitionRawListOptions;
 
   filters: PartitionRawFilter[] = [];
-  availableFiltersFields: PartitionRawFilterField[] = [];
+  filtersDefinitions: PartitionRawFilterField[] = [];
 
   intervalValue = 0;
   sharableURL = '';
@@ -208,7 +208,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
 
     this.options = this._partitionsIndexService.restoreOptions();
 
-    this.availableFiltersFields = this._partitionsIndexService.availableFiltersFields;
+    this.filtersDefinitions = this._partitionsIndexService.filtersDefinitions;
     this.filters = this._partitionsIndexService.restoreFilters();
 
     this.intervalValue = this._partitionsIndexService.restoreIntervalValue();
