@@ -1,4 +1,4 @@
-import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, CountTasksByStatusSessionRequest, CountTasksByStatusSessionResponse, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionRawField, SessionStatus, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, CountTasksByStatusSessionRequest, CountTasksByStatusSessionResponse, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionRawEnumField, SessionRawField, SessionStatus, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
@@ -14,14 +14,14 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
     '': ArmoniKSortDirection.SORT_DIRECTION_UNSPECIFIED
   };
 
-  readonly sortFields: Record<SessionRawFieldKey, SessionRawField> = {
-    'sessionId': SessionRawField.SESSION_RAW_FIELD_SESSION_ID,
-    'status': SessionRawField.SESSION_RAW_FIELD_STATUS,
-    'createdAt': SessionRawField.SESSION_RAW_FIELD_CREATED_AT,
-    'cancelledAt': SessionRawField.SESSION_RAW_FIELD_CANCELLED_AT,
-    'options': SessionRawField.SESSION_RAW_FIELD_OPTIONS,
-    'partitionIds': SessionRawField.SESSION_RAW_FIELD_PARTITION_IDS,
-    'duration': SessionRawField.SESSION_RAW_FIELD_DURATION,
+  readonly sortFields: Record<SessionRawFieldKey, SessionRawEnumField> = {
+    'sessionId': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_SESSION_ID,
+    'status': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_STATUS,
+    'createdAt': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_CREATED_AT,
+    'cancelledAt': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_CANCELLED_AT,
+    'options': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_OPTIONS,
+    'partitionIds': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_PARTITION_IDS,
+    'duration': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_DURATION,
   };
 
   constructor(
@@ -40,18 +40,20 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
         field: {
           // TODO: waiting for new sort field
           // @see https://github.com/aneoconsulting/ArmoniK.Api/pull/307
-          sessionRawField: this.sortFields[options.sort.active] ?? SessionRawField.SESSION_RAW_FIELD_SESSION_ID
+          sessionRawField: {
+            field: this.sortFields[options.sort.active] ?? SessionRawEnumField.SESSION_RAW_ENUM_FIELD_SESSION_ID
+          }
         }
       },
-      filter: {
-        sessionId: this._utilsService.convertFilterValue(findFilter(filters, 'sessionId')),
-        // TODO: waiting for the new filter
-        // applicationName: convertFilterValue(findFilter(filters, '')),
-        // applicationVersion: convertFilterValue(findFilter(filters, 'applicationVersion')),
-        applicationName: '',
-        applicationVersion: '',
-        status: this._utilsService.convertFilterValueToStatus<SessionStatus>(findFilter(filters, 'status')) ?? SessionStatus.SESSION_STATUS_UNSPECIFIED,
-      }
+      // filter: {
+      //   sessionId: this._utilsService.convertFilterValue(findFilter(filters, 'sessionId')),
+      //   // TODO: waiting for the new filter
+      //   // applicationName: convertFilterValue(findFilter(filters, '')),
+      //   // applicationVersion: convertFilterValue(findFilter(filters, 'applicationVersion')),
+      //   applicationName: '',
+      //   applicationVersion: '',
+      //   status: this._utilsService.convertFilterValueToStatus<SessionStatus>(findFilter(filters, 'status')) ?? SessionStatus.SESSION_STATUS_UNSPECIFIED,
+      // }
     });
 
     return this._sessionsClient.listSessions(listSessionsRequest);

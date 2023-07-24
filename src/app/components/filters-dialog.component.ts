@@ -13,6 +13,8 @@ import { FiltersDialogData } from '@app/types/dialog';
 import { Filter, FilterEvent, FilterField, FilterFieldSelect, FilterInput, FilterInputDate, FilterInputSelect, FilterInputText, FilterInputType } from '@app/types/filters';
 import { IconsService } from '@services/icons.service';
 import { FiltersDialogInputComponent } from './filters-dialog-input.component';
+import { FiltersService } from '@services/filters.service'
+
 @Component({
   selector: 'app-filters-dialog',
   template: `
@@ -34,6 +36,7 @@ import { FiltersDialogInputComponent } from './filters-dialog-input.component';
             </mat-select>
           </mat-form-field>
 
+          <!-- Must be updated depending of filter field type -->
           <span i18n>is</span>
 
           <app-filters-dialog-input [input]="findInput(filter)" (valueChange)="onInputValueChange(index, $event)"></app-filters-dialog-input>
@@ -105,6 +108,9 @@ import { FiltersDialogInputComponent } from './filters-dialog-input.component';
     MatIconModule,
     MatTooltipModule,
     MatMenuModule,
+  ],
+  providers: [
+    FiltersService
   ],
 })
 export class FiltersDialogComponent<T extends object> implements OnInit {

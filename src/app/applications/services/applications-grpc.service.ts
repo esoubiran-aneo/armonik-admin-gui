@@ -1,4 +1,4 @@
-import { ApplicationRawField, ApplicationsClient, SortDirection as ArmoniKSortDirection, CountTasksByStatusApplicationRequest, CountTasksByStatusApplicationResponse, ListApplicationsRequest, ListApplicationsResponse } from '@aneoconsultingfr/armonik.api.angular';
+import { ApplicationRawEnumField, ApplicationRawField, ApplicationsClient, SortDirection as ArmoniKSortDirection, CountTasksByStatusApplicationRequest, CountTasksByStatusApplicationResponse, ListApplicationsRequest, ListApplicationsResponse } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
@@ -14,11 +14,11 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
     '': ArmoniKSortDirection.SORT_DIRECTION_UNSPECIFIED
   };
 
-  readonly sortFields: Record<ApplicationRawFieldKey, ApplicationRawField> = {
-    'name': ApplicationRawField.APPLICATION_RAW_FIELD_NAME,
-    'namespace': ApplicationRawField.APPLICATION_RAW_FIELD_NAMESPACE,
-    'service': ApplicationRawField.APPLICATION_RAW_FIELD_SERVICE,
-    'version': ApplicationRawField.APPLICATION_RAW_FIELD_VERSION,
+  readonly sortFields: Record<ApplicationRawFieldKey, ApplicationRawEnumField> = {
+    'name': ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_NAME,
+    'namespace': ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_NAMESPACE,
+    'service': ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_SERVICE,
+    'version': ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_VERSION,
   };
 
   constructor(
@@ -36,15 +36,11 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
       sort: {
         direction: this.sortDirections[options.sort.direction],
         fields: [{
-          applicationField: this.sortFields[options.sort.active],
+          applicationField: {
+            field: this.sortFields[options.sort.active]
+          }
         }]
       },
-      filter: {
-        name: convertFilterValue(findFilter(filters, 'name')),
-        namespace: convertFilterValue(findFilter(filters, 'namespace')),
-        service: convertFilterValue(findFilter(filters, 'service')),
-        version: convertFilterValue(findFilter(filters, 'version'))
-      }
     });
 
     return this._applicationsClient.listApplications(request);

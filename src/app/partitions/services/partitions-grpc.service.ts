@@ -1,4 +1,4 @@
-import { SortDirection as ArmoniKSortDirection, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionRawField, PartitionsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionRawEnumField, PartitionRawField, PartitionsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
@@ -14,14 +14,14 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
     '': ArmoniKSortDirection.SORT_DIRECTION_UNSPECIFIED
   };
 
-  readonly sortFields: Record<PartitionRawFieldKey, PartitionRawField> = {
-    'id': PartitionRawField.PARTITION_RAW_FIELD_ID,
-    'parentPartitionIds': PartitionRawField.PARTITION_RAW_FIELD_PARENT_PARTITION_IDS,
-    'podConfiguration': PartitionRawField.PARTITION_RAW_FIELD_UNSPECIFIED,
-    'podMax': PartitionRawField.PARTITION_RAW_FIELD_POD_MAX,
-    'podReserved': PartitionRawField.PARTITION_RAW_FIELD_POD_RESERVED,
-    'preemptionPercentage': PartitionRawField.PARTITION_RAW_FIELD_PREEMPTION_PERCENTAGE,
-    'priority': PartitionRawField.PARTITION_RAW_FIELD_PRIORITY,
+  readonly sortFields: Record<PartitionRawFieldKey, PartitionRawEnumField> = {
+    'id': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_ID,
+    'parentPartitionIds': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PARENT_PARTITION_IDS,
+    'podConfiguration': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_UNSPECIFIED,
+    'podMax': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_POD_MAX,
+    'podReserved': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_POD_RESERVED,
+    'preemptionPercentage': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PREEMPTION_PERCENTAGE,
+    'priority': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PRIORITY,
   };
 
   constructor(
@@ -40,18 +40,20 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
       sort: {
         direction: this.sortDirections[options.sort.direction],
         field: {
-          partitionRawField: this.sortFields[options.sort.active] ?? PartitionRawField.PARTITION_RAW_FIELD_ID
+          partitionRawField: {
+            field: this.sortFields[options.sort.active] ?? PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_ID
+          }
         }
       },
-      filter: {
-        id: convertFilterValue(findFilter(filters, 'id')),
-        parentPartitionId: convertFilterValue(findFilter(filters, 'parentPartitionIds')),
-        podReserved:
-          convertFilterValueToNumber(findFilter(filters, 'podReserved')) as number,
-        podMax: convertFilterValueToNumber(findFilter(filters, 'podMax')) as number,
-        preemptionPercentage: convertFilterValueToNumber(findFilter(filters, 'preemptionPercentage')) as number,
-        priority: convertFilterValueToNumber(findFilter(filters, 'priority')) as number
-      }
+      // filter: {
+      //   id: convertFilterValue(findFilter(filters, 'id')),
+      //   parentPartitionId: convertFilterValue(findFilter(filters, 'parentPartitionIds')),
+      //   podReserved:
+      //     convertFilterValueToNumber(findFilter(filters, 'podReserved')) as number,
+      //   podMax: convertFilterValueToNumber(findFilter(filters, 'podMax')) as number,
+      //   preemptionPercentage: convertFilterValueToNumber(findFilter(filters, 'preemptionPercentage')) as number,
+      //   priority: convertFilterValueToNumber(findFilter(filters, 'priority')) as number
+      // }
     });
 
     return this._partitionsClient.listPartitions(listPartitionsRequest);

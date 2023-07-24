@@ -1,4 +1,4 @@
-import { SortDirection as ArmoniKSortDirection, GetResultRequest, GetResultResponse, ListResultsRequest, ListResultsResponse, ResultRawField, ResultStatus, ResultsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, GetResultRequest, GetResultResponse, ListResultsRequest, ListResultsResponse, ResultRawEnumField, ResultRawField, ResultStatus, ResultsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
@@ -17,14 +17,14 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
     '': ArmoniKSortDirection.SORT_DIRECTION_UNSPECIFIED
   };
 
-  readonly sortFields: Record<ResultRawFieldKey, ResultRawField> = {
-    'sessionId': ResultRawField.RESULT_RAW_FIELD_SESSION_ID,
-    'name': ResultRawField.RESULT_RAW_FIELD_NAME,
-    'status': ResultRawField.RESULT_RAW_FIELD_STATUS,
-    'createdAt': ResultRawField.RESULT_RAW_FIELD_CREATED_AT,
-    'ownerTaskId': ResultRawField.RESULT_RAW_FIELD_OWNER_TASK_ID,
-    'resultId': ResultRawField.RESULT_RAW_FIELD_RESULT_ID,
-    'completedAt': ResultRawField.RESULT_RAW_FIELD_COMPLETED_AT,
+  readonly sortFields: Record<ResultRawFieldKey, ResultRawEnumField> = {
+    'sessionId': ResultRawEnumField.RESULT_RAW_ENUM_FIELD_SESSION_ID,
+    'name': ResultRawEnumField.RESULT_RAW_ENUM_FIELD_NAME,
+    'status': ResultRawEnumField.RESULT_RAW_ENUM_FIELD_STATUS,
+    'createdAt': ResultRawEnumField.RESULT_RAW_ENUM_FIELD_CREATED_AT,
+    'ownerTaskId': ResultRawEnumField.RESULT_RAW_ENUM_FIELD_OWNER_TASK_ID,
+    'resultId': ResultRawEnumField.RESULT_RAW_ENUM_FIELD_RESULT_ID,
+    'completedAt': ResultRawEnumField.RESULT_RAW_ENUM_FIELD_COMPLETED_AT,
   };
 
 
@@ -38,18 +38,20 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
       sort: {
         direction: this.sortDirections[options.sort.direction],
         field: {
-          resultRawField: this.sortFields[options.sort.active] ?? ResultRawField.RESULT_RAW_FIELD_SESSION_ID
+          resultRawField: {
+            field: this.sortFields[options.sort.active] ?? ResultRawEnumField.RESULT_RAW_ENUM_FIELD_RESULT_ID
+          }
         }
       },
-      filter: {
-        name: convertFilterValue(findFilter(filters, 'name')),
-        // TODO: Find a way to convert the status (as sort direction, we can create a corresponding enum)
-        status: this.#utilsService.convertFilterValueToStatus<ResultStatus>(findFilter(filters, 'status')) ?? ResultStatus.RESULT_STATUS_UNSPECIFIED,
-        ownerTaskId: convertFilterValue(findFilter(filters, 'ownerTaskId')),
-        sessionId: convertFilterValue(findFilter(filters, 'sessionId')),
-        resultId: convertFilterValue(findFilter(filters, 'resultId')),
-        // TODO: Find a way to get the created after and the created before (for now, they are optional)
-      }
+      // filter: {
+      //   name: convertFilterValue(findFilter(filters, 'name')),
+      //   // TODO: Find a way to convert the status (as sort direction, we can create a corresponding enum)
+      //   status: this.#utilsService.convertFilterValueToStatus<ResultStatus>(findFilter(filters, 'status')) ?? ResultStatus.RESULT_STATUS_UNSPECIFIED,
+      //   ownerTaskId: convertFilterValue(findFilter(filters, 'ownerTaskId')),
+      //   sessionId: convertFilterValue(findFilter(filters, 'sessionId')),
+      //   resultId: convertFilterValue(findFilter(filters, 'resultId')),
+      //   // TODO: Find a way to get the created after and the created before (for now, they are optional)
+      // }
     });
 
     return this.#resultsClient.listResults(listResultRequest);

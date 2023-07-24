@@ -1,4 +1,4 @@
-import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskStatus, TaskSummary, TaskSummaryField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskStatus, TaskSummary, TaskSummaryEnumField, TaskSummaryField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
@@ -16,29 +16,29 @@ export class TasksGrpcService {
     '': ArmoniKSortDirection.SORT_DIRECTION_UNSPECIFIED
   };
 
-  readonly sortFields: Record<TaskSummaryFieldKey, TaskSummaryField> = {
-    id: TaskSummaryField.TASK_SUMMARY_FIELD_TASK_ID,
-    sessionId: TaskSummaryField.TASK_SUMMARY_FIELD_SESSION_ID,
-    ownerPodId: TaskSummaryField.TASK_SUMMARY_FIELD_OWNER_POD_ID,
-    initialTaskId: TaskSummaryField.TASK_SUMMARY_FIELD_INITIAL_TASK_ID,
-    status: TaskSummaryField.TASK_SUMMARY_FIELD_STATUS,
-    createdAt: TaskSummaryField.TASK_SUMMARY_FIELD_CREATED_AT,
-    submittedAt: TaskSummaryField.TASK_SUMMARY_FIELD_SUBMITTED_AT,
-    startedAt: TaskSummaryField.TASK_SUMMARY_FIELD_STARTED_AT,
-    endedAt: TaskSummaryField.TASK_SUMMARY_FIELD_ENDED_AT,
-    creationToEndDuration: TaskSummaryField.TASK_SUMMARY_FIELD_CREATION_TO_END_DURATION,
-    processingToEndDuration: TaskSummaryField.TASK_SUMMARY_FIELD_PROCESSING_TO_END_DURATION,
-    podTtl: TaskSummaryField.TASK_SUMMARY_FIELD_POD_TTL,
-    podHostname: TaskSummaryField.TASK_SUMMARY_FIELD_POD_HOSTNAME,
-    receivedAt: TaskSummaryField.TASK_SUMMARY_FIELD_RECEIVED_AT,
-    acquiredAt: TaskSummaryField.TASK_SUMMARY_FIELD_ACQUIRED_AT,
-    options: TaskSummaryField.TASK_SUMMARY_FIELD_UNSPECIFIED,
-    statusMessage: TaskSummaryField.TASK_SUMMARY_FIELD_UNSPECIFIED,
-    countDataDependencies: TaskSummaryField.TASK_SUMMARY_FIELD_UNSPECIFIED,
-    countExpectedOutputIds: TaskSummaryField.TASK_SUMMARY_FIELD_UNSPECIFIED,
-    countParentTaskIds: TaskSummaryField.TASK_SUMMARY_FIELD_UNSPECIFIED,
-    countRetryOfIds: TaskSummaryField.TASK_SUMMARY_FIELD_UNSPECIFIED,
-    error: TaskSummaryField.TASK_SUMMARY_FIELD_UNSPECIFIED,
+  readonly sortFields: Record<TaskSummaryFieldKey, TaskSummaryEnumField> = {
+    id: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_TASK_ID,
+    sessionId: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_SESSION_ID,
+    ownerPodId: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_OWNER_POD_ID,
+    initialTaskId: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_INITIAL_TASK_ID,
+    status: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_STATUS,
+    createdAt: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_CREATED_AT,
+    submittedAt: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_SUBMITTED_AT,
+    startedAt: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_STARTED_AT,
+    endedAt: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_ENDED_AT,
+    creationToEndDuration: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_CREATION_TO_END_DURATION,
+    processingToEndDuration: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_PROCESSING_TO_END_DURATION,
+    podTtl: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_POD_TTL,
+    podHostname: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_POD_HOSTNAME,
+    receivedAt: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_RECEIVED_AT,
+    acquiredAt: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_ACQUIRED_AT,
+    options: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
+    statusMessage: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
+    countDataDependencies: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
+    countExpectedOutputIds: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
+    countParentTaskIds: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
+    countRetryOfIds: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
+    error: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
   };
 
   list$(options: TaskSummaryListOptions, filters: TaskSummaryFilter[]): Observable<ListTasksResponse> {
@@ -52,15 +52,11 @@ export class TasksGrpcService {
       sort: {
         direction: this.sortDirections[options.sort.direction],
         field: {
-          taskOptionField: null as any,
-          taskSummaryField: this.sortFields[options.sort.active] ?? TaskSummaryField.TASK_SUMMARY_FIELD_TASK_ID
+          taskSummaryField: {
+            field: this.sortFields[options.sort.active] ?? TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_TASK_ID
+          }
         }
       },
-      filter: {
-        sessionId: this.#utilsService.convertFilterValue(findFilter(filters, 'sessionId')),
-        // initialTaskId: this.#utilsService.convertFilterValue(findFilter(filters, 'initialTaskId')),
-        status:  status ? [status] : [],
-      }
     });
 
     return this.#tasksClient.listTasks(listTasksRequest);
