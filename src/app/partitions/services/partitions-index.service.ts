@@ -32,8 +32,7 @@ export class PartitionsIndexService {
 
   readonly defaultFilters: PartitionRawFilter = this.#defaultConfigService.defaultPartitions.filters;
   readonly filtersDefinitions: PartitionRawFilterField[] = [
-    // TODO: filter on array
-    // Do not add filter on array or object fields
+    // Do not add filter on object fields
     {
       key: 'id',
       field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_ID,
@@ -59,6 +58,11 @@ export class PartitionsIndexService {
       field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PREEMPTION_PERCENTAGE,
       type: 'number',
     },
+    {
+      key: 'parentPartitionIds',
+      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PARENT_PARTITION_IDS,
+      type: 'array',
+    }
   ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultPartitions.interval;

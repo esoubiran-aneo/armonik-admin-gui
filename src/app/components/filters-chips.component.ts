@@ -4,6 +4,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { ColumnKey, FieldKey } from '@app/types/data';
 import { Filter, FiltersDefinition, FilterInputSelect, FiltersOr, FiltersAnd } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
+import { UtilsService } from '@services/utils.service';
 
 @Component({
   selector: 'app-filters-chips',
@@ -44,28 +45,21 @@ import { FiltersService } from '@services/filters.service';
 })
 export class FiltersChipsComponent<T extends object, U> {
   #filtersService = inject(FiltersService);
+  #utilsService = inject(UtilsService<T, U>);
 
   @Input({ required: true }) filtersAnd: FiltersAnd<T> = [];
   @Input({ required: true }) filtersFields: FiltersDefinition<T, U>[] = [];
   @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null = null;
 
   content(filter: Filter<T>): string {
-    if (!filter.value)
-      return $localize`No value`;
-
-    if (filter.value instanceof Object)
-      return this.columnToLabel(filter.key) + '=' + $localize`from ` + filter.value.start + $localize` to ` + filter.value.end;
-
-    // if (this.#isSelectFilter(filter)) {
-    //   const options = (this.filtersFields.find(field => field.key === filter.key) as FilterInputSelect).options;
-
-    //   const option = options.find(option => option.value === filter.value);
-    //   return this.columnToLabel(filter.key) + '=' + option?.label ?? filter.value;
-    // }
-
-
     const label = this.columnToLabel(filter.key);
-    const operator = this.#filtersService.findOperators('string')[filter.operator as number];
+
+    if (!filter.value)
+      return label + ' ' + $localize`has no value`;
+
+    const type = this.#utilsService.recoverType(filter, this.filtersFields);
+    const operator = this.#filtersService.findOperators(type)[filter.operator as number];
+
     return `${label} ${operator} ${filter.value}`
   }
 
@@ -81,10 +75,5 @@ export class FiltersChipsComponent<T extends object, U> {
 
   trackByFilter(_: number, filter: Filter<T>): string {
     return (filter.key as string) ?? '';
-  }
-
-  #isSelectFilter(filter: Filter<T>): boolean {
-    return false
-    // return this.filtersFields.find(field => field.key === filter.key)?.type === 'select';
   }
 }

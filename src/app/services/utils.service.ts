@@ -112,7 +112,7 @@ export class UtilsService<T extends object, U = null> {
         return null;
     }
 
-    const type = this.#recoverType(filter, filtersDefinitions);
+    const type = this.recoverType(filter, filtersDefinitions);
     const field = this.#recoverField(filter, filtersDefinitions);
 
     return cb(type, field);
@@ -121,7 +121,7 @@ export class UtilsService<T extends object, U = null> {
   /**
    * Recover the type of a filter definition using the filter.
    */
-  #recoverType(filter: Filter<T>, filtersDefinitions: FiltersDefinition<T, U>[]): FilterType  {
+  recoverType(filter: Filter<T>, filtersDefinitions: FiltersDefinition<T, U>[]): FilterType  {
     const filterDefinition = this.#recoverFilterDefinition(filter, filtersDefinitions);
 
     return filterDefinition.type;

@@ -108,6 +108,8 @@ export class FiltersDialogInputComponent {
       return 'number';
     case 'date':
       return 'date';
+    case 'array':
+      return 'string';
     // case 'select':
     //   return 'select';
     default:

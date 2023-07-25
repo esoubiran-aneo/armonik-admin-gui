@@ -37,8 +37,11 @@ export interface FiltersDefinitionStatus<T extends object, U> extends FilterDefi
   type: 'status'
   statuses: FilterValueOptions;
 };
+export interface FiltersDefinitionArray<T extends object, U> extends FilterDefinitionBase<T, U> {
+  type: 'array'
+};
 // Filters used to create the query builder.
-export type FiltersDefinition<T extends object, U = null> = FiltersDefinitionString<T, U> | FiltersDefinitionNumber<T, U> | FiltersDefinitionDate<T, U> | FiltersDefinitionStatus<T, U>;
+export type FiltersDefinition<T extends object, U = null> = FiltersDefinitionString<T, U> | FiltersDefinitionNumber<T, U> | FiltersDefinitionDate<T, U> | FiltersDefinitionStatus<T, U> | FiltersDefinitionArray<T, U>;
 
 // Value of a filter input.
 export type FilterInputValueString = MaybeNull<string>;
@@ -50,7 +53,7 @@ interface FilterInputBase {
   type: FilterType;
 }
 export interface FilterInputString extends FilterInputBase {
-  type: 'string';
+  type: 'string' | 'array';
   value: FilterInputValueString;
 }
 export interface FilterInputNumber extends FilterInputBase  {
@@ -76,7 +79,7 @@ interface FilterInputOutputBase {
   type: FilterType | 'date-start' | 'date-end';
 }
 export interface FilterInputOutputString extends FilterInputOutputBase {
-  type: 'string';
+  type: 'string' | 'array';
   value: MaybeNull<string>;
 };
 export interface FilterInputOutputNumber extends FilterInputOutputBase {

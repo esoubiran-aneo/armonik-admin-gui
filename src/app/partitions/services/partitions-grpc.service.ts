@@ -74,6 +74,30 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
               operator: filter.operator ?? 0
           }
         } satisfies PartitionFilterField.AsObject;
+        case 'number':
+          return {
+            number: {
+              field: {
+                partitionRawField: {
+                  field
+                },
+              },
+              value: filter.value?.toString() || '',
+              operator: filter.operator ?? 0
+          }
+        } satisfies PartitionFilterField.AsObject;
+        case 'array':
+          return {
+            array: {
+              field: {
+                partitionRawField: {
+                  field
+                },
+              },
+              value: filter.value?.toString() ?? '',
+              operator: filter.operator ?? 0
+          }
+        } satisfies PartitionFilterField.AsObject;
         default: {
           throw new Error(`Type ${type} not supported`);
         }

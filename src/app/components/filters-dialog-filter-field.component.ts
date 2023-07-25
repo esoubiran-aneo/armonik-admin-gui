@@ -3,7 +3,7 @@ import { Component, Input, inject } from "@angular/core";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 import { FieldKey } from "@app/types/data";
-import { Filter, FilterInput, FilterInputOutput, FilterInputType, FilterInputValueString, FiltersDefinition } from "@app/types/filters";
+import { Filter, FilterInput, FilterInputNumber, FilterInputOutput, FilterInputType, FilterInputValueString, FiltersDefinition } from "@app/types/filters";
 import { FiltersService } from "@services/filters.service";
 import { FiltersDialogInputComponent } from "./filters-dialog-input.component";
 
@@ -81,6 +81,9 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
       case 'string':
         this.filter.value = event.value;
         break;
+      case 'number':
+        this.filter.value = Number(event.value);
+        break;
     }
   }
 
@@ -97,19 +100,29 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
   }
 
   findInput(filter: Filter<T>): FilterInput {
+    // TODO: use the utils service
    const type = this.findType(filter);
 
    switch (type) {
-    // TODO: add the other types
     case 'string':
       return {
         type: 'string',
         value: filter.value as FilterInputValueString || null
       }
+    case 'number': {
+      return {
+        type: 'number',
+        value: Number(filter.value) || null
+      }
+    }
+    case 'array':
+      return {
+        type: 'string',
+        value: filter.value as FilterInputValueString || null
+      }
+    default:
+      throw new Error(`Unknown type ${type}`);
    }
-
-  //  FIXME: we need to update the type
-   return null as any;
   }
 
   findType(filter: Filter<T>): FilterInputType {
