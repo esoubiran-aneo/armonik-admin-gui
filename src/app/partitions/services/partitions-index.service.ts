@@ -28,7 +28,7 @@ export class PartitionsIndexService implements AppIndexService<PartitionRaw> {
 
   readonly defaultOptions: PartitionRawListOptions = this.#defaultConfigService.defaultPartitions.options;
 
-  readonly defaultFilters: PartitionRawFilter[] = this.#defaultConfigService.defaultPartitions.filters;
+  readonly defaultFilters: PartitionRawFilter = this.#defaultConfigService.defaultPartitions.filters;
   readonly filtersDefinitions: PartitionRawFilterField[] = [
     // Do not add filter on array or object fields
     // {
@@ -132,15 +132,15 @@ export class PartitionsIndexService implements AppIndexService<PartitionRaw> {
    * Filters
    */
 
-  saveFilters(filters: PartitionRawFilter[]): void {
+  saveFilters(filters: PartitionRawFilter): void {
     this.#tableService.saveFilters('partitions-filters', filters);
   }
 
-  restoreFilters(): PartitionRawFilter[] {
+  restoreFilters(): PartitionRawFilter {
     return this.#tableService.restoreFilters<PartitionRaw>('partitions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
-  resetFilters(): PartitionRawFilter[] {
+  resetFilters(): PartitionRawFilter {
     this.#tableService.resetFilters('partitions-filters');
 
     return this.defaultFilters;

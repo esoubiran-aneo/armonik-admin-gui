@@ -1,7 +1,7 @@
 import { TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { TaskOptions } from '@app/tasks/types';
 import { ColumnKey } from './data';
-import { Filter, FiltersDefinition } from './filters';
+import { FiltersDefinition, FiltersOr } from './filters';
 
 export interface ColumnsModifyDialogData<T extends object, O extends object> {
   currentColumns: ColumnKey<T, O>[]
@@ -12,10 +12,12 @@ export interface ColumnsModifyDialogData<T extends object, O extends object> {
 export type ColumnsModifyDialogResult<T extends object, O extends object> = ColumnKey<T, O>[];
 
 export interface FiltersDialogData<T extends object> {
-  filters: Filter<T>[]
+  filtersOr: FiltersOr<T>
   filtersDefinitions: FiltersDefinition<T>[]
   columnsLabels: Record<ColumnKey<T>, string>
 }
+
+export type FiltersDialogResult<T extends object> = FiltersOr<T>;
 
 export interface AutoRefreshDialogData {
   value: number
@@ -30,11 +32,14 @@ export type TaskStatusColored = {
 
 export interface ViewTasksByStatusDialogData {
   statusesCounts: TaskStatusColored[]
-}
+};
+
+export type ViewTasksByStatusDialogResult = Record<string, never>;
+
 export interface ViewObjectDialogData {
   title: string;
   object: TaskOptions;
-}
+};
 
 export type ViewObjectDialogResult = Record<string, never>;
 

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { TasksStatusesService } from './tasks-status.service';
-import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFilter, TaskSummaryListOptions, TasksFiltersDefinition } from '../types';
+import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFilters, TaskSummaryListOptions, TasksFiltersDefinition } from '../types';
 
 @Injectable()
 export class TasksIndexService {
@@ -59,7 +59,7 @@ export class TasksIndexService {
 
   readonly defaultOptions: TaskSummaryListOptions = this.#defaultConfigService.defaultTasks.options;
 
-  readonly defaultFilters: TaskSummaryFilter[] = this.#defaultConfigService.defaultTasks.filters;
+  readonly defaultFilters: TaskSummaryFilters = this.#defaultConfigService.defaultTasks.filters;
   readonly filtersDefinitions: TasksFiltersDefinition[] = [
     // Do not filter object or array fields
     // {
@@ -182,15 +182,15 @@ export class TasksIndexService {
    * Filters
    */
 
-  saveFilters(filters: TaskSummaryFilter[]): void {
+  saveFilters(filters: TaskSummaryFilters): void {
     this.#tableService.saveFilters('tasks-filters', filters);
   }
 
-  restoreFilters(): TaskSummaryFilter[] {
+  restoreFilters(): TaskSummaryFilters {
     return this.#tableService.restoreFilters<TaskSummary>('tasks-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
-  resetFilters(): TaskSummaryFilter[] {
+  resetFilters(): TaskSummaryFilters {
     this.#tableService.resetFilters('tasks-filters');
 
     return this.defaultFilters;

@@ -2,14 +2,14 @@ import { SortDirection as ArmoniKSortDirection } from '@aneoconsultingfr/armonik
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 import { ColumnKey, FieldKey } from './data';
-import { Filter, FiltersDefinition } from './filters';
+import { Filter, FiltersDefinition, FiltersOr } from './filters';
 import { ListOptions } from './options';
 
 export interface AppGrpcService<T extends object> {
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection>
   readonly sortFields: Record<FieldKey<T>, number>
 
-  list$(options: ListOptions<T>, filters: Filter<T>[]): Observable<unknown>
+  list$(options: ListOptions<T>, filters: FiltersOr<T>): Observable<unknown>
   get$(id: string): Observable<unknown>
 }
 
@@ -21,7 +21,7 @@ export interface AppIndexService<T extends object> {
 
   readonly defaultOptions: ListOptions<T>
 
-  readonly defaultFilters: Filter<T>[]
+  readonly defaultFilters: FiltersOr<T>
   readonly filtersDefinitions: FiltersDefinition<T>[]
   // TODO: add on AppGrpcService (or create a shared class for both)
   // readonly sortDirections: SortDirection
@@ -38,7 +38,7 @@ export interface AppIndexService<T extends object> {
   saveOptions(options: ListOptions<T>): void
   restoreOptions(): ListOptions<T>
   // Filters
-  saveFilters(filters: Filter<T>[]): void
-  restoreFilters(): Filter<T>[]
+  saveFilters(filters: FiltersOr<T>): void
+  restoreFilters(): FiltersOr<T>
   resetFilters(): void
 }

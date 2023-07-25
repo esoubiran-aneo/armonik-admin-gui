@@ -6,6 +6,9 @@ export type MaybeNull<T> = T | null;
 export type FilterType = 'string' | 'number' | 'date' | 'array' | 'status';
 export type FilterValueOptions = { key: string | number, value: string }[];
 
+export type FiltersOr<T extends object> = FiltersAnd<T>[];
+export type FiltersAnd<T extends object> = Filter<T>[];
+
 // Filters used to filter the data.
 export type Filter<T extends object> = {
   key: MaybeNull<FieldKey<T>>

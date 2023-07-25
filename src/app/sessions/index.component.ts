@@ -265,7 +265,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   options: SessionRawListOptions;
 
-  filters: SessionRawFilter[] = [];
+  filters: SessionRawFilter = [];
   filtersDefinitions: SessionsFiltersDefinition[] = [];
 
   intervalValue = 0;
@@ -481,9 +481,9 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFiltersChange(filters: unknown[]) {
-    this.filters = filters as SessionRawFilter[];
+    this.filters = filters as SessionRawFilter;
 
-    this._sessionsIndexService.saveFilters(filters as SessionRawFilter[]);
+    this._sessionsIndexService.saveFilters(filters as SessionRawFilter);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

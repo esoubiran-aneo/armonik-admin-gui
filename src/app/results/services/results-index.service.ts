@@ -29,7 +29,7 @@ export class ResultsIndexService implements AppIndexService<ResultRaw> {
 
   readonly defaultOptions: ResultRawListOptions = this.#defaultConfigService.defaultResults.options;
 
-  readonly defaultFilters: ResultRawFilter[] = this.#defaultConfigService.defaultResults.filters;
+  readonly defaultFilters: ResultRawFilter = this.#defaultConfigService.defaultResults.filters;
   readonly filtersDefinitions: ResultsFiltersDefinition[] = [
     // {
     //   field: 'name',
@@ -143,15 +143,15 @@ export class ResultsIndexService implements AppIndexService<ResultRaw> {
    * Filters
    */
 
-  saveFilters(filtersFields: ResultRawFilter[]): void {
+  saveFilters(filtersFields: ResultRawFilter): void {
     this.#tableService.saveFilters('results-filters', filtersFields);
   }
 
-  restoreFilters(): ResultRawFilter[] {
+  restoreFilters(): ResultRawFilter {
     return this.#tableService.restoreFilters<ResultRaw>('results-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
-  resetFilters(): ResultRawFilter[] {
+  resetFilters(): ResultRawFilter {
     this.#tableService.resetFilters('results-filters');
 
     return this.defaultFilters;

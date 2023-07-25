@@ -1,11 +1,11 @@
-import { TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterStringOperator, TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable } from '@angular/core';
 import { ApplicationRawColumnKey, ApplicationRawFilter, ApplicationRawListOptions } from '@app/applications/types';
 import { TasksStatusesGroup } from '@app/dashboard/types';
 import { PartitionRawColumnKey, PartitionRawFilter, PartitionRawListOptions } from '@app/partitions/types';
 import { ResultRawColumnKey, ResultRawFilter, ResultRawListOptions } from '@app/results/types';
 import { SessionRawColumnKey, SessionRawFilter, SessionRawListOptions } from '@app/sessions/types';
-import { TaskSummaryColumnKey, TaskSummaryFilter, TaskSummaryListOptions } from '@app/tasks/types';
+import { TaskSummaryColumnKey, TaskSummaryFilters, TaskSummaryListOptions } from '@app/tasks/types';
 import { ExportedDefaultConfig, ScopeConfig } from '@app/types/config';
 import { TaskStatusColored } from '@app/types/dialog';
 import { ExternalService } from '@app/types/external-service';
@@ -77,7 +77,27 @@ export class DefaultConfigService {
         direction: 'asc'
       },
     },
-    filters: [],
+    filters: [
+      [
+        {
+          key: 'name',
+          operator: FilterStringOperator.FILTER_STRING_OPERATOR_CONTAINS,
+          value: 'nice',
+        },
+        {
+          key: 'namespace',
+          operator: FilterStringOperator.FILTER_STRING_OPERATOR_CONTAINS,
+          value: '134567890',
+        }
+      ],
+      [
+        {
+          key: 'version',
+          operator: FilterStringOperator.FILTER_STRING_OPERATOR_CONTAINS,
+          value: '1.2.3',
+        }
+      ]
+    ],
   };
 
   readonly #defaultTasksByStatus: TaskStatusColored[] = [
@@ -151,7 +171,7 @@ export class DefaultConfigService {
     filters: [],
   };
 
-  readonly #defaultTasks: ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFilter> = {
+  readonly #defaultTasks: ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFilters> = {
     interval: 10,
     columns: [
       'id',
@@ -216,7 +236,7 @@ export class DefaultConfigService {
     return structuredClone(this.#defaultResults);
   }
 
-  get defaultTasks(): ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFilter> {
+  get defaultTasks(): ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFilters> {
     return structuredClone(this.#defaultTasks);
   }
 

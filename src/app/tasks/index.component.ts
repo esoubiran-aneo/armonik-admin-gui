@@ -38,7 +38,8 @@ import { UtilsService } from '@services/utils.service';
 import { TasksGrpcService } from './services/tasks-grpc.service';
 import { TasksIndexService } from './services/tasks-index.service';
 import { TasksStatusesService } from './services/tasks-status.service';
-import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilter, TasksFiltersDefinition, TaskSummaryListOptions} from './types';
+import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilters, TasksFiltersDefinition, TaskSummaryListOptions} from './types';
+import { Filter } from '@app/types/filters';
 
 @Component({
   selector: 'app-tasks-index',
@@ -269,7 +270,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   options: TaskSummaryListOptions;
 
-  filters: TaskSummaryFilter[] = [];
+  filters: TaskSummaryFilters = [];
   filtersDefinitions: TasksFiltersDefinition[] = [];
 
   sharableURL = '';
@@ -423,7 +424,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onRetries(task: TaskSummary): void {
-    const filter: TaskSummaryFilter = {
+    const filter: Filter<TaskSummary> = {
       key: 'initialTaskId',
       value: task.id,
       operator: FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
@@ -460,7 +461,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFiltersChange(value: unknown[]) {
-    this.filters = value as TaskSummaryFilter[];
+    this.filters = value as TaskSummaryFilters;
 
     this.#tasksIndexService.saveFilters(this.filters);
     this.paginator.pageIndex = 0;

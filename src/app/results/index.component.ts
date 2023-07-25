@@ -195,7 +195,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
 
   options: ResultRawListOptions;
 
-  filters: ResultRawFilter[] = [];
+  filters: ResultRawFilter = [];
   filtersDefinitions: ResultsFiltersDefinition[] = [];
 
   intervalValue = 0;
@@ -368,9 +368,9 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
   }
 
   onFiltersChange(value: unknown[]) {
-    this.filters = value as ResultRawFilter[];
+    this.filters = value as ResultRawFilter;
 
-    this._resultsIndexService.saveFilters(value as ResultRawFilter[]);
+    this._resultsIndexService.saveFilters(value as ResultRawFilter);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

@@ -29,7 +29,7 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
     private _utilsService: UtilsService<PartitionRaw>
   ) {}
 
-  list$(options: PartitionRawListOptions, filters: PartitionRawFilter[]): Observable<ListPartitionsResponse> {
+  list$(options: PartitionRawListOptions, filters: PartitionRawFilter): Observable<ListPartitionsResponse> {
     const findFilter = this._utilsService.findFilter;
     const convertFilterValue = this._utilsService.convertFilterValue;
     const convertFilterValueToNumber = this._utilsService.convertFilterValueToNumber;

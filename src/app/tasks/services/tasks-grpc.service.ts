@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 import { UtilsService } from '@services/utils.service';
-import { TaskSummaryFieldKey, TaskSummaryFilter, TaskSummaryListOptions } from '../types';
+import { TaskSummaryFieldKey, TaskSummaryFilters, TaskSummaryListOptions } from '../types';
 
 @Injectable()
 export class TasksGrpcService {
@@ -41,10 +41,10 @@ export class TasksGrpcService {
     error: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
   };
 
-  list$(options: TaskSummaryListOptions, filters: TaskSummaryFilter[]): Observable<ListTasksResponse> {
+  list$(options: TaskSummaryListOptions, filters: TaskSummaryFilters): Observable<ListTasksResponse> {
     const findFilter = this.#utilsService.findFilter;
 
-    const status = this.#utilsService.convertFilterValueToStatus<TaskStatus>(findFilter(filters, 'status'));
+    // const status = this.#utilsService.convertFilterValueToStatus<TaskStatus>(findFilter(filters, 'status'));
 
     const listTasksRequest = new ListTasksRequest({
       page: options.pageIndex,

@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { ColumnKey } from './data';
-import { Filter, FiltersDefinition } from './filters';
+import { Filter, FiltersDefinition, FiltersOr } from './filters';
 import { ListOptions } from './options';
 
 // Create a way to add 'count'
@@ -23,7 +23,7 @@ export interface AppIndexComponent<T extends object, O extends object = Record<s
   options: ListOptions<T>;
 
   // Filters
-  filters: Filter<T>[];
+  filters: FiltersOr<T>;
   filtersDefinitions: FiltersDefinition<T>[];
 
   // Miscellaneous

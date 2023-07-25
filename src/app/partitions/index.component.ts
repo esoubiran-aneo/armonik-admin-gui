@@ -179,7 +179,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
 
   options: PartitionRawListOptions;
 
-  filters: PartitionRawFilter[] = [];
+  filters: PartitionRawFilter = [];
   filtersDefinitions: PartitionRawFilterField[] = [];
 
   intervalValue = 0;
@@ -332,9 +332,9 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
   }
 
   onFiltersChange(filters: unknown[]) {
-    this.filters = filters as PartitionRawFilter[];
+    this.filters = filters as PartitionRawFilter;
 
-    this._partitionsIndexService.saveFilters(filters as PartitionRawFilter[]);
+    this._partitionsIndexService.saveFilters(filters as PartitionRawFilter);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

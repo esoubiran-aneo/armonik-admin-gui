@@ -2,7 +2,7 @@ export type ScopeConfig<C, O, F> = {
   interval: number;
   columns: C[];
   options: O;
-  filters: F[];
+  filters: F;
 };
 
 export type Scope = 'applications' | 'partitions' | 'sessions' | 'results' | 'tasks';

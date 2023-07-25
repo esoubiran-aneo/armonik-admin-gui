@@ -72,7 +72,7 @@ import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, Applic
     </app-table-actions-toolbar>
   </mat-toolbar-row>
 
-  <mat-toolbar-row>
+  <mat-toolbar-row class="filters">
     <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
@@ -137,6 +137,13 @@ import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, Applic
 app-table-actions-toolbar {
   flex-grow: 1;
 }
+
+.filters {
+  height: auto;
+  min-height: 64px;
+
+  padding: 1rem;
+}
   `],
   standalone: true,
   providers: [
@@ -195,7 +202,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   options: ApplicationRawListOptions;
 
-  filters: ApplicationRawFilter[] = [];
+  filters: ApplicationRawFilter = [];
   filtersDefinitions: ApplicationsFiltersDefinition[] = [];
 
 
@@ -348,9 +355,9 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFiltersChange(filters: unknown[]) {
-    this.filters = filters as ApplicationRawFilter[];
+    this.filters = filters as ApplicationRawFilter;
 
-    this._applicationsIndexService.saveFilters(filters as ApplicationRawFilter[]);
+    this._applicationsIndexService.saveFilters(filters as ApplicationRawFilter);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

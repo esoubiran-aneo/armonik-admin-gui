@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Filter, FiltersDefinition } from '@app/types/filters';
+import { Filter, FiltersDefinition, FiltersOr } from '@app/types/filters';
 import { QueryParamsOptionsKey } from '@app/types/query-params';
 
 /**
@@ -16,8 +16,8 @@ export class TableURLService {
   }
 
   // TODO: We need to rework this part to have a functionnal filter in the URL. (we can add a field name <key>_operator in the URL)
-  getQueryParamsFilters<T extends object>(filtersDefinitions: FiltersDefinition<T>[]): Filter<T>[] {
-    const params: Filter<T>[] = [];
+  getQueryParamsFilters<T extends object>(filtersDefinitions: FiltersDefinition<T>[]): FiltersOr<T> {
+    const params: FiltersOr<T> = [];
 
     for (const definition of filtersDefinitions) {
       const key = definition.key;
@@ -26,10 +26,10 @@ export class TableURLService {
       if (value) {
         switch (definition.type) {
         case 'string':
-          params.push({ key, value: String(value), operator: 0 });
+          throw new Error('Not implemented');
           break;
         case 'number':
-          params.push({ key, value: Number(value), operator: 0 });
+          throw new Error('Not implemented');
           break;
         case 'date':
           throw new Error('Not implemented');

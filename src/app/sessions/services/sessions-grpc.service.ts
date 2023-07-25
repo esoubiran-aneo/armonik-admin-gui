@@ -29,7 +29,7 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
     private _utilsService: UtilsService<SessionRaw>
   ) {}
 
-  list$(options: SessionRawListOptions, filters: SessionRawFilter[]): Observable<ListSessionsResponse> {
+  list$(options: SessionRawListOptions, filters: SessionRawFilter): Observable<ListSessionsResponse> {
     const findFilter = this._utilsService.findFilter;
 
     const listSessionsRequest = new ListSessionsRequest({

@@ -28,7 +28,7 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
   };
 
 
-  list$(options: ResultRawListOptions, filters: ResultRawFilter[]): Observable<ListResultsResponse> {
+  list$(options: ResultRawListOptions, filters: ResultRawFilter): Observable<ListResultsResponse> {
     const findFilter = this.#utilsService.findFilter;
     const convertFilterValue = this.#utilsService.convertFilterValue;
 

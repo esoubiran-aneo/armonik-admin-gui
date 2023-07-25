@@ -23,7 +23,7 @@ export class ApplicationsIndexService {
 
   readonly defaultOptions: ApplicationRawListOptions = this.#defaultConfigService.defaultApplications.options;
 
-  readonly defaultFilters: ApplicationRawFilter[] = this.#defaultConfigService.defaultApplications.filters;
+  readonly defaultFilters: ApplicationRawFilter = this.#defaultConfigService.defaultApplications.filters;
   readonly filtersDefinitions: ApplicationsFiltersDefinition[] = [
     {
       key: 'name',
@@ -118,15 +118,15 @@ export class ApplicationsIndexService {
    * Filters
    */
 
-  saveFilters(filters: ApplicationRawFilter[]): void {
+  saveFilters(filters: ApplicationRawFilter): void {
     this.#tableService.saveFilters('applications-filters', filters);
   }
 
-  restoreFilters(): ApplicationRawFilter[] {
+  restoreFilters(): ApplicationRawFilter {
     return this.#tableService.restoreFilters<ApplicationRaw>('applications-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
-  resetFilters(): ApplicationRawFilter[] {
+  resetFilters(): ApplicationRawFilter {
     this.#tableService.resetFilters('applications-filters');
 
     return this.defaultFilters;

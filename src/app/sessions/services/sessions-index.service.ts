@@ -42,7 +42,7 @@ export class SessionsIndexService {
 
   readonly defaultOptions: SessionRawListOptions = this.#defaultConfigService.defaultSessions.options;
 
-  readonly defaultFilters: SessionRawFilter[] = this.#defaultConfigService.defaultSessions.filters;
+  readonly defaultFilters: SessionRawFilter = this.#defaultConfigService.defaultSessions.filters;
   readonly filtersDefinitions: SessionsFiltersDefinition[] = [
     // Do not filter object or array fields
     // {
@@ -174,15 +174,15 @@ export class SessionsIndexService {
    * Filters
    */
 
-  saveFilters(filters: SessionRawFilter[]): void {
+  saveFilters(filters: SessionRawFilter): void {
     this.#tableService.saveFilters('sessions-filters', filters);
   }
 
-  restoreFilters(): SessionRawFilter[] {
+  restoreFilters(): SessionRawFilter {
     return this.#tableService.restoreFilters<SessionRaw>('sessions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
-  resetFilters(): SessionRawFilter[] {
+  resetFilters(): SessionRawFilter {
     this.#tableService.resetFilters('sessions-filters');
 
     return this.defaultFilters;
