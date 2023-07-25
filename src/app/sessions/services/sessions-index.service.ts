@@ -1,9 +1,10 @@
-import { SessionStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { SessionField, SessionRawEnumField, SessionStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { SessionsStatusesService } from './sessions-statuses.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawFilter, SessionRawListOptions, SessionsFiltersDefinition } from '../types';
+import { SessionRaw, SessionRawColumnKey, SessionRawField, SessionRawFilter, SessionRawListOptions, SessionsFiltersDefinition } from '../types';
+import { Session } from '@aneoconsultingfr/armonik.api.angular/lib/generated/objects.pb';
 
 @Injectable()
 export class SessionsIndexService {
@@ -44,11 +45,32 @@ export class SessionsIndexService {
 
   readonly defaultFilters: SessionRawFilter = this.#defaultConfigService.defaultSessions.filters;
   readonly filtersDefinitions: SessionsFiltersDefinition[] = [
-    // Do not filter object or array fields
-    // {
-    //   field: 'sessionId',
-    //   type: 'text',
-    // },
+    // Do not filter object fields
+    {
+      key: 'sessionId',
+      field: SessionRawEnumField.SESSION_RAW_ENUM_FIELD_SESSION_ID,
+      type: 'string',
+    },
+    {
+      key: 'partitionIds',
+      field: SessionRawEnumField.SESSION_RAW_ENUM_FIELD_PARTITION_IDS,
+      type: 'array'
+    },
+    {
+      key: 'status',
+      field: SessionRawEnumField.SESSION_RAW_ENUM_FIELD_STATUS,
+      type: 'status',
+      statuses: Object.keys(this.#sessionsStatusesService.statuses).map(status => {
+        return {
+          key: status,
+          value: this.#sessionsStatusesService.statuses[Number(status) as SessionStatus],
+        };
+      }),
+      // TODO: ajouter les options
+    }
+    // TODO: ajouter les times
+    // TODO: ajouter les durations dans les api (avec le support des filtres dans les groupes by)
+    // TODO: simplifier les filtres en retirant une couche.
     // {
     //   field: 'partitionIds',
     //   type: 'text',
@@ -179,7 +201,7 @@ export class SessionsIndexService {
   }
 
   restoreFilters(): SessionRawFilter {
-    return this.#tableService.restoreFilters<SessionRaw>('sessions-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<SessionRaw, SessionRawField>('sessions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): SessionRawFilter {

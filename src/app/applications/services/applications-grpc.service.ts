@@ -65,21 +65,21 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
   #buildFilterField(filter: Filter<ApplicationRaw>) {
     return (type: FilterType, field: ApplicationRawEnumField) => {
       switch (type) {
-      case 'string':
-        return {
-          string: {
-            field: {
-              applicationField: {
-                field: field
+        case 'string':
+          return {
+            string: {
+              field: {
+                applicationField: {
+                  field: field
+                },
               },
-            },
-            value: filter.value?.toString() ?? '',
-            operator: filter.operator ?? 0
-          }
-        } satisfies ApplicationFilterField.AsObject;
-      default: {
-        throw new Error(`Type ${type} not supported`);
-      }
+              value: filter.value?.toString() ?? '',
+              operator: filter.operator ?? 0
+            }
+          } satisfies ApplicationFilterField.AsObject;
+        default: {
+          throw new Error(`Type ${type} not supported`);
+        }
       }
     };
   }

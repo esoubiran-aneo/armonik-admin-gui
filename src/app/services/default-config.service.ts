@@ -77,27 +77,7 @@ export class DefaultConfigService {
         direction: 'asc'
       },
     },
-    filters: [
-      [
-        {
-          key: 'name',
-          operator: FilterStringOperator.FILTER_STRING_OPERATOR_CONTAINS,
-          value: 'nice',
-        },
-        {
-          key: 'namespace',
-          operator: FilterStringOperator.FILTER_STRING_OPERATOR_CONTAINS,
-          value: '134567890',
-        }
-      ],
-      [
-        {
-          key: 'version',
-          operator: FilterStringOperator.FILTER_STRING_OPERATOR_CONTAINS,
-          value: '1.2.3',
-        }
-      ]
-    ],
+    filters: [],
   };
 
   readonly #defaultTasksByStatus: TaskStatusColored[] = [

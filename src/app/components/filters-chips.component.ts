@@ -2,7 +2,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { ColumnKey, FieldKey } from '@app/types/data';
-import { Filter, FilterInputSelect, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { Filter, FilterInputStatus, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { UtilsService } from '@services/utils.service';
 
@@ -59,6 +59,12 @@ export class FiltersChipsComponent<T extends object, U> {
 
     const type = this.#utilsService.recoverType(filter, this.filtersFields);
     const operator = this.#filtersService.findOperators(type)[filter.operator as number];
+
+    if (type === 'status') {
+      const statuses = this.#utilsService.recoverStatuses(filter, this.filtersFields);
+      const status = statuses.find(s => s.key.toString() === filter.value?.toString());
+      return `${label} ${operator} ${status?.value}`;
+    }
 
     return `${label} ${operator} ${filter.value}`;
   }

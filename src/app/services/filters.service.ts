@@ -48,7 +48,7 @@ export class FiltersService {
     'number': this.filterNumberOperators,
     'date': this.filterDateOperators,
     'array': this.filterArrayOperators,
-    'status': this.filterStringOperators,
+    'status': this.filterStatusOperators,
   };
 
   findOperators(type: FilterType) {

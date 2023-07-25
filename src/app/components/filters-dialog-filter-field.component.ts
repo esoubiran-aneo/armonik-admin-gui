@@ -3,7 +3,7 @@ import { Component, Input, inject } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FieldKey } from '@app/types/data';
-import { Filter, FilterInput, FilterInputNumber, FilterInputOutput, FilterInputType, FilterInputValueString, FiltersDefinition } from '@app/types/filters';
+import { Filter, FilterInput, FilterInputNumber, FilterInputOutput, FilterInputType, FilterInputValueString, FilterValueOptions, FiltersDefinition } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { FiltersDialogInputComponent } from './filters-dialog-input.component';
 
@@ -102,6 +102,7 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
   findInput(filter: Filter<T>): FilterInput {
     // TODO: use the utils service
     const type = this.findType(filter);
+    const statuses = this.findStatuses(filter);
 
     switch (type) {
     case 'string':
@@ -120,6 +121,12 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
         type: 'string',
         value: filter.value as FilterInputValueString || null
       };
+    case 'status':
+      return {
+        type: 'status',
+        value: filter.value as string || null,
+        statuses
+      }
     default:
       throw new Error(`Unknown type ${type}`);
     }
@@ -136,10 +143,27 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
     return field?.type ?? 'string';
   }
 
+  findStatuses(filter: Filter<T>): FilterValueOptions {
+    if (!filter.key) {
+      return [];
+    }
+
+    const field = this.#findFilterMetadata(filter.key);
+
+    if (!field) {
+      return [];
+    }
+
+    if (field.type !== 'status') {
+      return [];
+    }
+
+    return field.statuses;
+  }
+
   findOperator(filter: Filter<T>) {
     const type = this.findType(filter);
-    // FIXME: we need to update the type
-    const operators = this.#filtersService.findOperators(type as any);
+    const operators = this.#filtersService.findOperators(type);
     return operators;
   }
 

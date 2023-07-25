@@ -1,13 +1,19 @@
-import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, CountTasksByStatusSessionRequest, CountTasksByStatusSessionResponse, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionRawEnumField, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
-import { Injectable } from '@angular/core';
+import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, CountTasksByStatusSessionRequest, CountTasksByStatusSessionResponse, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionFilterField, SessionRawEnumField, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
-import { SessionRaw, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions } from '../types';
+import { SessionRaw, SessionRawField, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions } from '../types';
+import { SessionsIndexService } from './sessions-index.service';
+import { Filter, FilterType } from '@app/types/filters';
 
 @Injectable()
 export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
+  readonly #sessionsIndexService = inject(SessionsIndexService);
+  readonly #sessionsClient = inject(SessionsClient);
+  readonly #utilsService = inject(UtilsService<SessionRaw, SessionRawField>);
+
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
     'desc': ArmoniKSortDirection.SORT_DIRECTION_DESC,
@@ -24,13 +30,9 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
     'duration': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_DURATION,
   };
 
-  constructor(
-    private _sessionsClient: SessionsClient,
-    private _utilsService: UtilsService<SessionRaw>
-  ) {}
-
   list$(options: SessionRawListOptions, filters: SessionRawFilter): Observable<ListSessionsResponse> {
-    const findFilter = this._utilsService.findFilter;
+
+    const requestFilters = this.#utilsService.createFilters<SessionFilterField.AsObject>(filters, this.#sessionsIndexService.filtersDefinitions, this.#buildFilterField);
 
     const listSessionsRequest = new ListSessionsRequest({
       page: options.pageIndex,
@@ -38,25 +40,15 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
       sort: {
         direction: this.sortDirections[options.sort.direction],
         field: {
-          // TODO: waiting for new sort field
-          // @see https://github.com/aneoconsulting/ArmoniK.Api/pull/307
           sessionRawField: {
             field: this.sortFields[options.sort.active] ?? SessionRawEnumField.SESSION_RAW_ENUM_FIELD_SESSION_ID
           }
         }
       },
-      // filter: {
-      //   sessionId: this._utilsService.convertFilterValue(findFilter(filters, 'sessionId')),
-      //   // TODO: waiting for the new filter
-      //   // applicationName: convertFilterValue(findFilter(filters, '')),
-      //   // applicationVersion: convertFilterValue(findFilter(filters, 'applicationVersion')),
-      //   applicationName: '',
-      //   applicationVersion: '',
-      //   status: this._utilsService.convertFilterValueToStatus<SessionStatus>(findFilter(filters, 'status')) ?? SessionStatus.SESSION_STATUS_UNSPECIFIED,
-      // }
+      filters: requestFilters
     });
 
-    return this._sessionsClient.listSessions(listSessionsRequest);
+    return this.#sessionsClient.listSessions(listSessionsRequest);
   }
 
   get$(sessionId: string): Observable<GetSessionResponse> {
@@ -64,7 +56,7 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
       sessionId
     });
 
-    return this._sessionsClient.getSession(getSessionRequest);
+    return this.#sessionsClient.getSession(getSessionRequest);
   }
 
   cancel$(sessionId: string): Observable<CancelSessionResponse> {
@@ -72,7 +64,7 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
       sessionId
     });
 
-    return this._sessionsClient.cancelSession(cancelSessionRequest);
+    return this.#sessionsClient.cancelSession(cancelSessionRequest);
   }
 
   countTasksByStatus$(sessionId: string): Observable<CountTasksByStatusSessionResponse> {
@@ -80,6 +72,40 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
       sessionId
     });
 
-    return this._sessionsClient.countTasksByStatus(request);
+    return this.#sessionsClient.countTasksByStatus(request);
+  }
+
+  #buildFilterField(filter: Filter<SessionRaw>) {
+    return (type: FilterType, field: SessionRawField) => {
+      switch (type) {
+        case 'string':
+          return {
+            string: {
+              field: {
+                // TODO: to know the level, we need to check how many times the field is prefix by options.
+                sessionRawField: {
+                  field: field as SessionRawEnumField
+                }
+              },
+              value: filter.value?.toString() ?? '',
+              operator: filter.operator ?? 0
+            }
+          } satisfies SessionFilterField.AsObject;
+        case 'status':
+          return {
+            status: {
+              field: {
+                sessionRawField: {
+                  field: field as SessionRawEnumField
+                }
+              },
+              value: Number(filter.value) ?? 0,
+              operator: filter.operator ?? 0
+            }
+          } satisfies SessionFilterField.AsObject;
+        default:
+          throw new Error(`Type ${type} not supported`);
+      }
+    }
   }
 }

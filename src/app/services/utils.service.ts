@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FieldKey } from '@app/types/data';
-import { Filter, FilterType, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { Filter, FilterType, FilterValueOptions, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
 
 @Injectable()
 export class UtilsService<T extends object, U = null> {
@@ -125,6 +125,19 @@ export class UtilsService<T extends object, U = null> {
     const filterDefinition = this.#recoverFilterDefinition(filter, filtersDefinitions);
 
     return filterDefinition.type;
+  }
+
+  /**
+   * Recover statuses of a filter definition using the filter.
+   */
+  recoverStatuses(filter: Filter<T>, filtersDefinitions: FiltersDefinition<T, U>[]): FilterValueOptions {
+    const filterDefinition = this.#recoverFilterDefinition(filter, filtersDefinitions);
+
+    if (filterDefinition.type !== 'status') {
+      throw new Error(`Filter definition is not a status`);
+    }
+
+    return filterDefinition.statuses;
   }
 
   /**

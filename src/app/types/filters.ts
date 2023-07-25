@@ -64,12 +64,12 @@ export interface FilterInputDate extends FilterInputBase {
   type: 'date';
   value: FilterInputValueDate;
 }
-export interface FilterInputSelect extends FilterInputBase  {
+export interface FilterInputStatus extends FilterInputBase  {
   type: 'status';
-  value: MaybeNull<number>;
-  options: FilterValueOptions;
+  value: MaybeNull<string>;
+  statuses: FilterValueOptions;
 }
-export type FilterInput = FilterInputString | FilterInputNumber | FilterInputDate | FilterInputSelect;
+export type FilterInput = FilterInputString | FilterInputNumber | FilterInputDate | FilterInputStatus;
 
 export type FilterInputValue = FilterInput['value'];
 export type FilterInputType = FilterInput['type'];

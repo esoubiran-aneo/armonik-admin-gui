@@ -16,7 +16,7 @@ import { FilterInput, FilterInputOutput, FilterInputType } from '@app/types/filt
   template: `
 <mat-form-field appearance="outline" subscriptSizing="dynamic" *ngIf="input.type === 'string'">
   <mat-label i18n="Input label">Value</mat-label>
-  <input matInput [type]="getInputType()" placeholder="Value" [value]="input.value" (change)="onTextChange($event)">
+  <input matInput [type]="getInputType()" placeholder="Value" [value]="input.value" (change)="onStringChange($event)">
 </mat-form-field>
 
 <mat-form-field appearance="outline" subscriptSizing="dynamic" *ngIf="input.type === 'number'">
@@ -34,12 +34,12 @@ import { FilterInput, FilterInputOutput, FilterInputType } from '@app/types/filt
   <mat-date-range-picker #picker></mat-date-range-picker>
 </mat-form-field>
 
-<!-- <mat-form-field appearance="outline" subscriptSizing="dynamic" *ngIf="input.type === 'select'">
+<mat-form-field appearance="outline" subscriptSizing="dynamic" *ngIf="input.type === 'status'">
   <mat-label i18n="Input label">Value</mat-label>
-  <mat-select [value]="input.value" (valueChange)="onSelectChange($event)">
-    <mat-option *ngFor="let option of input.options; trackBy: trackBySelect" [value]="option.value">{{ option.label }}</mat-option>
+  <mat-select [value]="input.value?.toString()" (valueChange)="onStatusChange($event)">
+    <mat-option *ngFor="let option of input.statuses; trackBy: trackBySelect" [value]="option.key">{{ option.value }}</mat-option>
   </mat-select>
-</mat-form-field> -->
+</mat-form-field>
   `,
   styles: [`
 mat-form-field {
@@ -72,7 +72,7 @@ export class FiltersDialogInputComponent {
   // Créer des types en fonction du type de champ
   @Output() valueChange: EventEmitter<FilterInputOutput> = new EventEmitter<FilterInputOutput>();
 
-  onTextChange(event: Event): void {
+  onStringChange(event: Event): void {
     this.valueChange.emit({
       type: 'string',
       value: (event.target as HTMLInputElement).value,
@@ -93,7 +93,7 @@ export class FiltersDialogInputComponent {
     });
   }
 
-  onSelectChange(event: string): void {
+  onStatusChange(event: string): void {
     this.valueChange.emit({
       type: 'string',
       value: event,
@@ -110,8 +110,8 @@ export class FiltersDialogInputComponent {
       return 'date';
     case 'array':
       return 'string';
-    // case 'select':
-    //   return 'select';
+    case 'status':
+      return 'status';
     default:
       return 'string';
     }
