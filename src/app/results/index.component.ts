@@ -35,7 +35,7 @@ import { UtilsService } from '@services/utils.service';
 import { ResultsGrpcService } from './services/results-grpc.service';
 import { ResultsIndexService } from './services/results-index.service';
 import { ResultsStatusesService } from './services/results-statuses.service';
-import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, ResultsFiltersDefinition, ResultRawListOptions } from './types';
+import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, ResultRawListOptions, ResultsFiltersDefinition } from './types';
 
 
 @Component({

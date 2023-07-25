@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ColumnKey } from '@app/types/data';
 import { FiltersDialogData } from '@app/types/dialog';
-import { Filter, FiltersOr, FiltersDefinition } from '@app/types/filters';
+import { Filter, FiltersDefinition, FiltersOr } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { IconsService } from '@services/icons.service';
 import { FiltersDialogInputComponent } from './filters-dialog-input.component';
@@ -80,7 +80,7 @@ export class FiltersDialogComponent<T extends object, U> implements OnInit {
   #iconsService = inject(IconsService);
   #dialogRef = inject(MatDialogRef<FiltersDialogComponent<T, U>>);
 
-  filtersOr: FiltersOr<T> = []
+  filtersOr: FiltersOr<T> = [];
   columnsLabels: Record<ColumnKey<T>, string> | null = null;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: FiltersDialogData<T, U>){}

@@ -1,12 +1,12 @@
-import { Component, EventEmitter, Input, Output, inject } from "@angular/core";
-import { FiltersDialogAndComponent } from "./filters-dialog-and.component";
-import { NgFor, NgIf } from "@angular/common";
-import { ColumnKey } from "@app/types/data";
-import { Filter, FiltersDefinition } from "@app/types/filters";
-import { IconsService } from "@services/icons.service";
-import { MatButtonModule } from "@angular/material/button";
-import { MatIconModule } from "@angular/material/icon";
-import { MatMenuModule } from "@angular/material/menu";
+import { NgFor, NgIf } from '@angular/common';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { ColumnKey } from '@app/types/data';
+import { Filter, FiltersDefinition } from '@app/types/filters';
+import { IconsService } from '@services/icons.service';
+import { FiltersDialogAndComponent } from './filters-dialog-and.component';
 
 @Component({
   selector: 'app-filters-dialog-or',
@@ -91,7 +91,7 @@ export class FiltersDialogOrComponent<T extends object, U> {
   @Input({ required: true }) first: boolean;
   @Input({ required: true }) filtersOr: Filter<T>[];
   @Input({ required: true }) filtersDefinitions: FiltersDefinition<T, U>[];
-  @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null
+  @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null;
 
   @Output() removeChange: EventEmitter<Filter<T>[]> = new EventEmitter<Filter<T>[]>();
 

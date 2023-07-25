@@ -32,14 +32,14 @@ export type TaskStatusColored = {
 
 export interface ViewTasksByStatusDialogData {
   statusesCounts: TaskStatusColored[]
-};
+}
 
 export type ViewTasksByStatusDialogResult = Record<string, never>;
 
 export interface ViewObjectDialogData {
   title: string;
   object: TaskOptions;
-};
+}
 
 export type ViewObjectDialogResult = Record<string, never>;
 

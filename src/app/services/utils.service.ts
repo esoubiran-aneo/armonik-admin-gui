@@ -63,7 +63,7 @@ export class UtilsService<T extends object, U = null> {
 
     return {
       filters: filtersOr
-    }
+    };
   }
 
   /**
@@ -109,7 +109,7 @@ export class UtilsService<T extends object, U = null> {
    */
   #createFilterField<F>(filter: Filter<T>, filtersDefinitions: FiltersDefinition<T, U>[], cb: (type: FilterType, field: U) => F): F | null {
     if (filter.key === null || filter.value === null || filter.operator === null) {
-        return null;
+      return null;
     }
 
     const type = this.recoverType(filter, filtersDefinitions);

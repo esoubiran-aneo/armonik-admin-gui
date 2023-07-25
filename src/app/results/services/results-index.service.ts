@@ -4,7 +4,7 @@ import { AppIndexService } from '@app/types/services';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { ResultsStatusesService } from './results-statuses.service';
-import { ResultRaw, ResultRawColumnKey, ResultRawFilter, ResultsFiltersDefinition, ResultRawListOptions } from '../types';
+import { ResultRaw, ResultRawColumnKey, ResultRawFilter, ResultRawListOptions, ResultsFiltersDefinition } from '../types';
 
 @Injectable()
 export class ResultsIndexService implements AppIndexService<ResultRaw> {

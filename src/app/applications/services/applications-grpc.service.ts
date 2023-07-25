@@ -1,14 +1,12 @@
-import { ApplicationFilterField, ApplicationFiltersAnd, ApplicationRawEnumField, ApplicationRawField, ApplicationsClient, SortDirection as ArmoniKSortDirection, CountTasksByStatusApplicationRequest, CountTasksByStatusApplicationResponse, ListApplicationsRequest, ListApplicationsResponse } from '@aneoconsultingfr/armonik.api.angular';
+import { ApplicationFilterField, ApplicationRawEnumField, ApplicationsClient, SortDirection as ArmoniKSortDirection, CountTasksByStatusApplicationRequest, CountTasksByStatusApplicationResponse, ListApplicationsRequest, ListApplicationsResponse } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
+import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
-import { ApplicationRaw, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions } from '../types';
-// FIXME: we need to export Filters from @aneoconsultingfr/armonik-api-angular
-import { Filters as ApplicationsFilters, FiltersOr as ApplicationsFiltersOr, FilterField } from '@aneoconsultingfr/armonik.api.angular/lib/generated/applications-filters.pb';
-import { Filter, FilterType, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
 import { ApplicationsIndexService } from './applications-index.service';
+import { ApplicationRaw, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions } from '../types';
 
 @Injectable()
 export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
@@ -66,23 +64,23 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
 
   #buildFilterField(filter: Filter<ApplicationRaw>) {
     return (type: FilterType, field: ApplicationRawEnumField) => {
-        switch (type) {
-          case 'string':
-            return {
-              string: {
-                field: {
-                  applicationField: {
-                    field: field
-                  },
-                },
-                value: filter.value?.toString() ?? '',
-                operator: filter.operator ?? 0
-            }
-          } satisfies ApplicationFilterField.AsObject;
-          default: {
-            throw new Error(`Type ${type} not supported`);
+      switch (type) {
+      case 'string':
+        return {
+          string: {
+            field: {
+              applicationField: {
+                field: field
+              },
+            },
+            value: filter.value?.toString() ?? '',
+            operator: filter.operator ?? 0
           }
-        }
+        } satisfies ApplicationFilterField.AsObject;
+      default: {
+        throw new Error(`Type ${type} not supported`);
       }
+      }
+    };
   }
 }

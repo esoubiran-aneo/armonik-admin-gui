@@ -44,7 +44,7 @@ import { CountByStatusComponent } from './components/count-by-status.component';
 import { SessionsGrpcService } from './services/sessions-grpc.service';
 import { SessionsIndexService } from './services/sessions-index.service';
 import { SessionsStatusesService } from './services/sessions-statuses.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, SessionsFiltersDefinition, SessionRawListOptions } from './types';
+import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions, SessionsFiltersDefinition } from './types';
 
 @Component({
   selector: 'app-sessions-index',

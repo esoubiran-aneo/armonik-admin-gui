@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from "@angular/core";
-import { FiltersDialogFilterFieldComponent } from "./filters-dialog-filter-field.component";
-import { MatMenuModule } from "@angular/material/menu";
-import { MatIconModule } from "@angular/material/icon";
-import { IconsService } from "@services/icons.service";
-import { MatButtonModule } from "@angular/material/button";
-import { ColumnKey } from "@app/types/data";
-import { Filter } from "@app/types/filters";
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { ColumnKey } from '@app/types/data';
+import { Filter } from '@app/types/filters';
+import { IconsService } from '@services/icons.service';
+import { FiltersDialogFilterFieldComponent } from './filters-dialog-filter-field.component';
 
 @Component({
   selector: 'app-filters-dialog-and',

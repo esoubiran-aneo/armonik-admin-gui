@@ -1,8 +1,8 @@
+import { ApplicationRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
-import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFilter, ApplicationsFiltersDefinition, ApplicationRawListOptions } from '../types';
-import { ApplicationRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
+import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFilter, ApplicationRawListOptions, ApplicationsFiltersDefinition } from '../types';
 
 @Injectable()
 // export class ApplicationsIndexService implements AppIndexService<ApplicationRaw> {

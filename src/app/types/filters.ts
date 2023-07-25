@@ -26,20 +26,20 @@ type FilterDefinitionBase<T extends object, U = null> = {
 
 export interface FiltersDefinitionString<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'string'
-};
+}
 export interface FiltersDefinitionNumber<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'number'
-};
+}
 export interface FiltersDefinitionDate<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'date'
-};
+}
 export interface FiltersDefinitionStatus<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'status'
   statuses: FilterValueOptions;
-};
+}
 export interface FiltersDefinitionArray<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'array'
-};
+}
 // Filters used to create the query builder.
 export type FiltersDefinition<T extends object, U = null> = FiltersDefinitionString<T, U> | FiltersDefinitionNumber<T, U> | FiltersDefinitionDate<T, U> | FiltersDefinitionStatus<T, U> | FiltersDefinitionArray<T, U>;
 
@@ -81,13 +81,13 @@ interface FilterInputOutputBase {
 export interface FilterInputOutputString extends FilterInputOutputBase {
   type: 'string' | 'array';
   value: MaybeNull<string>;
-};
+}
 export interface FilterInputOutputNumber extends FilterInputOutputBase {
   type: 'number';
   value: MaybeNull<number>;
-};
+}
 export interface FilterInputOutputDate extends FilterInputOutputBase {
   type: 'date-start' | 'date-end';
   value: MaybeNull<DateTime>;
-};
+}
 export type FilterInputOutput = FilterInputOutputString | FilterInputOutputNumber | FilterInputOutputDate;

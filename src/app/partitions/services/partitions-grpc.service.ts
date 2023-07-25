@@ -1,12 +1,12 @@
-import { SortDirection as ArmoniKSortDirection, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionRawEnumField, PartitionsClient, PartitionFiltersAnd, PartitionFiltersOr, PartitionFilterField, PartitionFilters } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionFilterField, PartitionFilters, PartitionFiltersAnd, PartitionFiltersOr, PartitionRawEnumField, PartitionsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
-import { AppGrpcService } from '@app/types/services';
-import { PartitionRaw, PartitionRawFieldKey, PartitionRawFilter, PartitionRawListOptions } from '../types';
-import { PartitionsIndexService } from './partitions-index.service';
 import { Filter, FilterType, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
+import { PartitionsIndexService } from './partitions-index.service';
+import { PartitionRaw, PartitionRawFieldKey, PartitionRawFilter, PartitionRawListOptions } from '../types';
 
 
 @Injectable()
@@ -62,46 +62,46 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
   #buildFilterField(filter: Filter<PartitionRaw>) {
     return (type: FilterType, field: PartitionRawEnumField) => {
       switch (type) {
-        case 'string':
-          return {
-            string: {
-              field: {
-                partitionRawField: {
-                  field
-                },
+      case 'string':
+        return {
+          string: {
+            field: {
+              partitionRawField: {
+                field
               },
-              value: filter.value?.toString() ?? '',
-              operator: filter.operator ?? 0
+            },
+            value: filter.value?.toString() ?? '',
+            operator: filter.operator ?? 0
           }
         } satisfies PartitionFilterField.AsObject;
-        case 'number':
-          return {
-            number: {
-              field: {
-                partitionRawField: {
-                  field
-                },
+      case 'number':
+        return {
+          number: {
+            field: {
+              partitionRawField: {
+                field
               },
-              value: filter.value?.toString() || '',
-              operator: filter.operator ?? 0
+            },
+            value: filter.value?.toString() || '',
+            operator: filter.operator ?? 0
           }
         } satisfies PartitionFilterField.AsObject;
-        case 'array':
-          return {
-            array: {
-              field: {
-                partitionRawField: {
-                  field
-                },
+      case 'array':
+        return {
+          array: {
+            field: {
+              partitionRawField: {
+                field
               },
-              value: filter.value?.toString() ?? '',
-              operator: filter.operator ?? 0
+            },
+            value: filter.value?.toString() ?? '',
+            operator: filter.operator ?? 0
           }
         } satisfies PartitionFilterField.AsObject;
-        default: {
-          throw new Error(`Type ${type} not supported`);
-        }
+      default: {
+        throw new Error(`Type ${type} not supported`);
       }
-    }
+      }
+    };
   }
 }

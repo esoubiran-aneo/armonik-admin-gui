@@ -89,7 +89,7 @@ export class FiltersToolbarComponent<T extends object, U = null> {
   }
 
   showFilters(): boolean {
-    return true
+    return true;
     // return  this.filters.length > 1 || (this.filters[0]?.value !== null && this.filters.length === 1);
   }
 

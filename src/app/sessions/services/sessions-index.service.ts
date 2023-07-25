@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { SessionsStatusesService } from './sessions-statuses.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawFilter, SessionsFiltersDefinition, SessionRawListOptions } from '../types';
+import { SessionRaw, SessionRawColumnKey, SessionRawFilter, SessionRawListOptions, SessionsFiltersDefinition } from '../types';
 
 @Injectable()
 export class SessionsIndexService {

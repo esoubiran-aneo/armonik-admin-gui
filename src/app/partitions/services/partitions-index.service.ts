@@ -1,9 +1,9 @@
+import { PartitionRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { AppIndexService } from '@app/types/services';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { PartitionRaw, PartitionRawColumnKey, PartitionRawFilter, PartitionRawFilterField, PartitionRawListOptions } from '../types';
-import { PartitionRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 
 @Injectable()
 // TODO: re-add app-index-service
