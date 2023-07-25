@@ -61,7 +61,6 @@ span {
   text-align: end;
 }
 
-/* TODO: support themes */
 .filters {
   background-color: #f5f5f5;
   border: 1px solid #e0e0e0;
