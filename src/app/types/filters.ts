@@ -18,26 +18,27 @@ export type Filter<T extends object> = {
 
 
 // Used to define filters available for the query builder.
-type FilterDefinitionBase<T extends object> = {
+type FilterDefinitionBase<T extends object, U = null> = {
   key: FieldKey<T>
+  field?: U
   type: FilterType
 };
 
-export interface FiltersDefinitionString<T extends object> extends FilterDefinitionBase<T> {
+export interface FiltersDefinitionString<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'string'
 };
-export interface FiltersDefinitionNumber<T extends object> extends FilterDefinitionBase<T> {
+export interface FiltersDefinitionNumber<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'number'
 };
-export interface FiltersDefinitionDate<T extends object> extends FilterDefinitionBase<T> {
+export interface FiltersDefinitionDate<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'date'
 };
-export interface FiltersDefinitionStatus<T extends object> extends FilterDefinitionBase<T> {
+export interface FiltersDefinitionStatus<T extends object, U> extends FilterDefinitionBase<T, U> {
   type: 'status'
   statuses: FilterValueOptions;
 };
 // Filters used to create the query builder.
-export type FiltersDefinition<T extends object> = FiltersDefinitionString<T> | FiltersDefinitionNumber<T> | FiltersDefinitionDate<T> | FiltersDefinitionStatus<T>;
+export type FiltersDefinition<T extends object, U = null> = FiltersDefinitionString<T, U> | FiltersDefinitionNumber<T, U> | FiltersDefinitionDate<T, U> | FiltersDefinitionStatus<T, U>;
 
 // Value of a filter input.
 export type FilterInputValueString = MaybeNull<string>;

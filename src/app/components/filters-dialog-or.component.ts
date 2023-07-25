@@ -88,10 +88,10 @@ span {
     IconsService
   ],
 })
-export class FiltersDialogOrComponent<T extends object> {
+export class FiltersDialogOrComponent<T extends object, U> {
   @Input({ required: true }) first: boolean;
   @Input({ required: true }) filtersOr: Filter<T>[];
-  @Input({ required: true }) filtersDefinitions: FiltersDefinition<T>[];
+  @Input({ required: true }) filtersDefinitions: FiltersDefinition<T, U>[];
   @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null
 
   @Output() removeChange: EventEmitter<Filter<T>[]> = new EventEmitter<Filter<T>[]>();

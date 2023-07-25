@@ -81,9 +81,9 @@ export class TableService {
   /**
    * Restore filters from the URL and then from the storage
    */
-  restoreFilters<T extends object>(key: `${Scope}-filters`, filtersDefinitions: FiltersDefinition<T>[]): FiltersOr<T> | null {
+  restoreFilters<T extends object, U = null>(key: `${Scope}-filters`, filtersDefinitions: FiltersDefinition<T, U>[]): FiltersOr<T> | null {
 
-    const queryParams = this._tableURLService.getQueryParamsFilters<T>(filtersDefinitions);
+    const queryParams = this._tableURLService.getQueryParamsFilters<T, U>(filtersDefinitions);
 
     if (queryParams.length) {
       this.saveFilters(key, queryParams);

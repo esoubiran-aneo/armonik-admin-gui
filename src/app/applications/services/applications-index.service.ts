@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFilter, ApplicationsFiltersDefinition, ApplicationRawListOptions } from '../types';
+import { ApplicationRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 
 @Injectable()
 // export class ApplicationsIndexService implements AppIndexService<ApplicationRaw> {
@@ -27,18 +28,22 @@ export class ApplicationsIndexService {
   readonly filtersDefinitions: ApplicationsFiltersDefinition[] = [
     {
       key: 'name',
+      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_NAME,
       type: 'string',
     },
     {
       key: 'namespace',
+      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_NAMESPACE,
       type: 'string',
     },
     {
       key: 'service',
+      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_SERVICE,
       type: 'string',
     },
     {
       key: 'version',
+      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_VERSION,
       type: 'string',
     }
   ];
@@ -123,7 +128,7 @@ export class ApplicationsIndexService {
   }
 
   restoreFilters(): ApplicationRawFilter {
-    return this.#tableService.restoreFilters<ApplicationRaw>('applications-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<ApplicationRaw, ApplicationRawEnumField>('applications-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): ApplicationRawFilter {

@@ -16,7 +16,7 @@ export class TableURLService {
   }
 
   // TODO: We need to rework this part to have a functionnal filter in the URL. (we can add a field name <key>_operator in the URL)
-  getQueryParamsFilters<T extends object>(filtersDefinitions: FiltersDefinition<T>[]): FiltersOr<T> {
+  getQueryParamsFilters<T extends object, U = null>(filtersDefinitions: FiltersDefinition<T, U>[]): FiltersOr<T> {
     const params: FiltersOr<T> = [];
 
     for (const definition of filtersDefinitions) {
@@ -27,10 +27,8 @@ export class TableURLService {
         switch (definition.type) {
         case 'string':
           throw new Error('Not implemented');
-          break;
         case 'number':
           throw new Error('Not implemented');
-          break;
         case 'date':
           throw new Error('Not implemented');
         case 'status':

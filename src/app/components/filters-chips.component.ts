@@ -42,11 +42,11 @@ import { FiltersService } from '@services/filters.service';
     FiltersService,
   ],
 })
-export class FiltersChipsComponent<T extends object> {
+export class FiltersChipsComponent<T extends object, U> {
   #filtersService = inject(FiltersService);
 
   @Input({ required: true }) filtersAnd: FiltersAnd<T> = [];
-  @Input({ required: true }) filtersFields: FiltersDefinition<T>[] = [];
+  @Input({ required: true }) filtersFields: FiltersDefinition<T, U>[] = [];
   @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null = null;
 
   content(filter: Filter<T>): string {

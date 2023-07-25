@@ -76,14 +76,14 @@ import { FiltersDialogOrComponent } from './filters-dialog-or.component';
     FiltersService
   ],
 })
-export class FiltersDialogComponent<T extends object> implements OnInit {
+export class FiltersDialogComponent<T extends object, U> implements OnInit {
   #iconsService = inject(IconsService);
-  #dialogRef = inject(MatDialogRef<FiltersDialogComponent<T>>);
+  #dialogRef = inject(MatDialogRef<FiltersDialogComponent<T, U>>);
 
   filtersOr: FiltersOr<T> = []
   columnsLabels: Record<ColumnKey<T>, string> | null = null;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: FiltersDialogData<T>){}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: FiltersDialogData<T, U>){}
 
   ngOnInit(): void {
     this.columnsLabels = this.data.columnsLabels;
@@ -124,7 +124,7 @@ export class FiltersDialogComponent<T extends object> implements OnInit {
    * Get the available field (all the field that can be added)
    * Sort the field alphabetically
    */
-  filtersDefinitions(): FiltersDefinition<T>[] {
+  filtersDefinitions(): FiltersDefinition<T, U>[] {
     return this.data.filtersDefinitions.sort((a, b) => (a.key as string).localeCompare(b.key as string));
   }
 

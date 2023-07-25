@@ -11,9 +11,9 @@ export interface ColumnsModifyDialogData<T extends object, O extends object> {
 
 export type ColumnsModifyDialogResult<T extends object, O extends object> = ColumnKey<T, O>[];
 
-export interface FiltersDialogData<T extends object> {
+export interface FiltersDialogData<T extends object, U> {
   filtersOr: FiltersOr<T>
-  filtersDefinitions: FiltersDefinition<T>[]
+  filtersDefinitions: FiltersDefinition<T, U>[]
   columnsLabels: Record<ColumnKey<T>, string>
 }
 
