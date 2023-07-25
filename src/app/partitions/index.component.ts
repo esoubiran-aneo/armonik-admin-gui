@@ -60,7 +60,7 @@ import { TableEmptyDataComponent } from '@components/table/table-empty-data.comp
     </app-table-actions-toolbar>
   </mat-toolbar-row>
 
-  <mat-toolbar-row>
+  <mat-toolbar-row class="filters">
     <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
@@ -126,6 +126,13 @@ import { TableEmptyDataComponent } from '@components/table/table-empty-data.comp
 app-table-actions-toolbar {
   flex-grow: 1;
 }
+
+.filters {
+  height: auto;
+  min-height: 64px;
+
+  padding: 1rem;
+}
   `],
   standalone: true,
   providers: [
@@ -166,7 +173,8 @@ app-table-actions-toolbar {
     TableEmptyDataComponent,
   ]
 })
-export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppIndexComponent<PartitionRaw> {
+// TODO: add app-index-component
+export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   #notificationService = inject(NotificationService);
   #iconsService = inject(IconsService);
 

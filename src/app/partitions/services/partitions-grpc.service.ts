@@ -1,13 +1,20 @@
-import { SortDirection as ArmoniKSortDirection, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionRawEnumField, PartitionRawField, PartitionsClient } from '@aneoconsultingfr/armonik.api.angular';
-import { Injectable } from '@angular/core';
+import { SortDirection as ArmoniKSortDirection, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionRawEnumField, PartitionsClient, PartitionFiltersAnd, PartitionFiltersOr, PartitionFilterField, PartitionFilters } from '@aneoconsultingfr/armonik.api.angular';
+import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 import { AppGrpcService } from '@app/types/services';
-import { UtilsService } from '@services/utils.service';
 import { PartitionRaw, PartitionRawFieldKey, PartitionRawFilter, PartitionRawListOptions } from '../types';
+import { PartitionsIndexService } from './partitions-index.service';
+import { Filter, FilterType, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { UtilsService } from '@services/utils.service';
+
 
 @Injectable()
 export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
+  #partitionsIndexService = inject(PartitionsIndexService);
+  #partitionsClient = inject(PartitionsClient);
+  #utilsService = inject(UtilsService<PartitionRaw, PartitionRawEnumField>);
+
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
     'desc': ArmoniKSortDirection.SORT_DIRECTION_DESC,
@@ -24,15 +31,8 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
     'priority': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PRIORITY,
   };
 
-  constructor(
-    private _partitionsClient: PartitionsClient,
-    private _utilsService: UtilsService<PartitionRaw>
-  ) {}
-
   list$(options: PartitionRawListOptions, filters: PartitionRawFilter): Observable<ListPartitionsResponse> {
-    const findFilter = this._utilsService.findFilter;
-    const convertFilterValue = this._utilsService.convertFilterValue;
-    const convertFilterValueToNumber = this._utilsService.convertFilterValueToNumber;
+    const requestFilters = this.#utilsService.createFilters<PartitionFilterField.AsObject>(filters, this.#partitionsIndexService.filtersDefinitions, this.#buildFilterField);
 
     const listPartitionsRequest = new ListPartitionsRequest({
       page: options.pageIndex,
@@ -45,18 +45,10 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
           }
         }
       },
-      // filter: {
-      //   id: convertFilterValue(findFilter(filters, 'id')),
-      //   parentPartitionId: convertFilterValue(findFilter(filters, 'parentPartitionIds')),
-      //   podReserved:
-      //     convertFilterValueToNumber(findFilter(filters, 'podReserved')) as number,
-      //   podMax: convertFilterValueToNumber(findFilter(filters, 'podMax')) as number,
-      //   preemptionPercentage: convertFilterValueToNumber(findFilter(filters, 'preemptionPercentage')) as number,
-      //   priority: convertFilterValueToNumber(findFilter(filters, 'priority')) as number
-      // }
+      filters: requestFilters
     });
 
-    return this._partitionsClient.listPartitions(listPartitionsRequest);
+    return this.#partitionsClient.listPartitions(listPartitionsRequest);
   }
 
   get$(id: string) :Observable<GetPartitionResponse> {
@@ -64,6 +56,28 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
       id
     });
 
-    return this._partitionsClient.getPartition(getPartitionRequest);
+    return this.#partitionsClient.getPartition(getPartitionRequest);
+  }
+
+  #buildFilterField(filter: Filter<PartitionRaw>) {
+    return (type: FilterType, field: PartitionRawEnumField) => {
+      switch (type) {
+        case 'string':
+          return {
+            string: {
+              field: {
+                partitionRawField: {
+                  field
+                },
+              },
+              value: filter.value?.toString() ?? '',
+              operator: filter.operator ?? 0
+          }
+        } satisfies PartitionFilterField.AsObject;
+        default: {
+          throw new Error(`Type ${type} not supported`);
+        }
+      }
+    }
   }
 }

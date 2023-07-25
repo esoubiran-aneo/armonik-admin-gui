@@ -3,9 +3,11 @@ import { AppIndexService } from '@app/types/services';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { PartitionRaw, PartitionRawColumnKey, PartitionRawFilter, PartitionRawFilterField, PartitionRawListOptions } from '../types';
+import { PartitionRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 
 @Injectable()
-export class PartitionsIndexService implements AppIndexService<PartitionRaw> {
+// TODO: re-add app-index-service
+export class PartitionsIndexService {
   #defaultConfigService = inject(DefaultConfigService);
 
   readonly tableName: string = 'partitions';
@@ -30,27 +32,33 @@ export class PartitionsIndexService implements AppIndexService<PartitionRaw> {
 
   readonly defaultFilters: PartitionRawFilter = this.#defaultConfigService.defaultPartitions.filters;
   readonly filtersDefinitions: PartitionRawFilterField[] = [
+    // TODO: filter on array
     // Do not add filter on array or object fields
-    // {
-    //   field: 'id',
-    //   type: 'text',
-    // },
-    // {
-    //   field: 'priority',
-    //   type: 'number',
-    // },
-    // {
-    //   field: 'podMax',
-    //   type: 'number',
-    // },
-    // {
-    //   field: 'podReserved',
-    //   type: 'number',
-    // },
-    // {
-    //   field: 'preemptionPercentage',
-    //   type: 'number',
-    // },
+    {
+      key: 'id',
+      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_ID,
+      type: 'string',
+    },
+    {
+      key: 'priority',
+      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PRIORITY,
+      type: 'number',
+    },
+    {
+      key: 'podMax',
+      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_POD_MAX,
+      type: 'number',
+    },
+    {
+      key: 'podReserved',
+      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_POD_RESERVED,
+      type: 'number',
+    },
+    {
+      key: 'preemptionPercentage',
+      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PREEMPTION_PERCENTAGE,
+      type: 'number',
+    },
   ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultPartitions.interval;
@@ -137,7 +145,7 @@ export class PartitionsIndexService implements AppIndexService<PartitionRaw> {
   }
 
   restoreFilters(): PartitionRawFilter {
-    return this.#tableService.restoreFilters<PartitionRaw>('partitions-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<PartitionRaw, PartitionRawEnumField>('partitions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): PartitionRawFilter {
