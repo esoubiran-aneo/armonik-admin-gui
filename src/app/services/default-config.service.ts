@@ -55,8 +55,8 @@ export class DefaultConfigService {
     'partitions',
     'divider',
     'sessions',
-    'results',
     'tasks',
+    'results',
     'divider',
     'settings',
     'divider'

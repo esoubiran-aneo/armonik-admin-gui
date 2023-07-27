@@ -14,7 +14,6 @@ import { RouterLink } from '@angular/router';
 import { Timestamp } from '@ngx-grpc/well-known-types';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
-import { AppIndexComponent } from '@app/types/components';
 import { Page } from '@app/types/pages';
 import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
@@ -63,7 +62,7 @@ import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, Resu
     </app-table-actions-toolbar>
   </mat-toolbar-row>
 
-  <mat-toolbar-row>
+  <mat-toolbar-row class="filters">
     <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
@@ -142,6 +141,13 @@ import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, Resu
 app-table-actions-toolbar {
   flex-grow: 1;
 }
+
+.filters {
+  height: auto;
+  min-height: 64px;
+
+  padding: 1rem;
+}
   `],
   standalone: true,
   providers: [
@@ -182,7 +188,7 @@ app-table-actions-toolbar {
     TableEmptyDataComponent,
   ]
 })
-export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppIndexComponent<ResultRaw> {
+export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   #notificationService = inject(NotificationService);
   #iconsService = inject(IconsService);
 

@@ -1,9 +1,9 @@
-import { TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { TaskStatus, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { TasksStatusesService } from './tasks-status.service';
-import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFilters, TaskSummaryListOptions, TasksFiltersDefinition } from '../types';
+import { TaskSummary, TaskSummaryColumnKey, TaskSummaryField, TaskSummaryFilters, TaskSummaryListOptions, TasksFiltersDefinition } from '../types';
 
 @Injectable()
 export class TasksIndexService {
@@ -61,30 +61,33 @@ export class TasksIndexService {
 
   readonly defaultFilters: TaskSummaryFilters = this.#defaultConfigService.defaultTasks.filters;
   readonly filtersDefinitions: TasksFiltersDefinition[] = [
-    // Do not filter object or array fields
-    // {
-    //   field: 'id',
-    //   type: 'text',
-    // },
-    // {
-    //   field: 'status',
-    //   type: 'select',
-    //   options: Object.keys(this.#tasksStatusesService.statuses).map(status => {
-    //     return {
-    //       value: status,
-    //       label: this.#tasksStatusesService.statuses[Number(status) as TaskStatus],
-    //     };
-    //   }),
-    // },
-    // {
-    //   field: 'sessionId',
-    //   type: 'text',
-    // },
-    // // Need to add this filter to the API
-    // {
-    //   field: 'initialTaskId',
-    //   type: 'text',
-    // }
+    // Do not filter object fields
+    {
+      key: 'id',
+      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_TASK_ID,
+      type: 'string',
+    },
+    {
+      key: 'sessionId',
+      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_SESSION_ID,
+      type: 'string',
+    },
+    {
+      key: 'initialTaskId',
+      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_INITIAL_TASK_ID,
+      type: 'string',
+    },
+    {
+      key: 'status',
+      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_STATUS,
+      type: 'status',
+      statuses: Object.keys(this.#tasksStatusesService.statuses).map(status => {
+        return {
+          key: status,
+          value: this.#tasksStatusesService.statuses[Number(status) as TaskStatus],
+        };
+      }),
+    }
   ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultTasks.interval;
@@ -187,7 +190,7 @@ export class TasksIndexService {
   }
 
   restoreFilters(): TaskSummaryFilters {
-    return this.#tableService.restoreFilters<TaskSummary>('tasks-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<TaskSummary, TaskSummaryField>('tasks-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): TaskSummaryFilters {

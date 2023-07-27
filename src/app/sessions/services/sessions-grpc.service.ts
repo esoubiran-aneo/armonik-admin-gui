@@ -74,7 +74,7 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
         sessionRawField: {
           field: field as SessionRawEnumField
         }
-      } as SessionFilterField.AsObject['field'];
+      } satisfies SessionFilterField.AsObject['field'];
 
       switch (type) {
       case 'string':

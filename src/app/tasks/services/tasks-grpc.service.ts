@@ -1,14 +1,17 @@
-import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskFilters, TaskSummary, TaskSummaryEnumField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, FilterStringOperator, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskFilterField, TaskFilters, TaskSummary, TaskSummaryEnumField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
+import { Filter, FilterType } from '@app/types/filters';
 import { UtilsService } from '@services/utils.service';
-import { TaskSummaryFieldKey, TaskSummaryFilters, TaskSummaryListOptions } from '../types';
+import { TasksIndexService } from './tasks-index.service';
+import { TaskSummaryField, TaskSummaryFieldKey, TaskSummaryFilters, TaskSummaryListOptions } from '../types';
 
 @Injectable()
 export class TasksGrpcService {
-  readonly #utilsService = inject(UtilsService<TaskSummary>);
+  readonly #utilsService = inject(UtilsService<TaskSummary, TaskSummaryField>);
   readonly #tasksClient = inject(TasksClient);
+  readonly #tasksIndexService = inject(TasksIndexService);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
@@ -42,9 +45,8 @@ export class TasksGrpcService {
   };
 
   list$(options: TaskSummaryListOptions, filters: TaskSummaryFilters): Observable<ListTasksResponse> {
-    const findFilter = this.#utilsService.findFilter;
 
-    // const status = this.#utilsService.convertFilterValueToStatus<TaskStatus>(findFilter(filters, 'status'));
+    const requestFilters = this.#utilsService.createFilters<TaskFilterField.AsObject>(filters, this.#tasksIndexService.filtersDefinitions, this.#buildFilterField);
 
     const listTasksRequest = new ListTasksRequest({
       page: options.pageIndex,
@@ -57,6 +59,7 @@ export class TasksGrpcService {
           }
         }
       },
+      filters: requestFilters
     });
 
     return this.#tasksClient.listTasks(listTasksRequest);
@@ -86,5 +89,37 @@ export class TasksGrpcService {
     });
 
     return this.#tasksClient.countTasksByStatus(request);
+  }
+
+  #buildFilterField(filter: Filter<TaskSummary>) {
+    return (type: FilterType, field: TaskSummaryField) => {
+
+      const filterField = {
+        taskSummaryField: {
+          field: field as TaskSummaryEnumField
+        }
+      } satisfies TaskFilterField.AsObject['field'];
+
+      switch (type) {
+      case 'string':
+        return {
+          field: filterField,
+          filterString: {
+            value: filter.value?.toString() ?? '',
+            operator: filter.operator ?? FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
+          },
+        } satisfies TaskFilterField.AsObject;
+      case 'status':
+        return {
+          field: filterField,
+          filterStatus: {
+            value: Number(filter.value) ?? 0,
+            operator: filter.operator ?? FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
+          },
+        } satisfies TaskFilterField.AsObject;
+      default:
+        throw new Error(`Type ${type} not supported`);
+      }
+    };
   }
 }

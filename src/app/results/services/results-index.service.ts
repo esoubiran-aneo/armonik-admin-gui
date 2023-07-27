@@ -1,13 +1,13 @@
-import { ResultStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { ResultRawEnumField, ResultStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
-import { AppIndexService } from '@app/types/services';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { ResultsStatusesService } from './results-statuses.service';
 import { ResultRaw, ResultRawColumnKey, ResultRawFilter, ResultRawListOptions, ResultsFiltersDefinition } from '../types';
 
+// TODO: Add it to AppIndexService and to every index service
 @Injectable()
-export class ResultsIndexService implements AppIndexService<ResultRaw> {
+export class ResultsIndexService {
   #defaultConfigService = inject(DefaultConfigService);
   #resultsStatusesService = inject(ResultsStatusesService);
 
@@ -31,6 +31,32 @@ export class ResultsIndexService implements AppIndexService<ResultRaw> {
 
   readonly defaultFilters: ResultRawFilter = this.#defaultConfigService.defaultResults.filters;
   readonly filtersDefinitions: ResultsFiltersDefinition[] = [
+    {
+      key: 'name',
+      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_NAME,
+      type: 'string',
+    },
+    {
+      key: 'sessionId',
+      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_SESSION_ID,
+      type: 'string',
+    },
+    {
+      key: 'ownerTaskId',
+      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_OWNER_TASK_ID,
+      type: 'string',
+    },
+    {
+      key: 'status',
+      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_STATUS,
+      type: 'status',
+      statuses: Object.keys(this.#resultsStatusesService.statuses).map(status => {
+        return {
+          key: status,
+          value: this.#resultsStatusesService.statuses[Number(status) as ResultStatus],
+        };
+      }),
+    }
     // {
     //   field: 'name',
     //   type: 'text',
@@ -148,7 +174,7 @@ export class ResultsIndexService implements AppIndexService<ResultRaw> {
   }
 
   restoreFilters(): ResultRawFilter {
-    return this.#tableService.restoreFilters<ResultRaw>('results-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<ResultRaw, ResultRawEnumField>('results-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): ResultRawFilter {

@@ -59,7 +59,7 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
         applicationField: {
           field: field as ApplicationRawEnumField
         }
-      } as ApplicationFilterField.AsObject['field'];
+      } satisfies ApplicationFilterField.AsObject['field'];
 
       switch (type) {
       case 'string':

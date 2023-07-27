@@ -1,15 +1,18 @@
-import { SortDirection as ArmoniKSortDirection, GetResultRequest, GetResultResponse, ListResultsRequest, ListResultsResponse, ResultRawEnumField, ResultRawField, ResultStatus, ResultsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, FilterStringOperator, GetResultRequest, GetResultResponse, ListResultsRequest, ListResultsResponse, ResultFilterField, ResultRawEnumField, ResultRawField, ResultStatus, ResultsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
+import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
+import { ResultsIndexService } from './results-index.service';
 import {  ResultRaw, ResultRawFieldKey, ResultRawFilter, ResultRawListOptions } from '../types';
 
 @Injectable()
 export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
-  #utilsService = inject(UtilsService<ResultRaw>);
+  #utilsService = inject(UtilsService<ResultRaw, ResultRawEnumField>);
   #resultsClient = inject(ResultsClient);
+  #resultsIndexService = inject(ResultsIndexService);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
@@ -29,8 +32,8 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
 
 
   list$(options: ResultRawListOptions, filters: ResultRawFilter): Observable<ListResultsResponse> {
-    const findFilter = this.#utilsService.findFilter;
-    const convertFilterValue = this.#utilsService.convertFilterValue;
+
+    const requestFilters = this.#utilsService.createFilters<ResultFilterField.AsObject>(filters, this.#resultsIndexService.filtersDefinitions, this.#buildFilterField);
 
     const listResultRequest = new ListResultsRequest({
       page: options.pageIndex,
@@ -43,15 +46,7 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
           }
         }
       },
-      // filter: {
-      //   name: convertFilterValue(findFilter(filters, 'name')),
-      //   // TODO: Find a way to convert the status (as sort direction, we can create a corresponding enum)
-      //   status: this.#utilsService.convertFilterValueToStatus<ResultStatus>(findFilter(filters, 'status')) ?? ResultStatus.RESULT_STATUS_UNSPECIFIED,
-      //   ownerTaskId: convertFilterValue(findFilter(filters, 'ownerTaskId')),
-      //   sessionId: convertFilterValue(findFilter(filters, 'sessionId')),
-      //   resultId: convertFilterValue(findFilter(filters, 'resultId')),
-      //   // TODO: Find a way to get the created after and the created before (for now, they are optional)
-      // }
+      filters: requestFilters
     });
 
     return this.#resultsClient.listResults(listResultRequest);
@@ -63,5 +58,31 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
     });
 
     return this.#resultsClient.getResult(getResultRequest);
+  }
+
+  #buildFilterField(filter: Filter<ResultRaw>) {
+    return (type: FilterType, field: ResultRawEnumField) => {
+
+      const filterField = {
+        resultRawField: {
+          field: field as ResultRawEnumField
+        }
+      } satisfies ResultFilterField.AsObject['field'];
+
+
+      switch (type) {
+      case 'string':
+        return {
+          field: filterField,
+          filterString: {
+            value: filter.value?.toString() ?? '',
+            operator: filter.operator ?? FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
+          }
+        } satisfies ResultFilterField.AsObject;
+      default: {
+        throw new Error(`Type ${type} not supported`);
+      }
+      }
+    };
   }
 }

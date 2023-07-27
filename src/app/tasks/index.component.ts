@@ -72,7 +72,7 @@ import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilt
     </app-table-actions-toolbar>
   </mat-toolbar-row>
 
-  <mat-toolbar-row>
+  <mat-toolbar-row class="filters">
     <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
@@ -205,6 +205,13 @@ import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilt
   styles: [`
 app-table-actions-toolbar {
   flex-grow: 1;
+}
+
+.filters {
+  height: auto;
+  min-height: 64px;
+
+  padding: 1rem;
 }
   `],
   standalone: true,

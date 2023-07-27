@@ -1,62 +1,8 @@
 import { Injectable } from '@angular/core';
-import { FieldKey } from '@app/types/data';
 import { Filter, FilterType, FilterValueOptions, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
 
 @Injectable()
 export class UtilsService<T extends object, U = null> {
-  // TODO: remove this function
-  findFilter(filters: Filter<T>[], field: FieldKey<T>): Filter<T> | null {
-    const filter = filters.find(f => f.key === field);
-
-    if (!filter) {
-      return null;
-    }
-
-    return filter;
-  }
-
-  // TODO: remove this function
-  convertFilterValue(filter: Filter<T> | null): string {
-    if (!filter) {
-      return '';
-    }
-
-    if (!filter.value) {
-      return '';
-    }
-
-    return filter.value.toString();
-  }
-
-  // TODO: remove this function
-  convertFilterValueToNumber(filter: Filter<T> | null): number | null {
-    if (!filter) {
-      return null;
-    }
-
-    if (!filter.value) {
-      return null;
-    }
-
-    const numberValue = Number(filter.value);
-
-    if (Number.isNaN(numberValue)) {
-      return null;
-    }
-
-    return numberValue;
-  }
-
-  // TODO: remove this function
-  convertFilterValueToStatus<S>(filter: Filter<T> | null): S | null {
-    const status = this.convertFilterValueToNumber(filter);
-
-    if (status === null) {
-      return null;
-    }
-
-    return status as S;
-  }
 
   createFilters<F>(filters: FiltersOr<T>, filtersDefinitions: FiltersDefinition<T, U>[], cb: (filter: Filter<T>) => (type: FilterType, field: U) => F) {
     const or = this.#createFiltersOr<F>(filters, filtersDefinitions, cb);
