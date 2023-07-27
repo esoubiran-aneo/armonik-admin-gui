@@ -14,6 +14,7 @@ export class PartitionsIndexService {
   readonly defaultColumns: PartitionRawColumnKey[] = this.#defaultConfigService.defaultPartitions.columns;
   readonly availableColumns: PartitionRawColumnKey[] = ['id', 'priority', 'parentPartitionIds', 'podConfiguration', 'podMax', 'podReserved', 'preemptionPercentage', 'actions', 'count'];
 
+  // TODO: We could use a custom type to know which columns are objects
   readonly objectColumns: PartitionRawColumnKey[] = ['podConfiguration', 'parentPartitionIds'];
 
   readonly columnsLabels: Record<PartitionRawColumnKey, string> = {
@@ -153,7 +154,7 @@ export class PartitionsIndexService {
   }
 
   restoreFilters(): PartitionRawFilter {
-    return this.#tableService.restoreFilters<PartitionRaw, PartitionRawEnumField>('partitions-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<PartitionRaw, PartitionRawColumnKey, PartitionRawEnumField>('partitions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): PartitionRawFilter {

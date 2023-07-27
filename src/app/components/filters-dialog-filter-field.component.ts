@@ -3,7 +3,7 @@ import { Component, Input, inject } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { FieldKey } from '@app/types/data';
-import { Filter, FilterInput, FilterInputNumber, FilterInputOutput, FilterInputType, FilterInputValueString, FilterValueOptions, FiltersDefinition } from '@app/types/filters';
+import { Filter, FilterInput, FilterInputOutput, FilterInputType, FilterInputValueString, FilterValueOptions, FiltersDefinition } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { FiltersDialogInputComponent } from './filters-dialog-input.component';
 
@@ -60,11 +60,11 @@ span {
   ],
 })
 // Every functions take a filter as parameter in order to simplify reusability.
-export class FiltersDialogFilterFieldComponent<T extends object> {
+export class FiltersDialogFilterFieldComponent<T extends object, R extends string, U = null> {
   @Input({ required: true }) first: boolean;
   @Input({ required: true }) filter: Filter<T>;
-  @Input({ required: true }) filtersDefinitions: FiltersDefinition<T>[];
-  @Input({ required: true }) columnsLabels: Record<FieldKey<T>, string> | null;
+  @Input({ required: true }) filtersDefinitions: FiltersDefinition<R, U>[];
+  @Input({ required: true }) columnsLabels: Record<R, string> | null;
 
   #filtersService = inject(FiltersService);
 
@@ -87,7 +87,7 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
     }
   }
 
-  definitionToLabel(filter: FiltersDefinition<T>): string {
+  definitionToLabel(filter: FiltersDefinition<R, U>): string {
     const field = filter.key;
 
     if (!field) {
@@ -126,7 +126,7 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
         type: 'status',
         value: filter.value as string || null,
         statuses
-      }
+      };
     default:
       throw new Error(`Unknown type ${type}`);
     }
@@ -138,7 +138,8 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
       return 'string';
     }
 
-    const field = this.#findFilterMetadata(filter.key);
+    // TODO: fix filter type
+    const field = this.#findFilterMetadata(filter.key as any);
 
     return field?.type ?? 'string';
   }
@@ -148,7 +149,8 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
       return [];
     }
 
-    const field = this.#findFilterMetadata(filter.key);
+    // TODO: fix filter type
+    const field = this.#findFilterMetadata(filter.key as any);
 
     if (!field) {
       return [];
@@ -167,7 +169,7 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
     return operators;
   }
 
-  trackByField(_: number, definition: FiltersDefinition<T>) {
+  trackByField(_: number, definition: FiltersDefinition<R, U>) {
     return definition.key;
   }
 
@@ -175,7 +177,7 @@ export class FiltersDialogFilterFieldComponent<T extends object> {
     return operator.key;
   }
 
-  #findFilterMetadata(key: FieldKey<T>): FiltersDefinition<T> | null {
+  #findFilterMetadata(key: R): FiltersDefinition<R, U> | null {
     return this.filtersDefinitions.find(f => f.key === key) ?? null;
   }
 }

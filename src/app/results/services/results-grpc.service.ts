@@ -6,11 +6,11 @@ import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
 import { ResultsIndexService } from './results-index.service';
-import {  ResultRaw, ResultRawFieldKey, ResultRawFilter, ResultRawListOptions } from '../types';
+import {  ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, ResultRawListOptions } from '../types';
 
 @Injectable()
 export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
-  #utilsService = inject(UtilsService<ResultRaw, ResultRawEnumField>);
+  #utilsService = inject(UtilsService<ResultRaw, ResultRawColumnKey, ResultRawEnumField>);
   #resultsClient = inject(ResultsClient);
   #resultsIndexService = inject(ResultsIndexService);
 

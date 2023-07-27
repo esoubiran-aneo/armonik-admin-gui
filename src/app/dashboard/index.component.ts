@@ -22,6 +22,7 @@ import { PageSectionComponent } from '@components/page-section.component';
 import { RefreshButtonComponent } from '@components/refresh-button.component';
 import { SpinnerComponent } from '@components/spinner.component';
 import { AutoRefreshService } from '@services/auto-refresh.service';
+import { FiltersService } from '@services/filters.service';
 import { IconsService } from '@services/icons.service';
 import { QueryParamsService } from '@services/query-params.service';
 import { ShareUrlService } from '@services/share-url.service';
@@ -123,6 +124,7 @@ app-actions-toolbar {
     TableStorageService,
     TasksByStatusService,
     UtilsService,
+    FiltersService,
   ],
   imports: [
     NgFor,
@@ -255,5 +257,4 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
       this._dashboardIndexService.saveStatusGroups(this.statusGroups);
     });
   }
-
 }

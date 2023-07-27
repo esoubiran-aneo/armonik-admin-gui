@@ -6,14 +6,14 @@ import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
 import { PartitionsIndexService } from './partitions-index.service';
-import { PartitionRaw, PartitionRawFieldKey, PartitionRawFilter, PartitionRawListOptions } from '../types';
+import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRawFilter, PartitionRawListOptions } from '../types';
 
 
 @Injectable()
 export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
   #partitionsIndexService = inject(PartitionsIndexService);
   #partitionsClient = inject(PartitionsClient);
-  #utilsService = inject(UtilsService<PartitionRaw, PartitionRawEnumField>);
+  #utilsService = inject(UtilsService<PartitionRaw, PartitionRawColumnKey,PartitionRawEnumField>);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,

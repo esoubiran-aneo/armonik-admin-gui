@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { ColumnKey } from '@app/types/data';
-import { Filter } from '@app/types/filters';
+import { Filter, FiltersDefinition } from '@app/types/filters';
 import { IconsService } from '@services/icons.service';
 import { FiltersDialogFilterFieldComponent } from './filters-dialog-filter-field.component';
 
@@ -53,11 +53,11 @@ import { FiltersDialogFilterFieldComponent } from './filters-dialog-filter-field
     IconsService,
   ],
 })
-export class FiltersDialogAndComponent<T extends object> {
+export class FiltersDialogAndComponent<T extends object, R extends string, U = null> {
   @Input({ required: true }) first: boolean;
   @Input({ required: true }) filter: Filter<T>;
-  @Input({ required: true }) filtersDefinitions: any;
-  @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null;
+  @Input({ required: true }) filtersDefinitions: FiltersDefinition<R, U>[];
+  @Input({ required: true }) columnsLabels: Record<R, string> | null;
 
   @Output() removeChange: EventEmitter<Filter<T>> = new EventEmitter<Filter<T>>();
 

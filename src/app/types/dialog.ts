@@ -11,10 +11,10 @@ export interface ColumnsModifyDialogData<T extends object, O extends object> {
 
 export type ColumnsModifyDialogResult<T extends object, O extends object> = ColumnKey<T, O>[];
 
-export interface FiltersDialogData<T extends object, U> {
+export interface FiltersDialogData<T extends object, R extends string, U> {
   filtersOr: FiltersOr<T>
-  filtersDefinitions: FiltersDefinition<T, U>[]
-  columnsLabels: Record<ColumnKey<T>, string>
+  filtersDefinitions: FiltersDefinition<R, U>[]
+  columnsLabels: Record<R, string>
 }
 
 export type FiltersDialogResult<T extends object> = FiltersOr<T>;
@@ -49,3 +49,6 @@ export interface ViewArrayDialogData {
 }
 
 export type ViewArrayDialogResult = Record<string, never>;
+
+export interface EditLineDialogData {
+  name :string }

@@ -8,6 +8,6 @@ export type ResultRawColumnKey = ColumnKey<ResultRaw, never>;
 
 // We need to find a way to use filter field for _after and for _before
 export type ResultRawFieldKey = FieldKey<ResultRaw>;
-export type ResultsFiltersDefinition = FiltersDefinition<ResultRaw, ResultRawEnumField>;
+export type ResultsFiltersDefinition = FiltersDefinition<ResultRawColumnKey, ResultRawEnumField>;
 export type ResultRawFilter = FiltersOr<ResultRaw>;
 export type ResultRawListOptions = ListOptions<ResultRaw>;

@@ -1,6 +1,7 @@
 import { FilterArrayOperator, FilterBooleanOperator, FilterDateOperator, FilterNumberOperator, FilterStatusOperator, FilterStringOperator } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable } from '@angular/core';
-import { FilterType } from '@app/types/filters';
+import { FieldKey } from '@app/types/data';
+import { FilterOperators, FilterType } from '@app/types/filters';
 
 @Injectable()
 export class FiltersService {
@@ -56,5 +57,9 @@ export class FiltersService {
 
   findOperators(type: FilterType) {
     return this.filterOperators[type];
+  }
+
+  createQueryParamsKey<T extends string>(or: number, operator: FilterOperators, field: T) {
+    return `or-${or}-operator-${operator.toString()}-${field}`;
   }
 }

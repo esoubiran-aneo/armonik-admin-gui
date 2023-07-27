@@ -7,7 +7,7 @@ import { QueryParamsFilterKey } from '@app/types/query-params';
 export type ApplicationRaw = GrpcApplicationRaw.AsObject;
 export type ApplicationRawColumnKey = ColumnKey<ApplicationRaw, never> | 'count';
 export type ApplicationRawFieldKey = FieldKey<ApplicationRaw>;
-export type ApplicationsFiltersDefinition = FiltersDefinition<ApplicationRaw, ApplicationRawEnumField>;
+export type ApplicationsFiltersDefinition = FiltersDefinition<ApplicationRawColumnKey, ApplicationRawEnumField>;
 export type ApplicationRawFilter = FiltersOr<ApplicationRaw>;
 export type ApplicationRawListOptions = ListOptions<ApplicationRaw>;
 

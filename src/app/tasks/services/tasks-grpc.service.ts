@@ -1,15 +1,15 @@
-import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, FilterStringOperator, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskFilterField, TaskFilters, TaskSummary, TaskSummaryEnumField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, FilterStringOperator, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskFilterField, TaskFilters, TaskOptionEnumField, TaskSummary, TaskSummaryEnumField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 import { Filter, FilterType } from '@app/types/filters';
 import { UtilsService } from '@services/utils.service';
 import { TasksIndexService } from './tasks-index.service';
-import { TaskSummaryField, TaskSummaryFieldKey, TaskSummaryFilters, TaskSummaryListOptions } from '../types';
+import { TaskSummaryColumnKey, TaskSummaryField, TaskSummaryFieldKey, TaskSummaryFilters, TaskSummaryListOptions } from '../types';
 
 @Injectable()
 export class TasksGrpcService {
-  readonly #utilsService = inject(UtilsService<TaskSummary, TaskSummaryField>);
+  readonly #utilsService = inject(UtilsService<TaskSummary, TaskSummaryColumnKey, TaskSummaryField>);
   readonly #tasksClient = inject(TasksClient);
   readonly #tasksIndexService = inject(TasksIndexService);
 
@@ -94,11 +94,18 @@ export class TasksGrpcService {
   #buildFilterField(filter: Filter<TaskSummary>) {
     return (type: FilterType, field: TaskSummaryField) => {
 
-      const filterField = {
-        taskSummaryField: {
+
+      const filterField: TaskFilterField.AsObject['field'] = {};
+
+      if(filter.key?.startsWith('options.')) {
+        filterField['taskOptionField'] = {
+          field: field as TaskOptionEnumField
+        };
+      } else {
+        filterField['taskSummaryField'] = {
           field: field as TaskSummaryEnumField
-        }
-      } satisfies TaskFilterField.AsObject['field'];
+        };
+      }
 
       switch (type) {
       case 'string':

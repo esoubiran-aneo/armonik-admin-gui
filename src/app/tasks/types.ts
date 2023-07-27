@@ -9,7 +9,7 @@ export type TaskSummaryColumnKey = ColumnKey<TaskSummary, TaskOptions> | 'select
 
 export type TaskSummaryFieldKey = FieldKey<TaskSummary>;
 export type TaskSummaryField = TaskSummaryEnumField | TaskOptionEnumField | TaskOptionGenericField;
-export type TasksFiltersDefinition = FiltersDefinition<TaskSummary, TaskSummaryField>;
+export type TasksFiltersDefinition = FiltersDefinition<TaskSummaryColumnKey, TaskSummaryField>;
 export type TaskSummaryFilters = FiltersOr<TaskSummary>;
 export type TaskSummaryListOptions = ListOptions<TaskSummary>;
 

@@ -1,4 +1,4 @@
-import { FilterStringOperator, TaskFilters, TaskOptionEnumField } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterString, FilterStringOperator, TaskFilters, TaskOptionEnumField, TaskOptions, TaskRaw, TaskSummary } from '@aneoconsultingfr/armonik.api.angular';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
@@ -16,6 +16,8 @@ import { Observable, Subject, Subscription, catchError, map, merge, of, startWit
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
+import { TaskSummaryColumnKey } from '@app/tasks/types';
+import { ColumnKey } from '@app/types/data';
 import { TaskStatusColored, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
 import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
@@ -27,6 +29,7 @@ import { TableContainerComponent } from '@components/table-container.component';
 import { ViewTasksByStatusDialogComponent } from '@components/view-tasks-by-status-dialog.component';
 import { EmptyCellPipe } from '@pipes/empty-cell.pipe';
 import { AutoRefreshService } from '@services/auto-refresh.service';
+import { FiltersService } from '@services/filters.service';
 import { IconsService } from '@services/icons.service';
 import { NotificationService } from '@services/notification.service';
 import { QueryParamsService } from '@services/query-params.service';
@@ -99,7 +102,7 @@ import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, Applic
         <td mat-cell *matCellDef="let element" appNoWrap>
         <app-count-tasks-by-status
           [statuses]="tasksStatusesColored"
-          [queryParams]="{ 'options.applicationName': element.name, 'options.applicationVersion': element.version }"
+          [queryParams]="createTasksByStatusQueryParams(element.name, element.version)"
           [filters]="countTasksByStatusFilters(element.name, element.version)"
         ></app-count-tasks-by-status>
         </td>
@@ -165,6 +168,7 @@ app-table-actions-toolbar {
     TasksByStatusService,
     TasksIndexService,
     TasksStatusesService,
+    FiltersService,
   ],
   imports: [
     NoWrapDirective,
@@ -196,6 +200,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   #notificationService = inject(NotificationService);
   #dialog = inject(MatDialog);
   #iconsService = inject(IconsService);
+  #filtersService = inject(FiltersService);
 
   displayedColumns: ApplicationRawColumnKey[] = [];
   availableColumns: ApplicationRawColumnKey[] = [];
@@ -421,6 +426,15 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
           ]
         }
       ]
+    };
+  }
+
+  createTasksByStatusQueryParams(name: string, version: string) {
+    const keyName = this.#filtersService.createQueryParamsKey<TaskSummaryColumnKey>(1, FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL, 'options.applicationName');
+    const keyVersion = this.#filtersService.createQueryParamsKey<TaskSummaryColumnKey>(1, FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL, 'options.applicationVersion');
+    return {
+      [keyName]: name,
+      [keyVersion]: version,
     };
   }
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { FieldKey } from '@app/types/data';
 import { Filter, FiltersDefinition, FiltersOr } from '@app/types/filters';
 import { QueryParamsOptionsKey } from '@app/types/query-params';
 
@@ -12,44 +13,57 @@ export class TableURLService {
   constructor(private _route: ActivatedRoute) {}
 
   getQueryParamsOptions<T>(key: QueryParamsOptionsKey) {
-    return this.getQueryParams<T>(key, false);
+    return this.getQueryParam<T>(key, false);
   }
 
-  // TODO: We need to rework this part to have a functionnal filter in the URL. (we can add a field name <key>_operator in the URL)
-  getQueryParamsFilters<T extends object, U = null>(filtersDefinitions: FiltersDefinition<T, U>[]): FiltersOr<T> {
-    const params: FiltersOr<T> = [];
+  getQueryParamsFilters<T extends object, R, U = null>(filtersDefinitions: FiltersDefinition<R, U>[]): FiltersOr<T> {
+    const params: Map<string, Filter<T>[]>  = new Map();
+    const filters: FiltersOr<T> = [];
 
-    for (const definition of filtersDefinitions) {
-      const key = definition.key;
-      const value = this.getQueryParams<string>(key.toString(), false);
+    const extractValues = /or-(?<order>\d)-operator-(?<operator>\d)-(?<field>.*)/;
+    const keys = this.getQueryParamKeys();
 
-      if (value) {
-        switch (definition.type) {
-        case 'string':
-          throw new Error('Not implemented');
-        case 'number':
-          throw new Error('Not implemented');
-        case 'date':
-          throw new Error('Not implemented');
-        case 'status':
-          throw new Error('Not implemented');
-        // case 'select': {
-        //   const isFound = filter.options.some(option => option.value === value);
-        //   if (isFound) {
-        //     params.push({ field: key, value });
-        //   }
-        //   break;
-        // }
-        default:
-          // this.#unreachable(filter);
-        }
+    for (const key of keys) {
+      const match = key.match(extractValues);
+      const order = match?.groups?.['order'];
+      const field = match?.groups?.['field'];
+      const operator = match?.groups?.['operator'];
+
+      if (!order || !field || !operator) {
+        console.error('Invalid key', key);
+        continue;
       }
+
+      const isInDefinition = filtersDefinitions.some(definition => definition.key === field);
+
+      if (!isInDefinition) {
+        console.error('Unknown field', field);
+        continue;
+      }
+
+      const currentParams = params.get(order) ?? [] as Filter<T>[];
+
+      currentParams.push({
+        key: field as FieldKey<T>,
+        operator: Number(operator),
+        value: this.getQueryParam(key, false)
+      });
+
+      params.set(order, currentParams);
     }
 
-    return params;
+    for (const [, value] of params) {
+      filters.push(value);
+    }
+
+    return filters;
   }
 
-  getQueryParams<T>(key: string, parse = true) {
+  getQueryParamKeys(): string[] {
+    return this._route.snapshot.queryParamMap.keys;
+  }
+
+  getQueryParam<T>(key: string, parse = true) {
     const data = this._route.snapshot.queryParamMap.get(key);
 
     if(data && parse) {

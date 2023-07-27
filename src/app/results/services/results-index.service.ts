@@ -174,7 +174,7 @@ export class ResultsIndexService {
   }
 
   restoreFilters(): ResultRawFilter {
-    return this.#tableService.restoreFilters<ResultRaw, ResultRawEnumField>('results-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<ResultRaw, ResultRawColumnKey, ResultRawEnumField>('results-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): ResultRawFilter {

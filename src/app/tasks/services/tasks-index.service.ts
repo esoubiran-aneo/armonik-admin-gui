@@ -1,4 +1,4 @@
-import { TaskStatus, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
+import { TaskOptionEnumField, TaskStatus, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
@@ -87,6 +87,21 @@ export class TasksIndexService {
           value: this.#tasksStatusesService.statuses[Number(status) as TaskStatus],
         };
       }),
+    },
+    {
+      key: 'options.applicationName',
+      field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_APPLICATION_NAME,
+      type: 'string',
+    },
+    {
+      key: 'options.applicationVersion',
+      field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_APPLICATION_VERSION,
+      type: 'string',
+    },
+    {
+      key: 'options.partitionId',
+      field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_PARTITION_ID,
+      type: 'string',
     }
   ];
 
@@ -190,7 +205,7 @@ export class TasksIndexService {
   }
 
   restoreFilters(): TaskSummaryFilters {
-    return this.#tableService.restoreFilters<TaskSummary, TaskSummaryField>('tasks-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<TaskSummary, TaskSummaryColumnKey, TaskSummaryField>('tasks-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): TaskSummaryFilters {

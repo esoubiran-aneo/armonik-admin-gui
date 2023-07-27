@@ -19,7 +19,7 @@ import { Observable, Subject, Subscription, catchError, map, merge, of, startWit
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
-import { TaskOptions } from '@app/tasks/types';
+import { TaskOptions, TaskSummaryColumnKey } from '@app/tasks/types';
 import { TaskStatusColored, ViewArrayDialogData, ViewArrayDialogResult, ViewObjectDialogData, ViewObjectDialogResult, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
 import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
@@ -33,6 +33,7 @@ import { ViewTasksByStatusDialogComponent } from '@components/view-tasks-by-stat
 import { DurationPipe } from '@pipes/duration.pipe';
 import { EmptyCellPipe } from '@pipes/empty-cell.pipe';
 import { AutoRefreshService } from '@services/auto-refresh.service';
+import { FiltersService } from '@services/filters.service';
 import { IconsService } from '@services/icons.service';
 import { NotificationService } from '@services/notification.service';
 import { QueryParamsService } from '@services/query-params.service';
@@ -106,9 +107,7 @@ import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, 
         <td mat-cell *matCellDef="let element" appNoWrap>
           <a mat-button
             [routerLink]="['/tasks']"
-            [queryParams]="{
-              sessionId: element[column],
-            }"
+            [queryParams]="createSessionIdQueryParams(element[column])"
           >
             {{ element[column] }}
           </a>
@@ -146,7 +145,7 @@ import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, 
         <td mat-cell *matCellDef="let element" appNoWrap>
           <app-count-tasks-by-status
             [statuses]="tasksStatusesColored"
-            [queryParams]="{ sessionId: element.sessionId }"
+            [queryParams]="createTasksByStatusQueryParams(element.sessionId)"
             [filters]="countTasksByStatusFilters(element.sessionId)"
           >
           </app-count-tasks-by-status>
@@ -234,6 +233,7 @@ app-table-actions-toolbar {
     TasksByStatusService,
     TasksStatusesService,
     TasksIndexService,
+    FiltersService,
   ],
   imports: [
     DurationPipe,
@@ -266,9 +266,10 @@ app-table-actions-toolbar {
   ]
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
-  #tasksByStatusService = inject(TasksByStatusService);
-  #notificationService = inject(NotificationService);
-  #dialog = inject(MatDialog);
+  readonly #tasksByStatusService = inject(TasksByStatusService);
+  readonly #notificationService = inject(NotificationService);
+  readonly #dialog = inject(MatDialog);
+  readonly #filtersService = inject(FiltersService);
 
   displayedColumns: SessionRawColumnKey[] = [];
   availableColumns: SessionRawColumnKey[] = [];
@@ -536,6 +537,14 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  createSessionIdQueryParams(sessionId: string) {
+    const keySession = this.#filtersService.createQueryParamsKey<TaskSummaryColumnKey>(1, FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL, 'sessionId');
+
+    return {
+      [keySession]: sessionId,
+    };
+  }
+
   countTasksByStatusFilters(sessionId: string): TaskFilters.AsObject {
     return {
       or: [
@@ -555,6 +564,14 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
           ]
         }
       ]
+    };
+  }
+
+  createTasksByStatusQueryParams(sessionId: string) {
+    const keySession = this.#filtersService.createQueryParamsKey<TaskSummaryColumnKey>(1, FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL, 'sessionId');
+
+    return {
+      [keySession]: sessionId,
     };
   }
 

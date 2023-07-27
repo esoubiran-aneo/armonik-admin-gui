@@ -6,6 +6,6 @@ import { ListOptions } from '@app/types/options';
 export type PartitionRaw = GrpcPartitionRaw.AsObject;
 export type PartitionRawColumnKey = ColumnKey<PartitionRaw, never> | 'count';
 export type PartitionRawFieldKey = FieldKey<PartitionRaw>;
-export type PartitionRawFilterField = FiltersDefinition<PartitionRaw, PartitionRawEnumField>;
+export type PartitionRawFilterField = FiltersDefinition<PartitionRawColumnKey, PartitionRawEnumField>;
 export type PartitionRawFilter = FiltersOr<PartitionRaw>;
 export type PartitionRawListOptions = ListOptions<PartitionRaw>;

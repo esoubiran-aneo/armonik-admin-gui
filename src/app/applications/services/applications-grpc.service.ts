@@ -6,13 +6,13 @@ import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
 import { ApplicationsIndexService } from './applications-index.service';
-import { ApplicationRaw, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions } from '../types';
+import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions } from '../types';
 
 @Injectable()
 export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
   readonly #applicationsIndexService = inject(ApplicationsIndexService);
   readonly #applicationsClient = inject(ApplicationsClient);
-  readonly #utilsService = inject(UtilsService<ApplicationRaw, ApplicationRawEnumField>);
+  readonly #utilsService = inject(UtilsService<ApplicationRaw, ApplicationRawColumnKey,ApplicationRawEnumField>);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,

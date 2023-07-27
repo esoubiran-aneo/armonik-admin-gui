@@ -74,13 +74,13 @@ button {
     MatTooltipModule,
   ]
 })
-export class FiltersToolbarComponent<T extends object, U = null> {
+export class FiltersToolbarComponent<T extends object, R extends string, U = null> {
   #iconsService = inject(IconsService);
   #dialog = inject(MatDialog);
 
   @Input({ required: true }) filters: FiltersOr<T> = [];
-  @Input({ required: true }) filtersFields: FiltersDefinition<T, U>[] = [];
-  @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string>;
+  @Input({ required: true }) filtersFields: FiltersDefinition<R, U>[] = [];
+  @Input({ required: true }) columnsLabels: Record<R, string>;
 
   @Output() filtersChange: EventEmitter<FiltersOr<T>> = new EventEmitter<FiltersOr<T>>();
 
@@ -94,7 +94,7 @@ export class FiltersToolbarComponent<T extends object, U = null> {
   }
 
   openFiltersDialog(): void {
-    const dialogRef = this.#dialog.open<FiltersDialogComponent<T, U>, FiltersDialogData<T, U>, FiltersDialogResult<T>>(FiltersDialogComponent, {
+    const dialogRef = this.#dialog.open<FiltersDialogComponent<T, R, U>, FiltersDialogData<T, R, U>, FiltersDialogResult<T>>(FiltersDialogComponent, {
       data: {
         filtersOr: Array.from(this.filters),
         filtersDefinitions: Array.from(this.filtersFields),

@@ -17,6 +17,7 @@ import { RouterModule } from '@angular/router';
 import { Timestamp } from '@ngx-grpc/well-known-types';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
+import { ResultRawColumnKey } from '@app/results/types';
 import { Filter } from '@app/types/filters';
 import { Page } from '@app/types/pages';
 import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
@@ -28,6 +29,7 @@ import { TableContainerComponent } from '@components/table-container.component';
 import { DurationPipe } from '@pipes/duration.pipe';
 import { EmptyCellPipe } from '@pipes/empty-cell.pipe';
 import { AutoRefreshService } from '@services/auto-refresh.service';
+import { FiltersService } from '@services/filters.service';
 import { IconsService } from '@services/icons.service';
 import { NotificationService } from '@services/notification.service';
 import { QueryParamsService } from '@services/query-params.service';
@@ -119,9 +121,7 @@ import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilt
         <td mat-cell *matCellDef="let element" appNoWrap>
           <a mat-button
             [routerLink]="['/results']"
-            [queryParams]="{
-              ownerTaskId: element[column],
-            }"
+            [queryParams]="createTaskIdQueryParams(element[column])"
           >
             {{ element[column] }}
           </a>
@@ -255,6 +255,7 @@ app-table-actions-toolbar {
     ShareUrlService,
     QueryParamsService,
     UtilsService,
+    FiltersService,
   ],
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -265,6 +266,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   #tasksIndexService = inject(TasksIndexService);
   #tasksGrpcService = inject(TasksGrpcService);
   #notificationService = inject(NotificationService);
+  #filtersService = inject(FiltersService);
 
   displayedColumns: TaskSummaryColumnKey[] = [];
   availableColumns: TaskSummaryColumnKey[] = [];
@@ -572,6 +574,14 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return $localize`Select Task ${row.id}`;
+  }
+
+  createTaskIdQueryParams(taskId: string) {
+    const keyTask = this.#filtersService.createQueryParamsKey<ResultRawColumnKey>(1, FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL, 'ownerTaskId');
+
+    return {
+      [keyTask]: taskId
+    };
   }
 
   trackByColumn(index: number, item: TaskSummaryColumnKey): string {

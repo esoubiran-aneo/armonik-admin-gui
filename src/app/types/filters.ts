@@ -1,3 +1,4 @@
+import { FilterArrayOperator, FilterBooleanOperator, FilterDateOperator, FilterNumberOperator, FilterStatusOperator, FilterStringOperator } from '@aneoconsultingfr/armonik.api.angular';
 import { DateTime } from 'luxon';
 import { FieldKey } from './data';
 
@@ -5,6 +6,8 @@ export type MaybeNull<T> = T | null;
 
 export type FilterType = 'string' | 'number' | 'date' | 'array' | 'status' | 'boolean';
 export type FilterValueOptions = { key: string | number, value: string }[];
+
+export type FilterOperators = FilterStringOperator | FilterNumberOperator | FilterDateOperator | FilterArrayOperator | FilterStatusOperator | FilterBooleanOperator;
 
 export type FiltersOr<T extends object> = FiltersAnd<T>[];
 export type FiltersAnd<T extends object> = Filter<T>[];
@@ -18,30 +21,30 @@ export type Filter<T extends object> = {
 
 
 // Used to define filters available for the query builder.
-type FilterDefinitionBase<T extends object, U = null> = {
-  key: FieldKey<T>
+type FilterDefinitionBase<T, U = null> = {
+  key: T
   field?: U
   type: FilterType
 };
 
-export interface FiltersDefinitionString<T extends object, U> extends FilterDefinitionBase<T, U> {
+export interface FiltersDefinitionString<T, U> extends FilterDefinitionBase<T, U> {
   type: 'string'
 }
-export interface FiltersDefinitionNumber<T extends object, U> extends FilterDefinitionBase<T, U> {
+export interface FiltersDefinitionNumber<T, U> extends FilterDefinitionBase<T, U> {
   type: 'number'
 }
-export interface FiltersDefinitionDate<T extends object, U> extends FilterDefinitionBase<T, U> {
+export interface FiltersDefinitionDate<T, U> extends FilterDefinitionBase<T, U> {
   type: 'date'
 }
-export interface FiltersDefinitionStatus<T extends object, U> extends FilterDefinitionBase<T, U> {
+export interface FiltersDefinitionStatus<T, U> extends FilterDefinitionBase<T, U> {
   type: 'status'
   statuses: FilterValueOptions;
 }
-export interface FiltersDefinitionArray<T extends object, U> extends FilterDefinitionBase<T, U> {
+export interface FiltersDefinitionArray<T, U> extends FilterDefinitionBase<T, U> {
   type: 'array'
 }
 // Filters used to create the query builder.
-export type FiltersDefinition<T extends object, U = null> = FiltersDefinitionString<T, U> | FiltersDefinitionNumber<T, U> | FiltersDefinitionDate<T, U> | FiltersDefinitionStatus<T, U> | FiltersDefinitionArray<T, U>;
+export type FiltersDefinition<T, U = null> = FiltersDefinitionString<T, U> | FiltersDefinitionNumber<T, U> | FiltersDefinitionDate<T, U> | FiltersDefinitionStatus<T, U> | FiltersDefinitionArray<T, U>;
 
 // Value of a filter input.
 export type FilterInputValueString = MaybeNull<string>;

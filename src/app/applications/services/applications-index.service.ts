@@ -128,7 +128,7 @@ export class ApplicationsIndexService {
   }
 
   restoreFilters(): ApplicationRawFilter {
-    return this.#tableService.restoreFilters<ApplicationRaw, ApplicationRawEnumField>('applications-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<ApplicationRaw, ApplicationRawColumnKey, ApplicationRawEnumField>('applications-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): ApplicationRawFilter {

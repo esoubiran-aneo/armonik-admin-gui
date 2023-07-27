@@ -6,13 +6,13 @@ import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
 import { SessionsIndexService } from './sessions-index.service';
-import { SessionRaw, SessionRawField, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions } from '../types';
+import { SessionRaw, SessionRawColumnKey, SessionRawField, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions } from '../types';
 
 @Injectable()
 export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
   readonly #sessionsIndexService = inject(SessionsIndexService);
   readonly #sessionsClient = inject(SessionsClient);
-  readonly #utilsService = inject(UtilsService<SessionRaw, SessionRawField>);
+  readonly #utilsService = inject(UtilsService<SessionRaw, SessionRawColumnKey, SessionRawField>);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,

@@ -198,7 +198,7 @@ export class SessionsIndexService {
   }
 
   restoreFilters(): SessionRawFilter {
-    return this.#tableService.restoreFilters<SessionRaw, SessionRawField>('sessions-filters', this.filtersDefinitions) ?? this.defaultFilters;
+    return this.#tableService.restoreFilters<SessionRaw, SessionRawColumnKey, SessionRawField>('sessions-filters', this.filtersDefinitions) ?? this.defaultFilters;
   }
 
   resetFilters(): SessionRawFilter {

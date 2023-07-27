@@ -2,7 +2,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { ColumnKey, FieldKey } from '@app/types/data';
-import { Filter, FilterInputStatus, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { Filter, FiltersAnd, FiltersDefinition } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { UtilsService } from '@services/utils.service';
 
@@ -43,16 +43,17 @@ import { UtilsService } from '@services/utils.service';
     FiltersService,
   ],
 })
-export class FiltersChipsComponent<T extends object, U> {
+export class FiltersChipsComponent<T extends object, R extends string, U> {
   #filtersService = inject(FiltersService);
-  #utilsService = inject(UtilsService<T, U>);
+  #utilsService = inject(UtilsService<T, R, U>);
 
   @Input({ required: true }) filtersAnd: FiltersAnd<T> = [];
-  @Input({ required: true }) filtersFields: FiltersDefinition<T, U>[] = [];
-  @Input({ required: true }) columnsLabels: Record<ColumnKey<T>, string> | null = null;
+  @Input({ required: true }) filtersFields: FiltersDefinition<R, U>[] = [];
+  @Input({ required: true }) columnsLabels: Record<R, string> | null = null;
 
   content(filter: Filter<T>): string {
-    const label = this.columnToLabel(filter.key);
+    // TODO: fix filter type
+    const label = this.columnToLabel(filter.key as any);
 
     if (!filter.value)
       return label + ' ' + $localize`has no value`;
@@ -69,7 +70,7 @@ export class FiltersChipsComponent<T extends object, U> {
     return `${label} ${operator} ${filter.value}`;
   }
 
-  columnToLabel(column: FieldKey<T> | null): string {
+  columnToLabel(column: R | null): string {
     if (column === null)
       return '';
 
