@@ -1,4 +1,4 @@
-import { SessionStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterStringOperator, SessionStatus, TaskFilters, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DatePipe, NgFor, NgIf } from '@angular/common';
@@ -20,6 +20,7 @@ import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TaskOptions } from '@app/tasks/types';
 import { TaskStatusColored, ViewArrayDialogData, ViewArrayDialogResult, ViewObjectDialogData, ViewObjectDialogResult, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
+import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
 import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
@@ -40,7 +41,6 @@ import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
-import { CountByStatusComponent } from './components/count-by-status.component';
 import { SessionsGrpcService } from './services/sessions-grpc.service';
 import { SessionsIndexService } from './services/sessions-index.service';
 import { SessionsStatusesService } from './services/sessions-statuses.service';
@@ -142,10 +142,12 @@ import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, 
       <!-- Session's Tasks Count by Status -->
       <ng-container *ngIf="isCountColumn(column)">
         <td mat-cell *matCellDef="let element" appNoWrap>
-          <app-sessions-count-by-status
+          <app-count-tasks-by-status
             [statuses]="tasksStatusesColored"
-            [sessionId]="element.sessionId"
-          ></app-sessions-count-by-status>
+            [queryParams]="{ sessionId: element.sessionId }"
+            [filters]="countTasksByStatusFilters(element.sessionId)"
+          >
+          </app-count-tasks-by-status>
         </td>
       </ng-container>
       <!-- Actions -->
@@ -232,6 +234,7 @@ app-table-actions-toolbar {
     DurationPipe,
     EmptyCellPipe,
     NoWrapDirective,
+    CountTasksByStatusComponent,
     TableInspectObjectComponent,
     NgIf,
     NgFor,
@@ -242,7 +245,6 @@ app-table-actions-toolbar {
     PageHeaderComponent,
     TableActionsToolbarComponent,
     FiltersToolbarComponent,
-    CountByStatusComponent,
     TableContainerComponent,
     MatTooltipModule,
     MatTableModule,
@@ -527,6 +529,28 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.interval.next(this.intervalValue);
     }
+  }
+
+  countTasksByStatusFilters(sessionId: string): TaskFilters.AsObject {
+    return {
+      or: [
+        {
+          and: [
+            {
+              field: {
+                taskSummaryField: {
+                  field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_SESSION_ID
+                }
+              },
+              filterString:  {
+                operator: FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL,
+                value: sessionId
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
 
   personalizeTasksByStatus() {

@@ -3,7 +3,7 @@ import { FieldKey } from './data';
 
 export type MaybeNull<T> = T | null;
 
-export type FilterType = 'string' | 'number' | 'date' | 'array' | 'status';
+export type FilterType = 'string' | 'number' | 'date' | 'array' | 'status' | 'boolean';
 export type FilterValueOptions = { key: string | number, value: string }[];
 
 export type FiltersOr<T extends object> = FiltersAnd<T>[];

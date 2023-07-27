@@ -1,8 +1,8 @@
-import { SortDirection as ArmoniKSortDirection, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionFilterField, PartitionFilters, PartitionFiltersAnd, PartitionFiltersOr, PartitionRawEnumField, PartitionsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, FilterArrayOperator, FilterNumberOperator, FilterStringOperator, GetPartitionRequest, GetPartitionResponse, ListPartitionsRequest, ListPartitionsResponse, PartitionFilterField, PartitionRawEnumField, PartitionsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
-import { Filter, FilterType, FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
 import { PartitionsIndexService } from './partitions-index.service';
@@ -61,41 +61,36 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
 
   #buildFilterField(filter: Filter<PartitionRaw>) {
     return (type: FilterType, field: PartitionRawEnumField) => {
+
+      const filterField = {
+        partitionRawField: {
+          field
+        }
+      } satisfies PartitionFilterField.AsObject['field'];
+
       switch (type) {
       case 'string':
         return {
-          string: {
-            field: {
-              partitionRawField: {
-                field
-              },
-            },
-            value: filter.value?.toString() ?? '',
-            operator: filter.operator ?? 0
+          field: filterField,
+          filterString: {
+            value: filter.value?.toString() || '',
+            operator: filter.operator ?? FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
           }
         } satisfies PartitionFilterField.AsObject;
       case 'number':
         return {
-          number: {
-            field: {
-              partitionRawField: {
-                field
-              },
-            },
+          field: filterField,
+          filterNumber: {
             value: filter.value?.toString() || '',
-            operator: filter.operator ?? 0
+            operator: filter.operator ?? FilterNumberOperator.FILTER_NUMBER_OPERATOR_EQUAL
           }
         } satisfies PartitionFilterField.AsObject;
       case 'array':
         return {
-          array: {
-            field: {
-              partitionRawField: {
-                field
-              },
-            },
-            value: filter.value?.toString() ?? '',
-            operator: filter.operator ?? 0
+          field: filterField,
+          filterArray: {
+            value: filter.value?.toString() || '',
+            operator: filter.operator ?? FilterArrayOperator.FILTER_ARRAY_OPERATOR_CONTAINS
           }
         } satisfies PartitionFilterField.AsObject;
       default: {

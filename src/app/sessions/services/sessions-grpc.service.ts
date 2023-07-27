@@ -1,12 +1,12 @@
-import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, CountTasksByStatusSessionRequest, CountTasksByStatusSessionResponse, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionFilterField, SessionRawEnumField, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, FilterStatusOperator, FilterStringOperator, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionFilterField, SessionRawEnumField, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
+import { Filter, FilterType } from '@app/types/filters';
 import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
-import { SessionRaw, SessionRawField, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions } from '../types';
 import { SessionsIndexService } from './sessions-index.service';
-import { Filter, FilterType } from '@app/types/filters';
+import { SessionRaw, SessionRawField, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions } from '../types';
 
 @Injectable()
 export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
@@ -67,45 +67,35 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
     return this.#sessionsClient.cancelSession(cancelSessionRequest);
   }
 
-  countTasksByStatus$(sessionId: string): Observable<CountTasksByStatusSessionResponse> {
-    const request = new CountTasksByStatusSessionRequest({
-      sessionId
-    });
-
-    return this.#sessionsClient.countTasksByStatus(request);
-  }
-
   #buildFilterField(filter: Filter<SessionRaw>) {
     return (type: FilterType, field: SessionRawField) => {
+
+      const filterField = {
+        sessionRawField: {
+          field: field as SessionRawEnumField
+        }
+      } as SessionFilterField.AsObject['field'];
+
       switch (type) {
-        case 'string':
-          return {
-            string: {
-              field: {
-                // TODO: to know the level, we need to check how many times the field is prefix by options.
-                sessionRawField: {
-                  field: field as SessionRawEnumField
-                }
-              },
-              value: filter.value?.toString() ?? '',
-              operator: filter.operator ?? 0
-            }
-          } satisfies SessionFilterField.AsObject;
-        case 'status':
-          return {
-            status: {
-              field: {
-                sessionRawField: {
-                  field: field as SessionRawEnumField
-                }
-              },
-              value: Number(filter.value) ?? 0,
-              operator: filter.operator ?? 0
-            }
-          } satisfies SessionFilterField.AsObject;
-        default:
-          throw new Error(`Type ${type} not supported`);
+      case 'string':
+        return {
+          field: filterField,
+          filterString: {
+            value: filter.value?.toString() ?? '',
+            operator: filter.operator ?? FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL,
+          },
+        } satisfies SessionFilterField.AsObject;
+      case 'status':
+        return {
+          field: filterField,
+          filterStatus: {
+            value: Number(filter.value) ?? 0,
+            operator: filter.operator ?? FilterStatusOperator.FILTER_STATUS_OPERATOR_EQUAL,
+          }
+        } satisfies SessionFilterField.AsObject;
+      default:
+        throw new Error(`Type ${type} not supported`);
       }
-    }
+    };
   }
 }

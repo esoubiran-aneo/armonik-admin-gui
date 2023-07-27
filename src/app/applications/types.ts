@@ -1,4 +1,4 @@
-import { ApplicationField, ApplicationRawEnumField, ApplicationRaw as GrpcApplicationRaw, StatusCount as GrpcStatusCount  } from '@aneoconsultingfr/armonik.api.angular';
+import { ApplicationRawEnumField, ApplicationRaw as GrpcApplicationRaw  } from '@aneoconsultingfr/armonik.api.angular';
 import { ColumnKey, FieldKey } from '@app/types/data';
 import { FiltersDefinition, FiltersOr } from '@app/types/filters';
 import { ListOptions } from '@app/types/options';
@@ -12,5 +12,3 @@ export type ApplicationRawFilter = FiltersOr<ApplicationRaw>;
 export type ApplicationRawListOptions = ListOptions<ApplicationRaw>;
 
 export type ApplicationRawQueryParamsFilterKey = QueryParamsFilterKey<ApplicationRaw>;
-
-export type StatusCount = GrpcStatusCount.AsObject;

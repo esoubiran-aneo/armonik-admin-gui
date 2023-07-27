@@ -1,10 +1,9 @@
-import { SessionField, SessionRawEnumField, SessionStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { SessionRawEnumField, SessionStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { SessionsStatusesService } from './sessions-statuses.service';
 import { SessionRaw, SessionRawColumnKey, SessionRawField, SessionRawFilter, SessionRawListOptions, SessionsFiltersDefinition } from '../types';
-import { Session } from '@aneoconsultingfr/armonik.api.angular/lib/generated/objects.pb';
 
 @Injectable()
 export class SessionsIndexService {
@@ -66,11 +65,9 @@ export class SessionsIndexService {
           value: this.#sessionsStatusesService.statuses[Number(status) as SessionStatus],
         };
       }),
-      // TODO: ajouter les options
     }
-    // TODO: ajouter les times
+    // TODO: ajouter le support des dates dans les filtres
     // TODO: ajouter les durations dans les api (avec le support des filtres dans les groupes by)
-    // TODO: simplifier les filtres en retirant une couche.
     // {
     //   field: 'partitionIds',
     //   type: 'text',

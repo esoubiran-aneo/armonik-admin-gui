@@ -1,3 +1,4 @@
+import { FilterStringOperator, TaskFilters, TaskOptionEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
@@ -15,6 +16,7 @@ import { Observable, Subject, Subscription, catchError, map, merge, of, startWit
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TaskStatusColored, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
+import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
 import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
@@ -33,7 +35,6 @@ import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
-import { CountByStatusComponent } from './components/count-by-status.component';
 import { ApplicationsGrpcService } from './services/applications-grpc.service';
 import { ApplicationsIndexService } from './services/applications-index.service';
 import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions, ApplicationsFiltersDefinition } from './types';
@@ -94,11 +95,11 @@ import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, Applic
       <!-- Application's Tasks Count by Status -->
       <ng-container *ngIf="isCountColumn(column)">
         <td mat-cell *matCellDef="let element" appNoWrap>
-         <app-applications-count-by-status
-          [name]="element.name"
-          [version]="element.version"
+        <app-count-tasks-by-status
           [statuses]="tasksStatusesColored"
-        ></app-applications-count-by-status>
+          [queryParams]="{ 'options.applicationName': element.name, 'options.applicationVersion': element.version }"
+          [filters]="countTasksByStatusFilters(element.name, element.version)"
+        ></app-count-tasks-by-status>
         </td>
       </ng-container>
       <!-- Action -->
@@ -168,7 +169,7 @@ app-table-actions-toolbar {
     NgFor,
     RouterLink,
     DragDropModule,
-    CountByStatusComponent,
+    CountTasksByStatusComponent,
     PageHeaderComponent,
     TableActionsToolbarComponent,
     FiltersToolbarComponent,
@@ -384,6 +385,39 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.interval.next(this.intervalValue);
     }
+  }
+
+  countTasksByStatusFilters(applicationName: string, applicationVersion: string): TaskFilters.AsObject {
+    return {
+      or: [
+        {
+          and: [
+            {
+              field: {
+                taskOptionField: {
+                  field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_APPLICATION_NAME
+                }
+              },
+              filterString: {
+                operator: FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL,
+                value: applicationName,
+              }
+            },
+            {
+              field: {
+                taskOptionField: {
+                  field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_APPLICATION_VERSION
+                },
+              },
+              filterString: {
+                operator: FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL,
+                value: applicationVersion,
+              }
+            }
+          ]
+        }
+      ]
+    };
   }
 
   personalizeTasksByStatus() {

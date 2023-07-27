@@ -1,4 +1,4 @@
-import { ApplicationFilterField, ApplicationRawEnumField, ApplicationsClient, SortDirection as ArmoniKSortDirection, CountTasksByStatusApplicationRequest, CountTasksByStatusApplicationResponse, ListApplicationsRequest, ListApplicationsResponse } from '@aneoconsultingfr/armonik.api.angular';
+import { ApplicationFilterField, ApplicationRawEnumField, ApplicationsClient, SortDirection as ArmoniKSortDirection, FilterStringOperator, ListApplicationsRequest, ListApplicationsResponse } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
@@ -52,34 +52,27 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
     throw new Error('This method must never be called.');
   }
 
-  // TODO: rename to countTasksByStatus$
-  countByStatus$(name: string, version: string): Observable<CountTasksByStatusApplicationResponse> {
-    const request = new CountTasksByStatusApplicationRequest({
-      name,
-      version
-    });
-
-    return this.#applicationsClient.countTasksByStatus(request);
-  }
-
   #buildFilterField(filter: Filter<ApplicationRaw>) {
     return (type: FilterType, field: ApplicationRawEnumField) => {
-      switch (type) {
-        case 'string':
-          return {
-            string: {
-              field: {
-                applicationField: {
-                  field: field
-                },
-              },
-              value: filter.value?.toString() ?? '',
-              operator: filter.operator ?? 0
-            }
-          } satisfies ApplicationFilterField.AsObject;
-        default: {
-          throw new Error(`Type ${type} not supported`);
+
+      const filterField = {
+        applicationField: {
+          field: field as ApplicationRawEnumField
         }
+      } as ApplicationFilterField.AsObject['field'];
+
+      switch (type) {
+      case 'string':
+        return {
+          field: filterField,
+          filterString: {
+            value: filter.value?.toString() ?? '',
+            operator: filter.operator ?? FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
+          }
+        } satisfies ApplicationFilterField.AsObject;
+      default: {
+        throw new Error(`Type ${type} not supported`);
+      }
       }
     };
   }

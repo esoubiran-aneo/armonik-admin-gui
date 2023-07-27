@@ -59,11 +59,9 @@ export class UtilsService<T extends object, U = null> {
   }
 
   createFilters<F>(filters: FiltersOr<T>, filtersDefinitions: FiltersDefinition<T, U>[], cb: (filter: Filter<T>) => (type: FilterType, field: U) => F) {
-    const filtersOr = this.#createFiltersOr<F>(filters, filtersDefinitions, cb);
+    const or = this.#createFiltersOr<F>(filters, filtersDefinitions, cb);
 
-    return {
-      filters: filtersOr
-    };
+    return or;
   }
 
   /**
@@ -75,13 +73,13 @@ export class UtilsService<T extends object, U = null> {
     for (const filter of filters) {
       const filtersAnd = this.#createFiltersAnd<F>(filter, filtersDefinitions, cb);
 
-      if (filtersAnd.filters && filtersAnd.filters.length > 0) {
+      if (filtersAnd.and && filtersAnd.and.length > 0) {
         filtersOr.push(filtersAnd);
       }
     }
 
     return {
-      filters: filtersOr
+      or: filtersOr
     };
   }
 
@@ -100,7 +98,7 @@ export class UtilsService<T extends object, U = null> {
     }
 
     return {
-      filters: filtersAnd
+      and: filtersAnd
     };
   }
 
@@ -134,7 +132,7 @@ export class UtilsService<T extends object, U = null> {
     const filterDefinition = this.#recoverFilterDefinition(filter, filtersDefinitions);
 
     if (filterDefinition.type !== 'status') {
-      throw new Error(`Filter definition is not a status`);
+      throw new Error('Filter definition is not a status');
     }
 
     return filterDefinition.statuses;

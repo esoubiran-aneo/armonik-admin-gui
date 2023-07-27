@@ -1,4 +1,4 @@
-import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskStatus, TaskSummary, TaskSummaryEnumField, TaskSummaryField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskFilters, TaskSummary, TaskSummaryEnumField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
@@ -79,8 +79,12 @@ export class TasksGrpcService {
     return this.#tasksClient.cancelTasks(request);
   }
 
-  countByStatu$(): Observable<CountTasksByStatusResponse> {
-    const request = new CountTasksByStatusRequest();
+  countByStatu$(filters?: TaskFilters.AsObject): Observable<CountTasksByStatusResponse> {
+
+    const request = new CountTasksByStatusRequest({
+      filters: filters
+    });
+
     return this.#tasksClient.countTasksByStatus(request);
   }
 }
