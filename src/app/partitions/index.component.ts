@@ -1,7 +1,9 @@
+import { FilterStringOperator, TaskFilters, TaskOptionEnumField, TaskStatus, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -12,14 +14,18 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink } from '@angular/router';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
-import { AppIndexComponent } from '@app/types/components';
+import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
+import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
+import { TaskStatusColored, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
+import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
 import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
 import { TableInspectObjectComponent } from '@components/table/table-inspect-object.component';
 import { TableActionsToolbarComponent } from '@components/table-actions-toolbar.component';
 import { TableContainerComponent } from '@components/table-container.component';
+import { ViewTasksByStatusDialogComponent } from '@components/view-tasks-by-status-dialog.component';
 import { EmptyCellPipe } from '@pipes/empty-cell.pipe';
 import { AutoRefreshService } from '@services/auto-refresh.service';
 import { IconsService } from '@services/icons.service';
@@ -30,6 +36,7 @@ import { StorageService } from '@services/storage.service';
 import { TableStorageService } from '@services/table-storage.service';
 import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
+import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
 import { PartitionsGrpcService } from './services/partitions-grpc.service';
 import { PartitionsIndexService } from './services/partitions-index.service';
@@ -57,6 +64,14 @@ import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRaw
       (displayedColumnsChange)="onColumnsChange($event)"
       (resetColumns)="onColumnsReset()"
       (resetFilters)="onFiltersReset()">
+      <ng-container extra-menu-items>
+        <button mat-menu-item (click)="personalizeTasksByStatus()">
+          <mat-icon aria-hidden="true" [fontIcon]="getIcon('tune')"></mat-icon>
+          <span i18n appNoWrap>
+            Personalize Tasks Status
+          </span>
+        </button>
+      </ng-container>
     </app-table-actions-toolbar>
   </mat-toolbar-row>
 
@@ -89,6 +104,17 @@ import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRaw
       <ng-container *ngIf="isObjectColumn(column)">
         <td mat-cell *matCellDef="let element" appNoWrap>
           <app-table-inspect-object [object]="element[column]" [label]="columnToLabel(column)"></app-table-inspect-object>
+        </td>
+      </ng-container>
+      <!-- Partition's Tasks Count by Status -->
+      <ng-container *ngIf="isCountColumn(column)">
+        <td mat-cell *matCellDef="let element" appNoWrap>
+          <app-count-tasks-by-status
+            [statuses]="tasksStatusesColored"
+            [queryParams]="{ }"
+            [filters]="countTasksByStatusFilters(element.id)"
+          >
+          </app-count-tasks-by-status>
         </td>
       </ng-container>
       <!-- Action -->
@@ -148,6 +174,9 @@ app-table-actions-toolbar {
     PartitionsIndexService,
     PartitionsGrpcService,
     NotificationService,
+    TasksByStatusService,
+    TasksStatusesService,
+    TasksIndexService,
   ],
   imports: [
     EmptyCellPipe,
@@ -157,6 +186,7 @@ app-table-actions-toolbar {
     RouterLink,
     DragDropModule,
     PageHeaderComponent,
+    CountTasksByStatusComponent,
     TableActionsToolbarComponent,
     TableInspectObjectComponent,
     FiltersToolbarComponent,
@@ -170,13 +200,20 @@ app-table-actions-toolbar {
     MatButtonModule,
     MatSnackBarModule,
     MatMenuModule,
+    MatDialogModule,
     TableEmptyDataComponent,
   ]
 })
 // TODO: add app-index-component
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
-  #notificationService = inject(NotificationService);
-  #iconsService = inject(IconsService);
+  readonly #notificationService = inject(NotificationService);
+  readonly #iconsService = inject(IconsService);
+  readonly #tasksByStatusService = inject(TasksByStatusService);
+  readonly #shareURLService = inject(ShareUrlService);
+  readonly #partitionsIndexService = inject(PartitionsIndexService);
+  readonly #partitionsGrpcService = inject(PartitionsGrpcService);
+  readonly #autoRefreshService = inject(AutoRefreshService);
+  readonly #dialog = inject(MatDialog);
 
   displayedColumns: PartitionRawColumnKey[] = [];
   availableColumns: PartitionRawColumnKey[] = [];
@@ -196,32 +233,28 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   refresh: Subject<void> = new Subject<void>();
   stopInterval: Subject<void> = new Subject<void>();
   interval: Subject<number> = new Subject<number>();
-  interval$: Observable<number> = this._autoRefreshService.createInterval(this.interval, this.stopInterval);
+  interval$: Observable<number> = this.#autoRefreshService.createInterval(this.interval, this.stopInterval);
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
+  tasksStatusesColored: TaskStatusColored[] = [];
+
   subscriptions: Subscription = new Subscription();
 
-  constructor(
-    private _iconsService: IconsService,
-    private _shareURLService: ShareUrlService,
-    private _partitionsIndexService: PartitionsIndexService,
-    private _partitionsGrpcService: PartitionsGrpcService,
-    private _autoRefreshService: AutoRefreshService
-  ) {}
-
   ngOnInit() {
-    this.displayedColumns = this._partitionsIndexService.restoreColumns();
-    this.availableColumns = this._partitionsIndexService.availableColumns;
+    this.displayedColumns = this.#partitionsIndexService.restoreColumns();
+    this.availableColumns = this.#partitionsIndexService.availableColumns;
 
-    this.options = this._partitionsIndexService.restoreOptions();
+    this.options = this.#partitionsIndexService.restoreOptions();
 
-    this.filtersDefinitions = this._partitionsIndexService.filtersDefinitions;
-    this.filters = this._partitionsIndexService.restoreFilters();
+    this.filtersDefinitions = this.#partitionsIndexService.filtersDefinitions;
+    this.filters = this.#partitionsIndexService.restoreFilters();
 
-    this.intervalValue = this._partitionsIndexService.restoreIntervalValue();
+    this.intervalValue = this.#partitionsIndexService.restoreIntervalValue();
 
-    this.sharableURL = this._shareURLService.generateSharableURL(this.options, this.filters);
+    this.sharableURL = this.#shareURLService.generateSharableURL(this.options, this.filters);
+
+    this.tasksStatusesColored = this.#tasksByStatusService.restoreStatuses('partitions');
   }
 
   ngAfterViewInit(): void {
@@ -244,10 +277,10 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
           };
           const filters = this.filters;
 
-          this.sharableURL = this._shareURLService.generateSharableURL(options, filters);
-          this._partitionsIndexService.saveOptions(options);
+          this.sharableURL = this.#shareURLService.generateSharableURL(options, filters);
+          this.#partitionsIndexService.saveOptions(options);
 
-          return this._partitionsGrpcService.list$(options, filters).pipe(catchError((error) => {
+          return this.#partitionsGrpcService.list$(options, filters).pipe(catchError((error) => {
             console.error(error);
             this.#notificationService.error('Unable to fetch partitions');
             return of(null);
@@ -277,39 +310,43 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   columnsLabels(): Record<PartitionRawColumnKey, string> {
-    return this._partitionsIndexService.columnsLabels;
+    return this.#partitionsIndexService.columnsLabels;
   }
 
   columnToLabel(column: PartitionRawColumnKey): string {
-    return this._partitionsIndexService.columnToLabel(column);
+    return this.#partitionsIndexService.columnToLabel(column);
   }
 
   isPartitionIdColumn(column: PartitionRawColumnKey): boolean {
-    return this._partitionsIndexService.isPartitionIdColumn(column);
+    return this.#partitionsIndexService.isPartitionIdColumn(column);
   }
 
   isActionsColumn(column: PartitionRawColumnKey): boolean {
-    return this._partitionsIndexService.isActionsColumn(column);
+    return this.#partitionsIndexService.isActionsColumn(column);
   }
 
   isObjectColumn(column: PartitionRawColumnKey): boolean {
-    return this._partitionsIndexService.isObjectColumn(column);
+    return this.#partitionsIndexService.isObjectColumn(column);
+  }
+
+  isCountColumn(column: PartitionRawColumnKey): boolean {
+    return this.#partitionsIndexService.isCountColumn(column);
   }
 
   isNotSortableColumn(column: PartitionRawColumnKey): boolean {
-    return this._partitionsIndexService.isNotSortableColumn(column);
+    return this.#partitionsIndexService.isNotSortableColumn(column);
   }
 
   isSimpleColumn(column: PartitionRawColumnKey): boolean {
-    return this._partitionsIndexService.isSimpleColumn(column);
+    return this.#partitionsIndexService.isSimpleColumn(column);
   }
 
   getIcon(name: string): string {
-    return this._iconsService.getIcon(name);
+    return this.#iconsService.getIcon(name);
   }
 
   getPageIcon(page: Page): string {
-    return this._iconsService.getPageIcon(page);
+    return this.#iconsService.getPageIcon(page);
   }
 
   onRefresh() {
@@ -326,41 +363,41 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
       this.refresh.next();
     }
 
-    this._partitionsIndexService.saveIntervalValue(value);
+    this.#partitionsIndexService.saveIntervalValue(value);
   }
 
   onColumnsChange(data: PartitionRawColumnKey[]) {
     this.displayedColumns = [...data];
 
-    this._partitionsIndexService.saveColumns(data);
+    this.#partitionsIndexService.saveColumns(data);
   }
 
   onColumnsReset() {
-    this.displayedColumns = this._partitionsIndexService.resetColumns();
+    this.displayedColumns = this.#partitionsIndexService.resetColumns();
   }
 
   onFiltersChange(filters: unknown[]) {
     this.filters = filters as PartitionRawFilter;
 
-    this._partitionsIndexService.saveFilters(filters as PartitionRawFilter);
+    this.#partitionsIndexService.saveFilters(filters as PartitionRawFilter);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   onFiltersReset() {
-    this.filters = this._partitionsIndexService.resetFilters();
+    this.filters = this.#partitionsIndexService.resetFilters();
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   autoRefreshTooltip() {
-    return this._autoRefreshService.autoRefreshTooltip(this.intervalValue);
+    return this.#autoRefreshService.autoRefreshTooltip(this.intervalValue);
   }
 
   onDrop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.displayedColumns, event.previousIndex, event.currentIndex);
 
-    this._partitionsIndexService.saveColumns(this.displayedColumns);
+    this.#partitionsIndexService.saveColumns(this.displayedColumns);
   }
 
   handleAutoRefreshStart() {
@@ -369,5 +406,44 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.interval.next(this.intervalValue);
     }
+  }
+
+  countTasksByStatusFilters(partition: string): TaskFilters.AsObject {
+    return {
+      or: [
+        {
+          and: [
+            {
+              field: {
+                taskOptionField: {
+                  field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_PARTITION_ID
+                }
+              },
+              filterString:  {
+                operator: FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL,
+                value: partition
+              }
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  personalizeTasksByStatus() {
+    const dialogRef = this.#dialog.open<ViewTasksByStatusDialogComponent, ViewTasksByStatusDialogData>(ViewTasksByStatusDialogComponent, {
+      data: {
+        statusesCounts: this.tasksStatusesColored,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) {
+        return;
+      }
+
+      this.tasksStatusesColored = result;
+      this.#tasksByStatusService.saveStatuses('partitions', result);
+    });
   }
 }

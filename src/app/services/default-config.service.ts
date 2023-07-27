@@ -229,6 +229,7 @@ export class DefaultConfigService {
     'dashboard-hide-groups-headers': this.#defaultDashboardHideGroupsHeader,
     'applications-tasks-by-status': this.#defaultTasksByStatus,
     'sessions-tasks-by-status': this.#defaultTasksByStatus,
+    'partitions-tasks-by-status': this.#defaultTasksByStatus,
     'applications-columns': this.#defaultApplications.columns,
     'applications-options': this.#defaultApplications.options,
     'applications-filters': this.#defaultApplications.filters,

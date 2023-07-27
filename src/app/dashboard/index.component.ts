@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Observable, Subject, Subscription, merge, startWith, switchMap, tap } from 'rxjs';
 import { TasksGrpcService } from '@app/tasks/services/tasks-grpc.service';
+import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { StatusCount } from '@app/tasks/types';
 import { Page } from '@app/types/pages';
@@ -25,6 +26,10 @@ import { IconsService } from '@services/icons.service';
 import { QueryParamsService } from '@services/query-params.service';
 import { ShareUrlService } from '@services/share-url.service';
 import { StorageService } from '@services/storage.service';
+import { TableStorageService } from '@services/table-storage.service';
+import { TableURLService } from '@services/table-url.service';
+import { TableService } from '@services/table.service';
+import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
 import { ManageGroupsDialogComponent } from './components/manage-groups-dialog.component';
 import { StatusesGroupCardComponent } from './components/statuses-group-card.component';
@@ -112,6 +117,11 @@ app-actions-toolbar {
     DashboardStorageService,
     DashboardIndexService,
     AutoRefreshService,
+    TasksIndexService,
+    TableService,
+    TableURLService,
+    TableStorageService,
+    TasksByStatusService,
     UtilsService,
   ],
   imports: [

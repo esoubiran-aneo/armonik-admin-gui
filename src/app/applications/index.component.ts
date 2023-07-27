@@ -14,6 +14,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink } from '@angular/router';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
+import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
+import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { TaskStatusColored, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
 import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
@@ -161,6 +163,8 @@ app-table-actions-toolbar {
     ApplicationsGrpcService,
     NotificationService,
     TasksByStatusService,
+    TasksIndexService,
+    TasksStatusesService,
   ],
   imports: [
     NoWrapDirective,

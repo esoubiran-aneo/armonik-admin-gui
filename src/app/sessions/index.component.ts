@@ -17,6 +17,8 @@ import { RouterLink } from '@angular/router';
 import { Timestamp } from '@ngx-grpc/well-known-types';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
+import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
+import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { TaskOptions } from '@app/tasks/types';
 import { TaskStatusColored, ViewArrayDialogData, ViewArrayDialogResult, ViewObjectDialogData, ViewObjectDialogResult, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
@@ -75,7 +77,7 @@ import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, 
           <span i18n appNoWrap>
             Personalize Tasks Status
           </span>
-      </button>
+        </button>
       </ng-container>
     </app-table-actions-toolbar>
   </mat-toolbar-row>
@@ -229,6 +231,9 @@ app-table-actions-toolbar {
     SessionsIndexService,
     SessionsGrpcService,
     NotificationService,
+    TasksByStatusService,
+    TasksStatusesService,
+    TasksIndexService,
   ],
   imports: [
     DurationPipe,

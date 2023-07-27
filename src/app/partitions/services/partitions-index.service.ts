@@ -1,6 +1,5 @@
 import { PartitionRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
-import { AppIndexService } from '@app/types/services';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { PartitionRaw, PartitionRawColumnKey, PartitionRawFilter, PartitionRawFilterField, PartitionRawListOptions } from '../types';
@@ -13,7 +12,7 @@ export class PartitionsIndexService {
   readonly tableName: string = 'partitions';
 
   readonly defaultColumns: PartitionRawColumnKey[] = this.#defaultConfigService.defaultPartitions.columns;
-  readonly availableColumns: PartitionRawColumnKey[] = ['id', 'priority', 'parentPartitionIds', 'podConfiguration', 'podMax', 'podReserved', 'preemptionPercentage', 'actions'];
+  readonly availableColumns: PartitionRawColumnKey[] = ['id', 'priority', 'parentPartitionIds', 'podConfiguration', 'podMax', 'podReserved', 'preemptionPercentage', 'actions', 'count'];
 
   readonly objectColumns: PartitionRawColumnKey[] = ['podConfiguration', 'parentPartitionIds'];
 
@@ -26,6 +25,7 @@ export class PartitionsIndexService {
     podReserved: $localize`Pod Reserved`,
     preemptionPercentage: $localize`Preemption Percentage`,
     actions: $localize`Actions`,
+    count: $localize`Tasks by Status`,
   };
 
   readonly defaultOptions: PartitionRawListOptions = this.#defaultConfigService.defaultPartitions.options;
@@ -85,15 +85,19 @@ export class PartitionsIndexService {
   }
 
   isNotSortableColumn(column: PartitionRawColumnKey): boolean {
-    return this.isActionsColumn(column) || this.isObjectColumn(column);
+    return this.isActionsColumn(column) || this.isObjectColumn(column) || this.isCountColumn(column);
   }
 
   isObjectColumn(column: PartitionRawColumnKey): boolean {
     return this.objectColumns.includes(column);
   }
 
+  isCountColumn(column: PartitionRawColumnKey): boolean {
+    return column === 'count';
+  }
+
   isSimpleColumn(column: PartitionRawColumnKey): boolean {
-    return !this.isActionsColumn(column) && !this.isPartitionIdColumn(column) && !this.isObjectColumn(column);
+    return !this.isActionsColumn(column) && !this.isPartitionIdColumn(column) && !this.isObjectColumn(column) && !this.isCountColumn(column);
   }
 
   /**
