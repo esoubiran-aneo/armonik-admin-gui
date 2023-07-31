@@ -9,6 +9,7 @@ import { ShareUrlComponent } from './share-url.component';
   <h1> <ng-content></ng-content> </h1>
 
   <app-share-url *ngIf="sharableURL" [sharableURL]="sharableURL"> </app-share-url>
+  
 </div>
   `,
   styles: [`

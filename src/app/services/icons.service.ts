@@ -47,6 +47,7 @@ export class IconsService {
     'layers-clear': 'layers_clear',
     'format-clear': 'format_color_reset',
     'highlight': 'highlight',
+    'filter-list': 'filter_list'
   };
 
   getIcon(name: string): string {

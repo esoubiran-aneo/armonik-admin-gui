@@ -3,7 +3,7 @@ import { JsonPipe, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -33,9 +33,10 @@ import { TableService } from '@services/table.service';
 import { UtilsService } from '@services/utils.service';
 import { AddLineDialogComponent } from './components/add-line-dialog.component';
 import { LineComponent } from './components/line.component';
+import { ManageLinesDialogComponent } from './components/manage-lines-dialog.component';
 import { DashboardIndexService } from './services/dashboard-index.service';
 import { DashboardStorageService } from './services/dashboard-storage.service';
-import { Line } from './types';
+import { Line, ManageLinesDialogData, ManageLinesDialogResult } from './types';
 
 
 @Component({
@@ -45,6 +46,10 @@ import { Line } from './types';
   <mat-icon matListItemIcon aria-hidden="true" [fontIcon]="getPageIcon('dashboard')"></mat-icon>
   <span i18n="Page title"> Dashboard </span>
 </app-page-header>
+
+<button class="reorder-line" mat-fab color="primary" aria-label=" Reorder lines" aria-hidden="true" (click)="onManageLinesDialog()" matTooltip="reorder lines">
+  <mat-icon [fontIcon]="getIcon('filter-list')"></mat-icon>
+</button>
 
 <button class="add-line" mat-fab color="primary" aria-label="Add a line" aria-hidden="true" (click)="onAddLineDialog()" matTooltip="Add a line">
   <mat-icon [fontIcon]="getIcon('add')"></mat-icon>
@@ -59,7 +64,7 @@ import { Line } from './types';
 </div>
 
 <div class="lines">
-  <app-page-section *ngFor="let line of lines; trackBy:trackByLine">
+  <app-page-section *ngFor="let line of lines; let index = index trackBy:trackByLine; ">
     <app-page-section-header icon="adjust">
       <span i18n="Section title">{{ line.name }}</span>
     </app-page-section-header>
@@ -74,6 +79,13 @@ import { Line } from './types';
   right: 2rem;
 
   z-index: 50;
+}
+
+.reorder-line {
+  position: fixed; 
+  z-index: 50;
+  bottom: 2rem; 
+  right: 7rem; 
 }
 
 .no-line {
@@ -213,6 +225,24 @@ export class IndexComponent implements OnInit {
 
   onSaveChange() {
     this.#dashboardIndexService.saveLines(this.lines);
+  }
+
+  onManageLinesDialog() {
+    const dialogRef: MatDialogRef<ManageLinesDialogComponent, ManageLinesDialogResult> = this.#dialog.open<ManageLinesDialogComponent, ManageLinesDialogData, ManageLinesDialogResult>(ManageLinesDialogComponent, {
+      data: {
+        lines : this.lines,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) {
+        return;
+      }
+      this.lines = result.lines;
+      this.onSaveChange();
+      
+    });
+
   }
 
   trackByLine(index: number, _: Line) {

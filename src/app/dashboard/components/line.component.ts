@@ -29,8 +29,6 @@ import { PageSectionHeaderComponent } from '../../components/page-section-header
 import { PageSectionComponent } from '../../components/page-section.component';
 import { RefreshButtonComponent } from '../../components/refresh-button.component';
 import { SpinnerComponent } from '../../components/spinner.component';
-import { DashboardIndexService } from '../services/dashboard-index.service';
-import { DashboardStorageService } from '../services/dashboard-storage.service';
 import { Line, ManageGroupsDialogData, ManageGroupsDialogResult } from '../types';
 
 @Component({
