@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltipModule  } from '@angular/material/tooltip';
 import { TasksGrpcService } from '@app/tasks/services/tasks-grpc.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { AddLineDialogData, AddLineDialogResult } from '@app/types/dialog';
@@ -39,6 +39,8 @@ import { DashboardStorageService } from './services/dashboard-storage.service';
 import { Line, ManageLinesDialogData, ManageLinesDialogResult } from './types';
 
 
+
+
 @Component({
   selector: 'app-dashboard-index',
   template: `
@@ -47,14 +49,25 @@ import { Line, ManageLinesDialogData, ManageLinesDialogResult } from './types';
   <span i18n="Page title"> Dashboard </span>
 </app-page-header>
 
-<button *ngIf="lines.length > 1" class="reorder-line" mat-fab color="primary" aria-label="Reorder dashboard lines" aria-hidden="true" (click)="onManageLinesDialog()" matTooltip="reorder your lines">
-  <mat-icon [fontIcon]="getIcon('filter-list')"></mat-icon>
-</button>
-
-<button *ngIf="lines.length > 0" class="add-line" mat-fab color="primary" aria-label="Add a line" aria-hidden="true" (click)="onAddLineDialog()" matTooltip="Add a line">
-  <mat-icon [fontIcon]="getIcon('add')"></mat-icon>
-</button>
-
+ <div class="fab-container">
+    <div class="settings"  *ngIf="lines.length > 0">
+        <button  class="settings-lines" mat-fab color="primary" aria-label="Manage lines" aria-hidden="true" matTooltipPosition="left" matTooltip="Manage your lines">
+          <mat-icon [fontIcon]="getIcon('settings')"></mat-icon>
+        </button>
+    </div>
+    <ul class="options">
+      <li>
+        <button *ngIf="lines.length > 1" class="reorder-line" mat-fab color="primary" aria-label="Reorder lines" aria-hidden="true" (click)="onManageLinesDialog()" matTooltipPosition="left" matTooltip="Reorder your lines">
+          <mat-icon [fontIcon]="getIcon('filter-list')"></mat-icon>
+        </button>
+      </li>
+      <li>
+        <button *ngIf="lines.length > 0" class="add-line" mat-fab color="primary" aria-label="Add a line" aria-hidden="true" (click)="onAddLineDialog()"matTooltipPosition="left" matTooltip="Add a line">
+          <mat-icon [fontIcon]="getIcon('add')"></mat-icon>
+        </button>
+      </li>
+    </ul>
+</div>
 <div *ngIf="lines.length === 0" class="no-line">
     <em i18n>
       Your dashboard is empty, add a line to start monitoring your tasks.
@@ -73,19 +86,32 @@ import { Line, ManageLinesDialogData, ManageLinesDialogResult } from './types';
 </div>
   `,
   styles: [`
-.add-line {
+
+
+.fab-container {
   position: fixed;
   bottom: 2rem;
-  right: 2rem;
-
+  right: 2rem; 
   z-index: 50;
+  
+}
+.options { 
+  position: absolute;
+  bottom: 3.8rem; 
+  list-style-type: none;
+  margin: 0; 
+  padding: 0;
+  opacity: 0; 
+  transition: all  0.3s;
+  transform-origin: 80% bottom; 
 }
 
-.reorder-line {
-  position: fixed; 
-  z-index: 50;
-  bottom: 2rem; 
-  right: 7rem; 
+.options li {
+  padding: .5rem 0;
+}
+
+.settings:hover + .options, .options:hover{
+   opacity: 1; 
 }
 
 .no-line {
@@ -228,8 +254,6 @@ export class IndexComponent implements OnInit {
   }
 
   onManageLinesDialog() {
-
-
     const dialogRef: MatDialogRef<ManageLinesDialogComponent, ManageLinesDialogResult> = this.#dialog.open<ManageLinesDialogComponent, ManageLinesDialogData, ManageLinesDialogResult>(ManageLinesDialogComponent, {
       data: {
         lines : this.lines,
