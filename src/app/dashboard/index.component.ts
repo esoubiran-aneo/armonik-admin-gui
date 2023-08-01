@@ -47,11 +47,11 @@ import { Line, ManageLinesDialogData, ManageLinesDialogResult } from './types';
   <span i18n="Page title"> Dashboard </span>
 </app-page-header>
 
-<button class="reorder-line" mat-fab color="primary" aria-label=" Reorder lines" aria-hidden="true" (click)="onManageLinesDialog()" matTooltip="reorder lines">
+<button *ngIf="lines.length > 1" class="reorder-line" mat-fab color="primary" aria-label="Reorder dashboard lines" aria-hidden="true" (click)="onManageLinesDialog()" matTooltip="reorder your lines">
   <mat-icon [fontIcon]="getIcon('filter-list')"></mat-icon>
 </button>
 
-<button class="add-line" mat-fab color="primary" aria-label="Add a line" aria-hidden="true" (click)="onAddLineDialog()" matTooltip="Add a line">
+<button *ngIf="lines.length > 0" class="add-line" mat-fab color="primary" aria-label="Add a line" aria-hidden="true" (click)="onAddLineDialog()" matTooltip="Add a line">
   <mat-icon [fontIcon]="getIcon('add')"></mat-icon>
 </button>
 
@@ -176,7 +176,7 @@ export class IndexComponent implements OnInit {
     const dialogRef = this.#dialog.open<AddLineDialogComponent, AddLineDialogData, AddLineDialogResult>(AddLineDialogComponent);
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (!result) return;
+      if (!result || result.name.trim() === '') return;
 
       if (result) {
         this.lines.push({
@@ -228,6 +228,8 @@ export class IndexComponent implements OnInit {
   }
 
   onManageLinesDialog() {
+
+
     const dialogRef: MatDialogRef<ManageLinesDialogComponent, ManageLinesDialogResult> = this.#dialog.open<ManageLinesDialogComponent, ManageLinesDialogData, ManageLinesDialogResult>(ManageLinesDialogComponent, {
       data: {
         lines : this.lines,
