@@ -76,14 +76,14 @@ import { Line, ManageLinesDialogData, ManageLinesDialogResult } from './types';
     <button mat-raised-button color="primary" (click)="onAddLineDialog()">Add a line</button>
 </div>
 
-<div class="lines">
-  <app-page-section *ngFor="let line of lines; let index = index trackBy:trackByLine; ">
+<main class="lines">
+  <app-page-section *ngFor="let line of lines; trackBy:trackByLine">
     <app-page-section-header icon="adjust">
       <span i18n="Section title">{{ line.name }}</span>
     </app-page-section-header>
-      <app-dashboard-line [line]="line"  (lineChange)="onSaveChange()" (lineDelete)="onDeleteLine($event)"></app-dashboard-line>
+      <app-dashboard-line [line]="line" (lineChange)="onSaveChange()" (lineDelete)="onDeleteLine($event)"></app-dashboard-line>
   </app-page-section>
-</div>
+</main>
   `,
   styles: [`
 

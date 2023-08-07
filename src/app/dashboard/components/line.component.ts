@@ -50,30 +50,41 @@ import { Line, ManageGroupsDialogData, ManageGroupsDialogResult } from '../types
         </button>
 
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="onToggleGroupsHeader()">
-            <mat-icon aria-hidden="true" [fontIcon]="line.hideGroupsHeader ? getIcon('view') : getIcon('view-off')"></mat-icon>
-            <span i18n>
-              Toggle Groups Header
-            </span>
-          </button>
-          <button mat-menu-item (click)="onManageGroupsDialog()">
-            <mat-icon aria-hidden="true" [fontIcon]="getIcon('tune')"></mat-icon>
-            <span i18n>
-              Manage Groups
-            </span>
-          </button>
-          <button mat-menu-item (click)="onEditNameLine(line.name)">
-            <mat-icon aria-hidden="true"  [fontIcon]="getIcon('edit')"></mat-icon>
-              <span i18n>
-                Edit name line
-              </span>
-          </button>
-          <button mat-menu-item (click)="onDeleteLine(line)">
-              <mat-icon aria-hidden="true" [fontIcon]="getIcon('delete')"></mat-icon>
-              <span i18n>
-                Delete line
-              </span>
-          </button>
+          <ul class="list-option-buttons">
+            <li>
+              <button mat-menu-item (click)="onToggleGroupsHeader()">
+                <mat-icon aria-hidden="true" [fontIcon]="line.hideGroupsHeader ? getIcon('view') : getIcon('view-off')"></mat-icon>
+                <span i18n>
+                  Toggle Groups Header
+                </span>
+              </button>
+           </li>
+           <li>
+              <button mat-menu-item (click)="onManageGroupsDialog()">
+                <mat-icon aria-hidden="true" [fontIcon]="getIcon('tune')"></mat-icon>
+                <span i18n>
+                  Manage Groups
+                </span>
+               </button>
+           </li>
+           <li>
+              <button mat-menu-item (click)="onEditNameLine(line.name)">
+                <mat-icon aria-hidden="true"  [fontIcon]="getIcon('edit')"></mat-icon>
+                  <span i18n>
+                    Edit name line
+                  </span>
+              </button>
+           </li>
+           <li>
+              <button mat-menu-item (click)="onDeleteLine(line)">
+                  <mat-icon aria-hidden="true" [fontIcon]="getIcon('delete')"></mat-icon>
+                  <span i18n>
+                    Delete line
+                  </span>
+              </button>
+          </li>
+         </ul>
+
         </mat-menu>
         </app-actions-toolbar-group>
     </app-actions-toolbar>
@@ -96,6 +107,12 @@ import { Line, ManageGroupsDialogData, ManageGroupsDialogResult } from '../types
   styles: [`
 app-actions-toolbar {
   flex-grow: 1;
+}
+
+.list-option-buttons {
+  list-style-type: none;
+  margin: 0; 
+  padding: 0; 
 }
 
 .groups {
@@ -141,11 +158,11 @@ export class LineComponent implements OnInit, AfterViewInit,OnDestroy {
   @Output() lineChange: EventEmitter<void> = new EventEmitter<void>();
   @Output() lineDelete: EventEmitter<Line> = new EventEmitter<Line>();
 
-  #dialog = inject(MatDialog);
-  #autoRefreshService = inject(AutoRefreshService);
-  #iconsService = inject(IconsService);
-  #taskGrpcService = inject(TasksGrpcService);
-  #tasksIndexService = inject(TasksIndexService);
+  readonly #dialog = inject(MatDialog);
+  readonly #autoRefreshService = inject(AutoRefreshService);
+  readonly #iconsService = inject(IconsService);
+  readonly #taskGrpcService = inject(TasksGrpcService);
+  readonly #tasksIndexService = inject(TasksIndexService);
 
   total: number;
   loadTasksStatus = false;
