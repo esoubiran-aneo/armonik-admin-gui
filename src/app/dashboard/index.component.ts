@@ -165,8 +165,8 @@ export class IndexComponent implements OnInit {
     return this.#iconsService.getPageIcon(name);
   }
 
-  splitLines(value: Line[] | []) : string {
-    return value.length > 1 ? 'split-lines': 'lines';
+  splitLines(value: Line[] ) : string {
+    return value.length > 3 ? 'split-lines': 'lines';
   }
 
   onAddLineDialog() {
