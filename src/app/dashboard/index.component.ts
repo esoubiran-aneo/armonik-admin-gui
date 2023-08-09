@@ -58,7 +58,7 @@ import { Line } from './types';
     <button mat-raised-button color="primary" (click)="onAddLineDialog()">Add a line</button>
 </div>
 
-<div class="lines">
+<div class="{{ splitLines(lines) }}">
   <app-page-section *ngFor="let line of lines; trackBy:trackByLine">
     <app-page-section-header icon="adjust">
       <span i18n="Section title">{{ line.name }}</span>
@@ -76,6 +76,12 @@ import { Line } from './types';
   z-index: 50;
 }
 
+.split-lines {
+  display: grid; 
+  grid-gap: 1rem; 
+  grid-template-columns: repeat(2, 1fr); 
+}
+
 .no-line {
   margin-top: 2rem;
 
@@ -90,7 +96,6 @@ import { Line } from './types';
 .lines {
   display: flex;
   flex-direction: column;
-
   gap: 4rem;
 
   /* Allow user to view tasks even with the add button */
@@ -158,6 +163,10 @@ export class IndexComponent implements OnInit {
 
   getPageIcon(name: Page): string {
     return this.#iconsService.getPageIcon(name);
+  }
+
+  splitLines(value: Line[] | []) : string {
+    return value.length > 1 ? 'split-lines': 'lines';
   }
 
   onAddLineDialog() {
