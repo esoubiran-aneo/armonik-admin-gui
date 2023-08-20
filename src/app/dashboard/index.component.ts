@@ -10,19 +10,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TasksGrpcService } from '@app/tasks/services/tasks-grpc.service';
+import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { AddLineDialogData, AddLineDialogResult } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
 import { ActionsToolbarGroupComponent } from '@components/actions-toolbar-group.component';
 import { ActionsToolbarComponent } from '@components/actions-toolbar.component';
 import { AutoRefreshButtonComponent } from '@components/auto-refresh-button.component';
-import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
+import { FiltersToolbarComponent } from '@components/filters/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { PageSectionHeaderComponent } from '@components/page-section-header.component';
 import { PageSectionComponent } from '@components/page-section.component';
 import { RefreshButtonComponent } from '@components/refresh-button.component';
 import { SpinnerComponent } from '@components/spinner.component';
 import { AutoRefreshService } from '@services/auto-refresh.service';
+import { FiltersService } from '@services/filters.service';
 import { IconsService } from '@services/icons.service';
 import { QueryParamsService } from '@services/query-params.service';
 import { ShareUrlService } from '@services/share-url.service';
@@ -30,6 +32,7 @@ import { StorageService } from '@services/storage.service';
 import { TableStorageService } from '@services/table-storage.service';
 import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
+import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
 import { AddLineDialogComponent } from './components/add-line-dialog.component';
 import { LineComponent } from './components/line.component';
@@ -107,11 +110,17 @@ import { Line } from './types';
     DashboardStorageService,
     DashboardIndexService,
     AutoRefreshService,
+    TasksIndexService,
+    TableService,
+    TableURLService,
+    TableStorageService,
+    TasksByStatusService,
     UtilsService,
     TableService,
     TableURLService,
     TableStorageService,
-    IconsService
+    IconsService,
+    FiltersService,
   ],
   imports: [
     NgFor,
