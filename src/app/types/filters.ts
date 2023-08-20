@@ -1,7 +1,6 @@
 import { FilterArrayOperator, FilterBooleanOperator, FilterDateOperator, FilterNumberOperator, FilterStatusOperator, FilterStringOperator } from '@aneoconsultingfr/armonik.api.angular';
 import { DateTime } from 'luxon';
 import { FilterFor } from '@app/sessions/services/sessions-filters.service';
-import { FieldKey } from './data';
 
 export type MaybeNull<T> = T | null;
 

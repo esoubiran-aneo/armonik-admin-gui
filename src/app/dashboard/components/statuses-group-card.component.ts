@@ -1,4 +1,4 @@
-import { FilterStringOperator, TaskStatus, TaskSummary } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterStringOperator, TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { NgFor, NgIf } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';

@@ -14,7 +14,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
-import { Timestamp } from '@ngx-grpc/well-known-types';
+import { Duration, Timestamp } from '@ngx-grpc/well-known-types';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { ResultRawColumnKey } from '@app/results/types';
@@ -381,7 +381,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     return session[column as keyof TaskSummary];
   }
 
-  extractData(element: TaskSummary, column: TaskSummaryColumnKey): any {
+  extractData(element: TaskSummary, column: TaskSummaryColumnKey): Duration | null {
     if (column.startsWith('options.')) {
       const optionColumn = column.replace('options.', '') as keyof TaskOptions;
       const options = element['options'] as TaskOptions | undefined;
@@ -390,10 +390,10 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
         return null;
       }
 
-      return options[optionColumn];
+      return options[optionColumn] as unknown as Duration;
     }
 
-    return element[column as keyof TaskSummary];
+    return element[column as keyof TaskSummary] as unknown as Duration;
   }
 
   isActionsColumn(column: TaskSummaryColumnKey): boolean {

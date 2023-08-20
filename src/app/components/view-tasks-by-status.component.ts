@@ -1,7 +1,7 @@
 
 import { FilterStringOperator, TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { NgFor, NgIf } from '@angular/common';
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';

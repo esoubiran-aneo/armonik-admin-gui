@@ -1,9 +1,9 @@
-import { SortDirection as ArmoniKSortDirection } from '@aneoconsultingfr/armonik.api.angular';
-import { SortDirection } from '@angular/material/sort';
-import { Observable } from 'rxjs';
-import { ColumnKey, FieldKey } from './data';
-import { Filter, FiltersOr } from './filters';
-import { ListOptions } from './options';
+// import { SortDirection as ArmoniKSortDirection } from '@aneoconsultingfr/armonik.api.angular';
+// import { SortDirection } from '@angular/material/sort';
+// import { Observable } from 'rxjs';
+// import { ColumnKey, FieldKey } from './data';
+// import { Filter, FiltersOr } from './filters';
+// import { ListOptions } from './options';
 
 // export interface AppGrpcService<T extends object> {
 //   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection>

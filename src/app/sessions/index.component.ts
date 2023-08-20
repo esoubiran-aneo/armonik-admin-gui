@@ -14,7 +14,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
-import { Timestamp } from '@ngx-grpc/well-known-types';
+import { Duration, Timestamp } from '@ngx-grpc/well-known-types';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
@@ -437,7 +437,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
     return this._sessionsIndexService.isActionsColumn(column);
   }
 
-  extractData(element: SessionRaw, column: SessionRawColumnKey): any {
+  extractData(element: SessionRaw, column: SessionRawColumnKey): Duration | null {
     if (column.startsWith('options.')) {
       const optionColumn = column.replace('options.', '') as keyof TaskOptions;
       const options = element['options'] as TaskOptions | undefined;
@@ -446,10 +446,10 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
         return null;
       }
 
-      return options[optionColumn];
+      return options[optionColumn] as unknown as Duration;
     }
 
-    return element[column as keyof SessionRaw];
+    return element[column as keyof SessionRaw] as unknown as Duration;
   }
 
   // TODO: move to a service for date and time

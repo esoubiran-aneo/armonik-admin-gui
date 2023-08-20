@@ -13,7 +13,6 @@ import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { ExternalService } from '@app/types/external-service';
-import { Page } from '@app/types/pages';
 import { IconsService } from '@services/icons.service';
 import { NavigationService } from '@services/navigation.service';
 import { StorageService } from '@services/storage.service';
