@@ -4,13 +4,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Theme } from '@app/types/themes';
+import { DefaultConfigService } from '@services/default-config.service';
+import { IconsService } from '@services/icons.service';
 import { StorageService } from '@services/storage.service';
 
 @Component({
   selector: 'app-theme-selector',
   template: `
 <button mat-button class="theme" [matMenuTriggerFor]="themeMenu" i18n-aria-label aria-label="Choose a theme" matTooltip="Select a theme">
-  <mat-icon matListItemIcon aria-hidden="true" fontIcon="format_color_fill"></mat-icon>
+  <mat-icon matListItemIcon aria-hidden="true" [fontIcon]="getIcon('format-color-fill')"></mat-icon>
 </button>
 <mat-menu #themeMenu="matMenu">
   <button mat-menu-item *ngFor="let theme of availableThemes" (click)="updateTheme(theme.name)">
@@ -46,12 +49,12 @@ import { StorageService } from '@services/storage.service';
   ],
 })
 export class ThemeSelectorComponent implements OnInit {
+  #defaultConfigService = inject(DefaultConfigService);
   #storageService = inject(StorageService);
+  #iconsService = inject(IconsService);
 
-  #themeStorageKey = 'theme';
-
-  currentTheme: string | null;
-  availableThemes = [
+  currentTheme: Theme = this.#defaultConfigService.defaultTheme;
+  availableThemes: { name: Theme, displayName: string }[] = [
     { name: 'deeppurple-amber', displayName: 'Deep Purple & Amber' },
     { name: 'indigo-pink', displayName: 'Indigo & Pink' },
     { name: 'pink-bluegrey', displayName: 'Pink & Blue-grey' },
@@ -59,7 +62,7 @@ export class ThemeSelectorComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    const theme = this.#storageService.getItem<string>(this.#themeStorageKey);
+    const theme = this.#storageService.getItem<Theme>('navigation-theme') as Theme | null;
 
     if (theme) {
       this.currentTheme = theme;
@@ -67,7 +70,11 @@ export class ThemeSelectorComponent implements OnInit {
     }
   }
 
-  updateTheme(themeName: string) {
+  getIcon(iconName: string) {
+    return this.#iconsService.getIcon(iconName);
+  }
+
+  updateTheme(themeName: Theme) {
     if (!themeName) {
       return;
     }
@@ -76,17 +83,17 @@ export class ThemeSelectorComponent implements OnInit {
       this.#removeTheme(this.currentTheme);
     }
 
-    if (themeName !== 'indigo-pink') {
+    if (themeName !== this.#defaultConfigService.defaultTheme) {
       this.#addTheme(themeName);
       this.currentTheme = themeName;
     } else {
-      this.currentTheme = null;
+      this.currentTheme = this.#defaultConfigService.defaultTheme;
     }
 
-    this.#storageService.setItem(this.#themeStorageKey, this.currentTheme);
+    this.#storageService.setItem('navigation-theme', this.currentTheme);
   }
 
-  #removeTheme(themeName: string) {
+  #removeTheme(themeName: Theme) {
     const theme = this.availableThemes.find(t => t.name === themeName);
     if (!theme) {
       return;
@@ -98,9 +105,12 @@ export class ThemeSelectorComponent implements OnInit {
     }
 
     themeElement.remove();
+
+    const body = document.getElementsByTagName('body')[0];
+    body.classList.remove(theme.name);
   }
 
-  #addTheme(themeName: string) {
+  #addTheme(themeName: Theme) {
     const theme = this.availableThemes.find(t => t.name === themeName);
 
     if (!theme) {
@@ -115,5 +125,8 @@ export class ThemeSelectorComponent implements OnInit {
     themeElement.href = `${theme.name}.css`;
 
     head.appendChild(themeElement);
+
+    const body = document.getElementsByTagName('body')[0];
+    body.classList.add(theme.name);
   }
 }

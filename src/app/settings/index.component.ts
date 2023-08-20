@@ -1,6 +1,6 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,10 +9,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule} from '@angular/material/snack-bar';
-import { Sidebar, SidebarItem, SidebarLinkName } from '@app/types/navigation';
+import { Key } from '@app/types/config';
+import { Sidebar, SidebarItem } from '@app/types/navigation';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { PageSectionHeaderComponent } from '@components/page-section-header.component';
 import { PageSectionComponent } from '@components/page-section.component';
+import { IconsService } from '@services/icons.service';
 import { NavigationService } from '@services/navigation.service';
 import { NotificationService } from '@services/notification.service';
 import { QueryParamsService } from '@services/query-params.service';
@@ -23,7 +25,7 @@ import { StorageService } from '@services/storage.service';
   selector: 'app-settings-index',
   template: `
 <app-page-header [sharableURL]="sharableURL">
-  <mat-icon aria-hidden="true" fontIcon="settings"></mat-icon>
+  <mat-icon aria-hidden="true" [fontIcon]="getIcon('settings')"></mat-icon>
   <span i18n="Page title"> Settings </span>
 </app-page-header>
 
@@ -32,7 +34,6 @@ import { StorageService } from '@services/storage.service';
 </p>
 
 <app-page-section class="sidebar">
-  <!-- TODO: update the navigation icon -->
   <!-- TODO: use in a dialog -->
   <app-page-section-header icon="format_list_bulleted">
     <span i18n="Section title"> Sidebar </span>
@@ -58,12 +59,12 @@ import { StorageService } from '@services/storage.service';
       </mat-form-field>
 
       <button mat-icon-button aria-label="More options" mat-tooltip="More options" [matMenuTriggerFor]="menu">
-        <mat-icon aria-hidden="true" fontIcon="more_vert"></mat-icon>
+        <mat-icon aria-hidden="true" [fontIcon]="getIcon('more')"></mat-icon>
       </button>
 
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="onRemoveSidebarItem(index)">
-          <mat-icon aria-hidden="true" fontIcon="delete"></mat-icon>
+          <mat-icon aria-hidden="true" [fontIcon]="getIcon('delete')"></mat-icon>
           <span i18n>Remove</span>
         </button>
       </mat-menu>
@@ -71,7 +72,7 @@ import { StorageService } from '@services/storage.service';
   </ul>
 
   <button class="add-sidebar-item" mat-button (click)="onAddSidebarItem()">
-    <mat-icon aria-hidden="true" fontIcon="add"></mat-icon>
+    <mat-icon aria-hidden="true" [fontIcon]="getIcon('add')"></mat-icon>
     <span i18n> Add a status </span>
   </button>
 
@@ -83,7 +84,7 @@ import { StorageService } from '@services/storage.service';
 </app-page-section>
 
 <app-page-section class="storage">
-  <app-page-section-header icon="storage">
+  <app-page-section-header [icon]="getIcon('storage')">
     <span i18n="Section title"> Storage </span>
   </app-page-section-header>
 
@@ -110,7 +111,7 @@ import { StorageService } from '@services/storage.service';
 </app-page-section>
 
 <app-page-section class="export">
-  <app-page-section-header icon="file_download">
+  <app-page-section-header [icon]="getIcon('download')">
     <span i18n="Section title"> Export your data </span>
   </app-page-section-header>
 
@@ -124,7 +125,7 @@ import { StorageService } from '@services/storage.service';
 </app-page-section>
 
 <app-page-section class="import">
-  <app-page-section-header icon="file_upload">
+  <app-page-section-header [icon]="getIcon('upload')">
     <span i18n="Section title"> Import your data </span>
   </app-page-section-header>
 
@@ -232,7 +233,6 @@ app-page-section + app-page-section {
   `],
   standalone: true,
   providers: [
-    StorageService,
     ShareUrlService,
     QueryParamsService,
     NotificationService,
@@ -256,23 +256,25 @@ app-page-section + app-page-section {
 })
 export class IndexComponent implements OnInit {
   sharableURL = '';
-  keys: Set<string>;
+  keys: Set<Key> = new Set();
 
   sidebar: Sidebar[] = [];
 
+  #iconsService = inject(IconsService);
   #shareURLService = inject(ShareUrlService);
   #notificationService = inject(NotificationService);
   #navigationService = inject(NavigationService);
-
-  constructor(
-    private _storageService: StorageService,
-  ) {}
+  #storageService = inject(StorageService);
 
   ngOnInit(): void {
     this.sharableURL = this.#shareURLService.generateSharableURL(null, null);
-    this.keys = this.#sortKeys(this._storageService.keys);
 
+    this.keys = this.#sortKeys(this.#storageService.restoreKeys());
     this.sidebar = this.#navigationService.restoreSidebar();
+  }
+
+  getIcon(name: string): string {
+    return this.#iconsService.getIcon(name);
   }
 
   onResetSidebar(): void {
@@ -280,11 +282,12 @@ export class IndexComponent implements OnInit {
   }
 
   onResetToDefaultSidebar(): void {
-    this.sidebar = this.#navigationService.defaultSidebar;
+    this.sidebar = Array.from(this.#navigationService.defaultSidebar);
   }
 
   onSaveSidebar(): void {
     this.#navigationService.saveSidebar(this.sidebar);
+    this.keys = this.#sortKeys(this.#storageService.restoreKeys());
   }
 
   onRemoveSidebarItem(index: number): void {
@@ -329,17 +332,17 @@ export class IndexComponent implements OnInit {
     const checkboxes = form.querySelectorAll('input[type="checkbox"]');
 
     const checkboxesArray = Array.from(checkboxes) as HTMLInputElement[];
-    const keys = [];
+    const keys: Key[] = [];
 
     for (const checkbox of checkboxesArray) {
       if (checkbox.checked) {
-        keys.push(checkbox.name);
+        keys.push(checkbox.name as Key);
       }
     }
 
     for (const key of keys) {
       this.keys.delete(key);
-      this._storageService.removeItem(key);
+      this.#storageService.removeItem(key);
     }
 
     this.#notificationService.success('Data cleared');
@@ -348,14 +351,14 @@ export class IndexComponent implements OnInit {
   clearAll(): void {
     for (const key of this.keys) {
       this.keys.delete(key);
-      this._storageService.removeItem(key);
+      this.#storageService.removeItem(key);
     }
 
     this.#notificationService.success('All data cleared');
   }
 
   exportData(): void {
-    const data = JSON.stringify(this._storageService.exportData());
+    const data = JSON.stringify(this.#storageService.exportData());
 
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -402,10 +405,10 @@ export class IndexComponent implements OnInit {
 
     reader.onload = () => {
       const data = reader.result as string;
-      this._storageService.importData(data);
-      this.keys = this.#sortKeys(this._storageService.keys);
+      this.#storageService.importData(data);
+      this.keys = this.#sortKeys(this.#storageService.restoreKeys());
 
-      const hasSidebarKey = this.keys.has(this.#navigationService.sidebarKey);
+      const hasSidebarKey = this.keys.has('navigation-sidebar');
 
       // Update sidebar
       if (hasSidebarKey) {
@@ -442,10 +445,7 @@ export class IndexComponent implements OnInit {
     moveItemInArray(this.sidebar, event.previousIndex, event.currentIndex);
   }
 
-  #sortKeys(keys: Set<string>): Set<string> {
-    const keysArray = Array.from(keys);
-    const sortedKeys = keysArray.sort();
-
-    return new Set(sortedKeys);
+  #sortKeys(keys: Set<Key>): Set<Key> {
+    return new Set([...keys].sort());
   }
 }

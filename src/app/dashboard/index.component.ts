@@ -1,5 +1,5 @@
 import { JsonPipe, NgFor, NgIf } from '@angular/common';
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -8,9 +8,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Observable, Subject, Subscription, merge, startWith, switchMap, tap } from 'rxjs';
-import { TaskGrpcService } from '@app/tasks/services/task-grpc.service';
-import { TasksStatusesService } from '@app/tasks/services/task-status.service';
+import { TasksGrpcService } from '@app/tasks/services/tasks-grpc.service';
+import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { StatusCount } from '@app/tasks/types';
+import { Page } from '@app/types/pages';
 import { ActionsToolbarGroupComponent } from '@components/actions-toolbar-group.component';
 import { ActionsToolbarComponent } from '@components/actions-toolbar.component';
 import { AutoRefreshButtonComponent } from '@components/auto-refresh-button.component';
@@ -20,9 +21,11 @@ import { PageSectionComponent } from '@components/page-section.component';
 import { RefreshButtonComponent } from '@components/refresh-button.component';
 import { SpinnerComponent } from '@components/spinner.component';
 import { AutoRefreshService } from '@services/auto-refresh.service';
+import { IconsService } from '@services/icons.service';
 import { QueryParamsService } from '@services/query-params.service';
 import { ShareUrlService } from '@services/share-url.service';
 import { StorageService } from '@services/storage.service';
+import { UtilsService } from '@services/utils.service';
 import { ManageGroupsDialogComponent } from './components/manage-groups-dialog.component';
 import { StatusesGroupCardComponent } from './components/statuses-group-card.component';
 import { DashboardIndexService } from './services/dashboard-index.service';
@@ -33,7 +36,7 @@ import { TasksStatusesGroup } from './types';
   selector: 'app-dashboard-index',
   template: `
 <app-page-header [sharableURL]="sharableURL">
-  <mat-icon matListItemIcon aria-hidden="true" fontIcon="dashboard"></mat-icon>
+  <mat-icon matListItemIcon aria-hidden="true" [fontIcon]="getPageIcon('dashboard')"></mat-icon>
   <span i18n="Page title"> Dashboard </span>
 </app-page-header>
 
@@ -53,11 +56,21 @@ import { TasksStatusesGroup } from './types';
         <app-auto-refresh-button [intervalValue]="intervalValue" (intervalValueChange)="onIntervalValueChange($event)"></app-auto-refresh-button>
 
         <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Show more options">
-          <mat-icon aria-hidden="true" fontIcon="more_vert"></mat-icon>
+          <mat-icon aria-hidden="true" [fontIcon]="getIcon('more')"></mat-icon>
         </button>
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="onToggleGroupsHeader()" i18n>Toggle Groups Header</button>
-          <button mat-menu-item (click)="onManageGroupsDialog()" i18n>Manage Groups</button>
+          <button mat-menu-item (click)="onToggleGroupsHeader()">
+            <mat-icon aria-hidden="true" [fontIcon]="hideGroupHeaders ? getIcon('view') : getIcon('view-off')"></mat-icon>
+            <span i18n>
+              Toggle Groups Header
+            </span>
+          </button>
+          <button mat-menu-item (click)="onManageGroupsDialog()">
+            <mat-icon aria-hidden="true" [fontIcon]="getIcon('tune')"></mat-icon>
+            <span i18n>
+              Manage Groups
+            </span>
+          </button>
         </mat-menu>
       </app-actions-toolbar-group>
     </app-actions-toolbar>
@@ -94,11 +107,12 @@ app-actions-toolbar {
     TasksStatusesService,
     ShareUrlService,
     QueryParamsService,
-    TaskGrpcService,
+    TasksGrpcService,
     StorageService,
     DashboardStorageService,
     DashboardIndexService,
     AutoRefreshService,
+    UtilsService,
   ],
   imports: [
     NgFor,
@@ -123,6 +137,8 @@ app-actions-toolbar {
   ],
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
+  #iconsService = inject(IconsService);
+
   hideGroupHeaders: boolean;
   statusGroups: TasksStatusesGroup[] = [];
   data: StatusCount[] = [];
@@ -142,7 +158,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private _dialog: MatDialog,
     private _shareURLService: ShareUrlService,
-    private _taskGrpcService: TaskGrpcService,
+    private _taskGrpcService: TasksGrpcService,
     private _dashboardIndexService: DashboardIndexService,
     private _autoRefreshService: AutoRefreshService
   ) {}
@@ -176,6 +192,14 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+  }
+
+  getIcon(name: string): string {
+    return this.#iconsService.getIcon(name);
+  }
+
+  getPageIcon(name: Page): string {
+    return this.#iconsService.getPageIcon(name);
   }
 
   autoRefreshTooltip(): string {

@@ -11,12 +11,15 @@ import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink } from '@angular/router';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
+import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { AppIndexComponent } from '@app/types/components';
 import { Page } from '@app/types/pages';
 import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
+import { TableInspectObjectComponent } from '@components/table/table-inspect-object.component';
 import { TableActionsToolbarComponent } from '@components/table-actions-toolbar.component';
 import { TableContainerComponent } from '@components/table-container.component';
+import { EmptyCellPipe } from '@pipes/empty-cell.pipe';
 import { AutoRefreshService } from '@services/auto-refresh.service';
 import { IconsService } from '@services/icons.service';
 import { NotificationService } from '@services/notification.service';
@@ -30,12 +33,13 @@ import { UtilsService } from '@services/utils.service';
 import { PartitionsGrpcService } from './services/partitions-grpc.service';
 import { PartitionsIndexService } from './services/partitions-index.service';
 import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRawFilter, PartitionRawFilterField, PartitionRawListOptions } from './types';
+import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
 
 @Component({
   selector: 'app-partitions-index',
   template: `
 <app-page-header [sharableURL]="sharableURL">
-  <mat-icon matListItemIcon aria-hidden="true" [fontIcon]="getIcon('partitions')"></mat-icon>
+  <mat-icon matListItemIcon aria-hidden="true" [fontIcon]="getPageIcon('partitions')"></mat-icon>
   <span i18n="Page title">Partitions</span>
 </app-page-header>
 
@@ -66,28 +70,36 @@ import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRaw
 
     <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
       <!-- Header -->
-      <th mat-header-cell mat-sort-header [disabled]="column === 'actions'" *matHeaderCellDef cdkDrag>
+      <th mat-header-cell mat-sort-header [disabled]="isNotSortableColumn(column)" *matHeaderCellDef cdkDrag appNoWrap>
         {{ columnToLabel(column) }}
       </th>
       <!-- Application Column -->
-      <ng-container *ngIf="column !== 'actions' && column !== 'id'">
-        <td mat-cell *matCellDef="let element"> {{ element[column] || '-' }} </td>
+      <ng-container *ngIf="isSimpleColumn(column)">
+        <td mat-cell *matCellDef="let element" appNoWrap>
+          {{ element[column] | emptyCell }}
+        </td>
       </ng-container>
       <!-- ID -->
-      <ng-container *ngIf="column === 'id'">
-        <td mat-cell *matCellDef="let element">
+      <ng-container *ngIf="isPartitionIdColumn(column)">
+        <td mat-cell *matCellDef="let element" appNoWrap>
           {{ element[column] }}
         </td>
       </ng-container>
+      <!-- Object -->
+      <ng-container *ngIf="isObjectColumn(column)">
+        <td mat-cell *matCellDef="let element" appNoWrap>
+          <app-table-inspect-object [object]="element[column]" [label]="columnToLabel(column)"></app-table-inspect-object>
+        </td>
+      </ng-container>
       <!-- Action -->
-      <ng-container *ngIf="column === 'actions'">
-        <td mat-cell *matCellDef="let element">
+      <ng-container *ngIf="isActionsColumn(column)">
+        <td mat-cell *matCellDef="let element" appNoWrap>
           <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions">
-            <mat-icon>more_vert</mat-icon>
+            <mat-icon [fontIcon]="getIcon('more')"></mat-icon>
           </button>
           <mat-menu #menu="matMenu">
             <a mat-menu-item [routerLink]="['/partitions', element.id]">
-              <mat-icon aria-hidden="true" fontIcon="visibility"></mat-icon>
+              <mat-icon aria-hidden="true" [fontIcon]="getIcon('view')"></mat-icon>
               <span i18n>See partition</span>
             </a>
           </mat-menu>
@@ -95,11 +107,18 @@ import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRaw
       </ng-container>
     </ng-container>
 
+    <!-- Empty -->
+    <tr *matNoDataRow>
+      <td [attr.colspan]="displayedColumns.length">
+        <app-table-empty-data></app-table-empty-data>
+      </td>
+    </tr>
+
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 
-  <mat-paginator [length]="total" [pageIndex]="options.pageIndex" [pageSize]="options.pageSize" aria-label="Select page of partitions" i18n-aria-label>
+  <mat-paginator [length]="total" [pageIndex]="options.pageIndex" [pageSize]="options.pageSize"  [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of partitions" i18n-aria-label>
     </mat-paginator>
 </app-table-container>
   `,
@@ -124,12 +143,15 @@ app-table-actions-toolbar {
     NotificationService,
   ],
   imports: [
+    EmptyCellPipe,
+    NoWrapDirective,
     NgIf,
     NgFor,
     RouterLink,
     DragDropModule,
     PageHeaderComponent,
     TableActionsToolbarComponent,
+    TableInspectObjectComponent,
     FiltersToolbarComponent,
     TableContainerComponent,
     MatTableModule,
@@ -141,10 +163,12 @@ app-table-actions-toolbar {
     MatButtonModule,
     MatSnackBarModule,
     MatMenuModule,
+    TableEmptyDataComponent,
   ]
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppIndexComponent<PartitionRaw> {
   #notificationService = inject(NotificationService);
+  #iconsService = inject(IconsService);
 
   displayedColumns: PartitionRawColumnKey[] = [];
   availableColumns: PartitionRawColumnKey[] = [];
@@ -252,8 +276,32 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
     return this._partitionsIndexService.columnToLabel(column);
   }
 
-  getIcon(name: Page): string {
-    return this._iconsService.getPageIcon(name);
+  isPartitionIdColumn(column: PartitionRawColumnKey): boolean {
+    return this._partitionsIndexService.isPartitionIdColumn(column);
+  }
+
+  isActionsColumn(column: PartitionRawColumnKey): boolean {
+    return this._partitionsIndexService.isActionsColumn(column);
+  }
+
+  isObjectColumn(column: PartitionRawColumnKey): boolean {
+    return this._partitionsIndexService.isObjectColumn(column);
+  }
+
+  isNotSortableColumn(column: PartitionRawColumnKey): boolean {
+    return this._partitionsIndexService.isNotSortableColumn(column);
+  }
+
+  isSimpleColumn(column: PartitionRawColumnKey): boolean {
+    return this._partitionsIndexService.isSimpleColumn(column);
+  }
+
+  getIcon(name: string): string {
+    return this._iconsService.getIcon(name);
+  }
+
+  getPageIcon(page: Page): string {
+    return this._iconsService.getPageIcon(page);
   }
 
   onRefresh() {
@@ -287,11 +335,13 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy, AppInde
     this.filters = filters as PartitionRawFilter[];
 
     this._partitionsIndexService.saveFilters(filters as PartitionRawFilter[]);
+    this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   onFiltersReset() {
     this.filters = this._partitionsIndexService.resetFilters();
+    this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
