@@ -1,6 +1,5 @@
 import { FilterArrayOperator, FilterBooleanOperator, FilterDateOperator, FilterNumberOperator, FilterStatusOperator, FilterStringOperator } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable } from '@angular/core';
-import { FieldKey } from '@app/types/data';
 import { FilterOperators, FilterType } from '@app/types/filters';
 
 @Injectable()

@@ -20,10 +20,11 @@ import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { TaskOptions, TaskSummaryColumnKey } from '@app/tasks/types';
-import { TaskStatusColored, ViewArrayDialogData, ViewArrayDialogResult, ViewObjectDialogData, ViewObjectDialogResult, ViewTasksByStatusDialogData } from '@app/types/dialog';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
+import { TaskStatusColored, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
 import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
-import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
+import { FiltersToolbarComponent } from '@components/filters/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
 import { TableInspectObjectComponent } from '@components/table/table-inspect-object.component';
@@ -44,10 +45,11 @@ import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
+import { SessionsFiltersService } from './services/sessions-filters.service';
 import { SessionsGrpcService } from './services/sessions-grpc.service';
 import { SessionsIndexService } from './services/sessions-index.service';
 import { SessionsStatusesService } from './services/sessions-statuses.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions, SessionsFiltersDefinition } from './types';
+import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFiltersOr, SessionRawListOptions } from './types';
 
 @Component({
   selector: 'app-sessions-index',
@@ -84,7 +86,7 @@ import { SessionRaw, SessionRawColumnKey, SessionRawFieldKey, SessionRawFilter, 
   </mat-toolbar-row>
 
   <mat-toolbar-row class="filters">
-    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -234,6 +236,10 @@ app-table-actions-toolbar {
     TasksStatusesService,
     TasksIndexService,
     FiltersService,
+    {
+      provide: DATA_FILTERS_SERVICE,
+      useClass: SessionsFiltersService
+    }
   ],
   imports: [
     DurationPipe,
@@ -270,6 +276,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly #notificationService = inject(NotificationService);
   readonly #dialog = inject(MatDialog);
   readonly #filtersService = inject(FiltersService);
+  readonly #sessionsFiltersService = inject(DATA_FILTERS_SERVICE);
 
   displayedColumns: SessionRawColumnKey[] = [];
   availableColumns: SessionRawColumnKey[] = [];
@@ -280,8 +287,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   options: SessionRawListOptions;
 
-  filters: SessionRawFilter = [];
-  filtersDefinitions: SessionsFiltersDefinition[] = [];
+  filters: SessionRawFiltersOr = [];
 
   intervalValue = 0;
   sharableURL = '';
@@ -312,8 +318,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this._sessionsIndexService.restoreOptions();
 
-    this.filtersDefinitions = this._sessionsIndexService.filtersDefinitions;
-    this.filters = this._sessionsIndexService.restoreFilters();
+    this.filters = this.#sessionsFiltersService.restoreFilters();
 
     this.intervalValue = this._sessionsIndexService.restoreIntervalValue();
 
@@ -496,15 +501,15 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFiltersChange(filters: unknown[]) {
-    this.filters = filters as SessionRawFilter;
+    this.filters = filters as SessionRawFiltersOr;
 
-    this._sessionsIndexService.saveFilters(filters as SessionRawFilter);
+    this.#sessionsFiltersService.saveFilters(filters as SessionRawFiltersOr);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   onFiltersReset() {
-    this.filters = this._sessionsIndexService.resetFilters();
+    this.filters = this.#sessionsFiltersService.resetFilters();
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

@@ -1,9 +1,8 @@
-import { TaskOptionEnumField, TaskStatus, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { TasksStatusesService } from './tasks-status.service';
-import { TaskSummary, TaskSummaryColumnKey, TaskSummaryField, TaskSummaryFilters, TaskSummaryListOptions, TasksFiltersDefinition } from '../types';
+import { TaskSummary, TaskSummaryColumnKey, TaskSummaryListOptions } from '../types';
 
 @Injectable()
 export class TasksIndexService {
@@ -58,52 +57,6 @@ export class TasksIndexService {
   };
 
   readonly defaultOptions: TaskSummaryListOptions = this.#defaultConfigService.defaultTasks.options;
-
-  readonly defaultFilters: TaskSummaryFilters = this.#defaultConfigService.defaultTasks.filters;
-  readonly filtersDefinitions: TasksFiltersDefinition[] = [
-    // Do not filter object fields
-    {
-      key: 'id',
-      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_TASK_ID,
-      type: 'string',
-    },
-    {
-      key: 'sessionId',
-      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_SESSION_ID,
-      type: 'string',
-    },
-    {
-      key: 'initialTaskId',
-      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_INITIAL_TASK_ID,
-      type: 'string',
-    },
-    {
-      key: 'status',
-      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_STATUS,
-      type: 'status',
-      statuses: Object.keys(this.#tasksStatusesService.statuses).map(status => {
-        return {
-          key: status,
-          value: this.#tasksStatusesService.statuses[Number(status) as TaskStatus],
-        };
-      }),
-    },
-    {
-      key: 'options.applicationName',
-      field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_APPLICATION_NAME,
-      type: 'string',
-    },
-    {
-      key: 'options.applicationVersion',
-      field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_APPLICATION_VERSION,
-      type: 'string',
-    },
-    {
-      key: 'options.partitionId',
-      field: TaskOptionEnumField.TASK_OPTION_ENUM_FIELD_PARTITION_ID,
-      type: 'string',
-    }
-  ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultTasks.interval;
 
@@ -194,23 +147,5 @@ export class TasksIndexService {
     this.#tableService.resetColumns('tasks-columns');
 
     return Array.from(this.defaultColumns);
-  }
-
-  /**
-   * Filters
-   */
-
-  saveFilters(filters: TaskSummaryFilters): void {
-    this.#tableService.saveFilters('tasks-filters', filters);
-  }
-
-  restoreFilters(): TaskSummaryFilters {
-    return this.#tableService.restoreFilters<TaskSummary, TaskSummaryColumnKey, TaskSummaryField>('tasks-filters', this.filtersDefinitions) ?? this.defaultFilters;
-  }
-
-  resetFilters(): TaskSummaryFilters {
-    this.#tableService.resetFilters('tasks-filters');
-
-    return this.defaultFilters;
   }
 }

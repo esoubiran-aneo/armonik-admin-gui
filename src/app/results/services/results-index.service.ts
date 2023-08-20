@@ -1,11 +1,9 @@
-import { ResultRawEnumField, ResultStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
 import { ResultsStatusesService } from './results-statuses.service';
-import { ResultRaw, ResultRawColumnKey, ResultRawFilter, ResultRawListOptions, ResultsFiltersDefinition } from '../types';
+import { ResultRaw, ResultRawColumnKey, ResultRawListOptions } from '../types';
 
-// TODO: Add it to AppIndexService and to every index service
 @Injectable()
 export class ResultsIndexService {
   #defaultConfigService = inject(DefaultConfigService);
@@ -28,62 +26,6 @@ export class ResultsIndexService {
   };
 
   readonly defaultOptions: ResultRawListOptions = this.#defaultConfigService.defaultResults.options;
-
-  readonly defaultFilters: ResultRawFilter = this.#defaultConfigService.defaultResults.filters;
-  readonly filtersDefinitions: ResultsFiltersDefinition[] = [
-    {
-      key: 'name',
-      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_NAME,
-      type: 'string',
-    },
-    {
-      key: 'sessionId',
-      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_SESSION_ID,
-      type: 'string',
-    },
-    {
-      key: 'ownerTaskId',
-      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_OWNER_TASK_ID,
-      type: 'string',
-    },
-    {
-      key: 'status',
-      field: ResultRawEnumField.RESULT_RAW_ENUM_FIELD_STATUS,
-      type: 'status',
-      statuses: Object.keys(this.#resultsStatusesService.statuses).map(status => {
-        return {
-          key: status,
-          value: this.#resultsStatusesService.statuses[Number(status) as ResultStatus],
-        };
-      }),
-    }
-    // {
-    //   field: 'name',
-    //   type: 'text',
-    // },
-    // {
-    //   field: 'status',
-    //   type: 'select',
-    //   options: Object.keys(this.#resultsStatusesService.statuses).map(status => {
-    //     return {
-    //       value: status,
-    //       label: this.#resultsStatusesService.statuses[Number(status) as ResultStatus],
-    //     };
-    //   }),
-    // },
-    // {
-    //   field: 'ownerTaskId',
-    //   type: 'text',
-    // },
-    // {
-    //   field: 'createdAt',
-    //   type: 'date',
-    // },
-    // {
-    //   field: 'sessionId',
-    //   type: 'text',
-    // },
-  ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultResults.interval;
 
@@ -163,23 +105,5 @@ export class ResultsIndexService {
     this.#tableService.resetColumns('results-columns');
 
     return Array.from(this.defaultColumns);
-  }
-
-  /**
-   * Filters
-   */
-
-  saveFilters(filtersFields: ResultRawFilter): void {
-    this.#tableService.saveFilters('results-filters', filtersFields);
-  }
-
-  restoreFilters(): ResultRawFilter {
-    return this.#tableService.restoreFilters<ResultRaw, ResultRawColumnKey, ResultRawEnumField>('results-filters', this.filtersDefinitions) ?? this.defaultFilters;
-  }
-
-  resetFilters(): ResultRawFilter {
-    this.#tableService.resetFilters('results-filters');
-
-    return this.defaultFilters;
   }
 }

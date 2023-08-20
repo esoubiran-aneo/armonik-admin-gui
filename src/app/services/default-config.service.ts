@@ -1,11 +1,11 @@
-import { FilterStringOperator, TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable } from '@angular/core';
 import { ApplicationRawColumnKey, ApplicationRawFilter, ApplicationRawListOptions } from '@app/applications/types';
 import { TasksStatusesGroup } from '@app/dashboard/types';
-import { PartitionRawColumnKey, PartitionRawFilter, PartitionRawListOptions } from '@app/partitions/types';
-import { ResultRawColumnKey, ResultRawFilter, ResultRawListOptions } from '@app/results/types';
-import { SessionRawColumnKey, SessionRawFilter, SessionRawListOptions } from '@app/sessions/types';
-import { TaskSummaryColumnKey, TaskSummaryFilters, TaskSummaryListOptions } from '@app/tasks/types';
+import { PartitionRawColumnKey, PartitionRawFiltersOr, PartitionRawListOptions } from '@app/partitions/types';
+import { ResultRawColumnKey, ResultRawFiltersOr, ResultRawListOptions } from '@app/results/types';
+import { SessionRawColumnKey, SessionRawFiltersOr, SessionRawListOptions } from '@app/sessions/types';
+import { TaskSummaryColumnKey, TaskSummaryFiltersOr, TaskSummaryListOptions } from '@app/tasks/types';
 import { ExportedDefaultConfig, ScopeConfig } from '@app/types/config';
 import { TaskStatusColored } from '@app/types/dialog';
 import { ExternalService } from '@app/types/external-service';
@@ -99,7 +99,7 @@ export class DefaultConfigService {
     },
   ];
 
-  readonly #defaultPartitions: ScopeConfig<PartitionRawColumnKey, PartitionRawListOptions, PartitionRawFilter> = {
+  readonly #defaultPartitions: ScopeConfig<PartitionRawColumnKey, PartitionRawListOptions, PartitionRawFiltersOr> = {
     interval: 10,
     columns: [
       'id',
@@ -116,7 +116,7 @@ export class DefaultConfigService {
     filters: [],
   };
 
-  readonly #defaultSessions: ScopeConfig<SessionRawColumnKey, SessionRawListOptions, SessionRawFilter> = {
+  readonly #defaultSessions: ScopeConfig<SessionRawColumnKey, SessionRawListOptions, SessionRawFiltersOr> = {
     interval: 10,
     columns: [
       'sessionId',
@@ -134,7 +134,7 @@ export class DefaultConfigService {
     filters: [],
   };
 
-  readonly #defaultResults: ScopeConfig<ResultRawColumnKey, ResultRawListOptions, ResultRawFilter> = {
+  readonly #defaultResults: ScopeConfig<ResultRawColumnKey, ResultRawListOptions, ResultRawFiltersOr> = {
     interval: 10,
     columns: [
       'name',
@@ -151,7 +151,7 @@ export class DefaultConfigService {
     filters: [],
   };
 
-  readonly #defaultTasks: ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFilters> = {
+  readonly #defaultTasks: ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFiltersOr> = {
     interval: 10,
     columns: [
       'id',
@@ -204,19 +204,19 @@ export class DefaultConfigService {
     return structuredClone(this.#defaultTasksByStatus);
   }
 
-  get defaultPartitions(): ScopeConfig<PartitionRawColumnKey, PartitionRawListOptions, PartitionRawFilter> {
+  get defaultPartitions(): ScopeConfig<PartitionRawColumnKey, PartitionRawListOptions, PartitionRawFiltersOr> {
     return structuredClone(this.#defaultPartitions);
   }
 
-  get defaultSessions(): ScopeConfig<SessionRawColumnKey, SessionRawListOptions, SessionRawFilter> {
+  get defaultSessions(): ScopeConfig<SessionRawColumnKey, SessionRawListOptions, SessionRawFiltersOr> {
     return structuredClone(this.#defaultSessions);
   }
 
-  get defaultResults(): ScopeConfig<ResultRawColumnKey, ResultRawListOptions, ResultRawFilter> {
+  get defaultResults(): ScopeConfig<ResultRawColumnKey, ResultRawListOptions, ResultRawFiltersOr> {
     return structuredClone(this.#defaultResults);
   }
 
-  get defaultTasks(): ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFilters> {
+  get defaultTasks(): ScopeConfig<TaskSummaryColumnKey, TaskSummaryListOptions, TaskSummaryFiltersOr> {
     return structuredClone(this.#defaultTasks);
   }
 

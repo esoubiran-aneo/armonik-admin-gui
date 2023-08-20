@@ -1,8 +1,8 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
-import { ColumnKey, FieldKey } from '@app/types/data';
-import { Filter, FiltersAnd, FiltersDefinition } from '@app/types/filters';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
+import { Filter, FiltersAnd } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { UtilsService } from '@services/utils.service';
 
@@ -12,7 +12,7 @@ import { UtilsService } from '@services/utils.service';
 <mat-chip-listbox>
    <ng-container *ngFor="let filter of filtersAnd; let last = last; trackBy:trackByFilter">
     <mat-chip class="mat-mdc-standard-chip mat-primary mat-mdc-chip-selected">
-      <span *ngIf="filter.key;else noField"> {{ content(filter) }} </span>
+      <span *ngIf="filter.field;else noField"> {{ content(filter) }} </span>
     </mat-chip>
     <span class="text" *ngIf="!last">AND</span>
   </ng-container>
@@ -43,26 +43,25 @@ import { UtilsService } from '@services/utils.service';
     FiltersService,
   ],
 })
-export class FiltersChipsComponent<T extends object, R extends string, U> {
+export class FiltersChipsComponent<T extends number, U extends number | null = null> {
   #filtersService = inject(FiltersService);
-  #utilsService = inject(UtilsService<T, R, U>);
+  #utilsService = inject(UtilsService<T, U>);
+  #dataFiltersService = inject(DATA_FILTERS_SERVICE);
 
-  @Input({ required: true }) filtersAnd: FiltersAnd<T> = [];
-  @Input({ required: true }) filtersFields: FiltersDefinition<R, U>[] = [];
-  @Input({ required: true }) columnsLabels: Record<R, string> | null = null;
+  @Input({ required: true }) filtersAnd: FiltersAnd<T, U> = [];
 
-  content(filter: Filter<T>): string {
-    // TODO: fix filter type
-    const label = this.columnToLabel(filter.key as any);
+  content(filter: Filter<T, U>): string {
+    const label = this.#dataFiltersService.retriveLabel(filter.for ?? 'root', Number(filter.field));
 
     if (!filter.value)
       return label + ' ' + $localize`has no value`;
 
-    const type = this.#utilsService.recoverType(filter, this.filtersFields);
+    const filtersDefinitions = this.#dataFiltersService.retriveFiltersDefinitions();
+    const type = this.#utilsService.recoverType(filter, filtersDefinitions);
     const operator = this.#filtersService.findOperators(type)[filter.operator as number];
 
     if (type === 'status') {
-      const statuses = this.#utilsService.recoverStatuses(filter, this.filtersFields);
+      const statuses = this.#utilsService.recoverStatuses(filter, filtersDefinitions);
       const status = statuses.find(s => s.key.toString() === filter.value?.toString());
       return `${label} ${operator} ${status?.value}`;
     }
@@ -70,17 +69,7 @@ export class FiltersChipsComponent<T extends object, R extends string, U> {
     return `${label} ${operator} ${filter.value}`;
   }
 
-  columnToLabel(column: R | null): string {
-    if (column === null)
-      return '';
-
-    if (this.columnsLabels === null)
-      return column.toString();
-    else
-      return this.columnsLabels[column];
-  }
-
-  trackByFilter(_: number, filter: Filter<T>): string {
-    return (filter.key as string) ?? '';
+  trackByFilter(_: number, filter: Filter<T, U>): string {
+    return filter.field?.toString() ?? '';
   }
 }

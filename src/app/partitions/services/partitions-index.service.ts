@@ -1,8 +1,7 @@
-import { PartitionRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
-import { PartitionRaw, PartitionRawColumnKey, PartitionRawFilter, PartitionRawFilterField, PartitionRawListOptions } from '../types';
+import { PartitionRaw, PartitionRawColumnKey, PartitionRawListOptions } from '../types';
 
 @Injectable()
 // TODO: re-add app-index-service
@@ -30,41 +29,6 @@ export class PartitionsIndexService {
   };
 
   readonly defaultOptions: PartitionRawListOptions = this.#defaultConfigService.defaultPartitions.options;
-
-  readonly defaultFilters: PartitionRawFilter = this.#defaultConfigService.defaultPartitions.filters;
-  readonly filtersDefinitions: PartitionRawFilterField[] = [
-    // Do not add filter on object fields
-    {
-      key: 'id',
-      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_ID,
-      type: 'string',
-    },
-    {
-      key: 'priority',
-      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PRIORITY,
-      type: 'number',
-    },
-    {
-      key: 'podMax',
-      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_POD_MAX,
-      type: 'number',
-    },
-    {
-      key: 'podReserved',
-      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_POD_RESERVED,
-      type: 'number',
-    },
-    {
-      key: 'preemptionPercentage',
-      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PREEMPTION_PERCENTAGE,
-      type: 'number',
-    },
-    {
-      key: 'parentPartitionIds',
-      field: PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PARENT_PARTITION_IDS,
-      type: 'array',
-    }
-  ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultPartitions.interval;
 
@@ -143,23 +107,5 @@ export class PartitionsIndexService {
     this.#tableService.resetColumns('partitions-columns');
 
     return Array.from(this.defaultColumns);
-  }
-
-  /**
-   * Filters
-   */
-
-  saveFilters(filters: PartitionRawFilter): void {
-    this.#tableService.saveFilters('partitions-filters', filters);
-  }
-
-  restoreFilters(): PartitionRawFilter {
-    return this.#tableService.restoreFilters<PartitionRaw, PartitionRawColumnKey, PartitionRawEnumField>('partitions-filters', this.filtersDefinitions) ?? this.defaultFilters;
-  }
-
-  resetFilters(): PartitionRawFilter {
-    this.#tableService.resetFilters('partitions-filters');
-
-    return this.defaultFilters;
   }
 }

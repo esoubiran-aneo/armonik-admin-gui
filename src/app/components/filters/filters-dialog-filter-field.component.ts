@@ -2,8 +2,9 @@ import { KeyValue, KeyValuePipe, NgFor, NgIf } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { FieldKey } from '@app/types/data';
-import { Filter, FilterInput, FilterInputOutput, FilterInputType, FilterInputValueString, FilterValueOptions, FiltersDefinition } from '@app/types/filters';
+import { FilterDefinition, FilterFor } from '@app/sessions/services/sessions-filters.service';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
+import { Filter, FilterInput, FilterInputOutput, FilterInputType, FilterInputValueString, FilterValueOptions } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { FiltersDialogInputComponent } from './filters-dialog-input.component';
 
@@ -14,9 +15,9 @@ import { FiltersDialogInputComponent } from './filters-dialog-input.component';
 <span *ngIf="!first" i18n="Filter condition">And</span>
 <mat-form-field appearance="outline"  subscriptSizing="dynamic">
   <mat-label i18n="Label input">Column</mat-label>
-  <mat-select (valueChange)="onFieldChange($event)" [value]="filter.key">
-    <mat-option *ngFor="let definition of filtersDefinitions; trackBy: trackByField" [value]="definition.key">
-      {{ definitionToLabel(definition) }}
+  <mat-select (valueChange)="onFieldChange($event)" [value]="filter.for + '-' + filter.field?.toString()">
+    <mat-option *ngFor="let definition of filtersDefinitions; trackBy: trackByField" [value]="definition.for + '-' + definition.field">
+      {{ retriveLabel(definition) }}
     </mat-option>
   </mat-select>
 </mat-form-field>
@@ -59,17 +60,25 @@ span {
     FiltersService,
   ],
 })
-// Every functions take a filter as parameter in order to simplify reusability.
-export class FiltersDialogFilterFieldComponent<T extends object, R extends string, U = null> {
+export class FiltersDialogFilterFieldComponent<T extends number, U extends number | null = null> {
   @Input({ required: true }) first: boolean;
-  @Input({ required: true }) filter: Filter<T>;
-  @Input({ required: true }) filtersDefinitions: FiltersDefinition<R, U>[];
-  @Input({ required: true }) columnsLabels: Record<R, string> | null;
+  @Input({ required: true }) filter: Filter<T, U>;
 
   #filtersService = inject(FiltersService);
+  #dataFiltersService = inject(DATA_FILTERS_SERVICE);
 
-  onFieldChange(event: FieldKey<T>) {
-    this.filter.key = event;
+  get filtersDefinitions() {
+    return this.#dataFiltersService.retriveFiltersDefinitions<T, U>();
+  }
+
+  retriveLabel(filterDefinition: FilterDefinition<T, U>) {
+    return this.#dataFiltersService.retriveLabel(filterDefinition.for, filterDefinition.field);
+  }
+
+  onFieldChange(event: string) {
+    const [for_, key] = event.split('-');
+    this.filter.for = for_ as FilterFor<T, U>;
+    this.filter.field = Number(key) as T | U;
   }
 
   onOperatorChange(event: string) {
@@ -87,20 +96,7 @@ export class FiltersDialogFilterFieldComponent<T extends object, R extends strin
     }
   }
 
-  definitionToLabel(filter: FiltersDefinition<R, U>): string {
-    const field = filter.key;
-
-    if (!field) {
-      return $localize`Select a column`;
-    }
-
-    const label =  this.columnsLabels?.[field] ?? field;
-
-    return label.toString();
-  }
-
-  findInput(filter: Filter<T>): FilterInput {
-    // TODO: use the utils service
+  findInput(filter: Filter<T, U>): FilterInput {
     const type = this.findType(filter);
     const statuses = this.findStatuses(filter);
 
@@ -132,25 +128,23 @@ export class FiltersDialogFilterFieldComponent<T extends object, R extends strin
     }
   }
 
-  findType(filter: Filter<T>): FilterInputType {
+  findType(filter: Filter<T, U>): FilterInputType {
 
-    if (!filter.key) {
+    if (!filter.field) {
       return 'string';
     }
 
-    // TODO: fix filter type
-    const field = this.#findFilterMetadata(filter.key as any);
+    const field = this.#findFilterMetadata(filter);
 
     return field?.type ?? 'string';
   }
 
-  findStatuses(filter: Filter<T>): FilterValueOptions {
-    if (!filter.key) {
+  findStatuses(filter: Filter<T, U>): FilterValueOptions {
+    if (!filter.field) {
       return [];
     }
 
-    // TODO: fix filter type
-    const field = this.#findFilterMetadata(filter.key as any);
+    const field = this.#findFilterMetadata(filter);
 
     if (!field) {
       return [];
@@ -163,21 +157,21 @@ export class FiltersDialogFilterFieldComponent<T extends object, R extends strin
     return field.statuses;
   }
 
-  findOperator(filter: Filter<T>) {
+  findOperator(filter: Filter<T, U>) {
     const type = this.findType(filter);
     const operators = this.#filtersService.findOperators(type);
     return operators;
   }
 
-  trackByField(_: number, definition: FiltersDefinition<R, U>) {
-    return definition.key;
+  trackByField(_: number, definition: FilterDefinition<T, U>) {
+    return definition.for + definition.field;
   }
 
   trackByOperator(_: number, operator: KeyValue<string, string>) {
     return operator.key;
   }
 
-  #findFilterMetadata(key: R): FiltersDefinition<R, U> | null {
-    return this.filtersDefinitions.find(f => f.key === key) ?? null;
+  #findFilterMetadata(filter: Filter<T, U>): FilterDefinition<T, U> | null {
+    return this.#dataFiltersService.retriveFiltersDefinitions<T, U>().find(f => f.for === filter.for && f.field === filter.field) ?? null;
   }
 }

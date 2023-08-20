@@ -8,9 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ColumnKey } from '@app/types/data';
 import { FiltersDialogData } from '@app/types/dialog';
-import { Filter, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { Filter, FiltersOr } from '@app/types/filters';
 import { FiltersService } from '@services/filters.service';
 import { IconsService } from '@services/icons.service';
 import { FiltersDialogInputComponent } from './filters-dialog-input.component';
@@ -29,8 +28,6 @@ import { FiltersDialogOrComponent } from './filters-dialog-or.component';
           <app-filters-dialog-or
             [first]="index === 0"
             [filtersOr]="filtersOr"
-            [filtersDefinitions]="filtersDefinitions()"
-            [columnsLabels]="columnsLabels"
             (removeChange)="onRemoveOr($event)"
           ></app-filters-dialog-or>
         </ng-container>
@@ -73,21 +70,18 @@ import { FiltersDialogOrComponent } from './filters-dialog-or.component';
     MatMenuModule,
   ],
   providers: [
-    FiltersService
+    FiltersService,
   ],
 })
-export class FiltersDialogComponent<T extends object, R extends string, U> implements OnInit {
+export class FiltersDialogComponent<T extends number, U extends number | null = null> implements OnInit {
   #iconsService = inject(IconsService);
-  #dialogRef = inject(MatDialogRef<FiltersDialogComponent<T, R, U>>);
+  #dialogRef = inject(MatDialogRef<FiltersDialogComponent<T, U>>);
 
-  filtersOr: FiltersOr<T> = [];
-  columnsLabels: Record<R, string> | null = null;
+  filtersOr: FiltersOr<T, U> = [];
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: FiltersDialogData<T, R, U>){}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: FiltersDialogData<T, U>){}
 
   ngOnInit(): void {
-    this.columnsLabels = this.data.columnsLabels;
-
     if (!this.data.filtersOr.length) {
       this.onAdd();
     } else {
@@ -98,14 +92,15 @@ export class FiltersDialogComponent<T extends object, R extends string, U> imple
   onAdd() {
     this.filtersOr.push([
       {
-        key: null,
+        for: null,
+        field: null,
         operator: null,
         value: null,
       }
     ]);
   }
 
-  onRemoveOr(filters: Filter<T>[]) {
+  onRemoveOr(filters: Filter<T, U>[]) {
     const index = this.filtersOr.indexOf(filters);
     if (index > -1) {
       this.filtersOr.splice(index, 1);
@@ -120,15 +115,7 @@ export class FiltersDialogComponent<T extends object, R extends string, U> imple
     return this.#iconsService.getIcon(name);
   }
 
-  /**
-   * Get the available field (all the field that can be added)
-   * Sort the field alphabetically
-   */
-  filtersDefinitions(): FiltersDefinition<R, U>[] {
-    return this.data.filtersDefinitions.sort((a, b) => (a.key as string).localeCompare(b.key as string));
-  }
-
-  trackByFilter(index: number, filters: Filter<T>[]) {
+  trackByFilter(index: number, filters: Filter<T, U>[]) {
     return index + filters.length;
   }
 }

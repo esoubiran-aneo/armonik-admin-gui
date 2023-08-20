@@ -1,4 +1,4 @@
-import { FilterStringOperator, TaskOptions, TaskStatus } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterStringOperator, TaskOptions, TaskStatus, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { SelectionModel } from '@angular/cdk/collections';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -18,9 +18,9 @@ import { Timestamp } from '@ngx-grpc/well-known-types';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { ResultRawColumnKey } from '@app/results/types';
-import { Filter } from '@app/types/filters';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
 import { Page } from '@app/types/pages';
-import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
+import { FiltersToolbarComponent } from '@components/filters/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
 import { TableInspectObjectComponent } from '@components/table/table-inspect-object.component';
@@ -38,10 +38,11 @@ import { TableStorageService } from '@services/table-storage.service';
 import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { UtilsService } from '@services/utils.service';
+import { TasksFiltersService } from './services/tasks-filters.service';
 import { TasksGrpcService } from './services/tasks-grpc.service';
 import { TasksIndexService } from './services/tasks-index.service';
 import { TasksStatusesService } from './services/tasks-status.service';
-import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilters, TaskSummaryListOptions, TasksFiltersDefinition} from './types';
+import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilter, TaskSummaryFiltersOr, TaskSummaryListOptions } from './types';
 
 @Component({
   selector: 'app-tasks-index',
@@ -75,7 +76,7 @@ import { TaskSummary, TaskSummaryColumnKey, TaskSummaryFieldKey, TaskSummaryFilt
   </mat-toolbar-row>
 
   <mat-toolbar-row class="filters">
-    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -256,17 +257,22 @@ app-table-actions-toolbar {
     QueryParamsService,
     UtilsService,
     FiltersService,
+    {
+      provide: DATA_FILTERS_SERVICE,
+      useClass: TasksFiltersService,
+    }
   ],
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
-  #iconsService = inject(IconsService);
-  #shareURLService = inject(ShareUrlService);
-  #autoRefreshService = inject(AutoRefreshService);
-  #tasksStatusesService = inject(TasksStatusesService);
-  #tasksIndexService = inject(TasksIndexService);
-  #tasksGrpcService = inject(TasksGrpcService);
-  #notificationService = inject(NotificationService);
-  #filtersService = inject(FiltersService);
+  readonly #iconsService = inject(IconsService);
+  readonly #shareURLService = inject(ShareUrlService);
+  readonly #autoRefreshService = inject(AutoRefreshService);
+  readonly #tasksStatusesService = inject(TasksStatusesService);
+  readonly #tasksIndexService = inject(TasksIndexService);
+  readonly #tasksGrpcService = inject(TasksGrpcService);
+  readonly #notificationService = inject(NotificationService);
+  readonly #filtersService = inject(FiltersService);
+  readonly #tasksFiltersService = inject(DATA_FILTERS_SERVICE);
 
   displayedColumns: TaskSummaryColumnKey[] = [];
   availableColumns: TaskSummaryColumnKey[] = [];
@@ -279,8 +285,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   options: TaskSummaryListOptions;
 
-  filters: TaskSummaryFilters = [];
-  filtersDefinitions: TasksFiltersDefinition[] = [];
+  filters: TaskSummaryFiltersOr = [];
 
   sharableURL = '';
 
@@ -300,8 +305,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this.#tasksIndexService.restoreOptions();
 
-    this.filtersDefinitions = this.#tasksIndexService.filtersDefinitions;
-    this.filters = this.#tasksIndexService.restoreFilters();
+    this.filters = this.#tasksFiltersService.restoreFilters();
 
     this.intervalValue = this.#tasksIndexService.restoreIntervalValue();
 
@@ -433,8 +437,9 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onRetries(task: TaskSummary): void {
-    const filter: Filter<TaskSummary> = {
-      key: 'initialTaskId',
+    const filter: TaskSummaryFilter = {
+      for: 'root',
+      field: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_INITIAL_TASK_ID,
       value: task.id,
       operator: FilterStringOperator.FILTER_STRING_OPERATOR_EQUAL
     };
@@ -470,15 +475,15 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFiltersChange(value: unknown[]) {
-    this.filters = value as TaskSummaryFilters;
+    this.filters = value as TaskSummaryFiltersOr;
 
-    this.#tasksIndexService.saveFilters(this.filters);
+    this.#tasksFiltersService.saveFilters(this.filters);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   onFiltersReset(): void{
-    this.filters = this.#tasksIndexService.resetFilters();
+    this.filters = this.#tasksFiltersService.resetFilters();
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

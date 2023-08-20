@@ -1,18 +1,17 @@
-import { SortDirection as ArmoniKSortDirection, FilterStringOperator, GetResultRequest, GetResultResponse, ListResultsRequest, ListResultsResponse, ResultFilterField, ResultRawEnumField, ResultRawField, ResultStatus, ResultsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, FilterStringOperator, GetResultRequest, GetResultResponse, ListResultsRequest, ListResultsResponse, ResultFilterField, ResultRawEnumField, ResultsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
-import { Filter, FilterType } from '@app/types/filters';
-import { AppGrpcService } from '@app/types/services';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
+import { FilterType } from '@app/types/filters';
 import { UtilsService } from '@services/utils.service';
-import { ResultsIndexService } from './results-index.service';
-import {  ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, ResultRawListOptions } from '../types';
+import {  ResultRawFieldKey, ResultRawFilter, ResultRawFiltersOr, ResultRawListOptions } from '../types';
 
 @Injectable()
-export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
-  #utilsService = inject(UtilsService<ResultRaw, ResultRawColumnKey, ResultRawEnumField>);
-  #resultsClient = inject(ResultsClient);
-  #resultsIndexService = inject(ResultsIndexService);
+export class ResultsGrpcService {
+  readonly #resultsFiltersService = inject(DATA_FILTERS_SERVICE);
+  readonly #utilsService = inject(UtilsService<ResultRawEnumField>);
+  readonly #resultsClient = inject(ResultsClient);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
@@ -31,9 +30,9 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
   };
 
 
-  list$(options: ResultRawListOptions, filters: ResultRawFilter): Observable<ListResultsResponse> {
+  list$(options: ResultRawListOptions, filters: ResultRawFiltersOr): Observable<ListResultsResponse> {
 
-    const requestFilters = this.#utilsService.createFilters<ResultFilterField.AsObject>(filters, this.#resultsIndexService.filtersDefinitions, this.#buildFilterField);
+    const requestFilters = this.#utilsService.createFilters<ResultFilterField.AsObject>(filters, this.#resultsFiltersService.retriveFiltersDefinitions(), this.#buildFilterField);
 
     const listResultRequest = new ListResultsRequest({
       page: options.pageIndex,
@@ -60,7 +59,7 @@ export class ResultsGrpcService implements AppGrpcService<ResultRaw> {
     return this.#resultsClient.getResult(getResultRequest);
   }
 
-  #buildFilterField(filter: Filter<ResultRaw>) {
+  #buildFilterField(filter: ResultRawFilter) {
     return (type: FilterType, field: ResultRawEnumField) => {
 
       const filterField = {

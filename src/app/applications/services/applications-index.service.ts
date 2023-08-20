@@ -1,8 +1,7 @@
-import { ApplicationRawEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
-import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFilter, ApplicationRawListOptions, ApplicationsFiltersDefinition } from '../types';
+import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawListOptions } from '../types';
 
 @Injectable()
 // export class ApplicationsIndexService implements AppIndexService<ApplicationRaw> {
@@ -23,30 +22,6 @@ export class ApplicationsIndexService {
   };
 
   readonly defaultOptions: ApplicationRawListOptions = this.#defaultConfigService.defaultApplications.options;
-
-  readonly defaultFilters: ApplicationRawFilter = this.#defaultConfigService.defaultApplications.filters;
-  readonly filtersDefinitions: ApplicationsFiltersDefinition[] = [
-    {
-      key: 'name',
-      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_NAME,
-      type: 'string',
-    },
-    {
-      key: 'namespace',
-      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_NAMESPACE,
-      type: 'string',
-    },
-    {
-      key: 'service',
-      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_SERVICE,
-      type: 'string',
-    },
-    {
-      key: 'version',
-      field: ApplicationRawEnumField.APPLICATION_RAW_ENUM_FIELD_VERSION,
-      type: 'string',
-    }
-  ];
 
   readonly defaultIntervalValue = this.#defaultConfigService.defaultApplications.interval;
 
@@ -117,23 +92,5 @@ export class ApplicationsIndexService {
     this.#tableService.resetColumns('applications-columns');
 
     return Array.from(this.defaultColumns);
-  }
-
-  /**
-   * Filters
-   */
-
-  saveFilters(filters: ApplicationRawFilter): void {
-    this.#tableService.saveFilters('applications-filters', filters);
-  }
-
-  restoreFilters(): ApplicationRawFilter {
-    return this.#tableService.restoreFilters<ApplicationRaw, ApplicationRawColumnKey, ApplicationRawEnumField>('applications-filters', this.filtersDefinitions) ?? this.defaultFilters;
-  }
-
-  resetFilters(): ApplicationRawFilter {
-    this.#tableService.resetFilters('applications-filters');
-
-    return this.defaultFilters;
   }
 }

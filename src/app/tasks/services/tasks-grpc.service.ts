@@ -1,17 +1,17 @@
-import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, FilterStringOperator, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskFilterField, TaskFilters, TaskOptionEnumField, TaskSummary, TaskSummaryEnumField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelTasksRequest, CancelTasksResponse, CountTasksByStatusRequest, CountTasksByStatusResponse, FilterStringOperator, GetTaskRequest, GetTaskResponse, ListTasksRequest, ListTasksResponse, TaskFilterField, TaskFilters, TaskOptionEnumField, TaskSummaryEnumField, TasksClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
 import { Filter, FilterType } from '@app/types/filters';
 import { UtilsService } from '@services/utils.service';
-import { TasksIndexService } from './tasks-index.service';
-import { TaskSummaryColumnKey, TaskSummaryField, TaskSummaryFieldKey, TaskSummaryFilters, TaskSummaryListOptions } from '../types';
+import { TaskSummaryField, TaskSummaryFieldKey, TaskSummaryFiltersOr, TaskSummaryListOptions } from '../types';
 
 @Injectable()
 export class TasksGrpcService {
-  readonly #utilsService = inject(UtilsService<TaskSummary, TaskSummaryColumnKey, TaskSummaryField>);
+  readonly #tasksFiltersService = inject(DATA_FILTERS_SERVICE);
+  readonly #utilsService = inject(UtilsService<TaskSummaryEnumField, TaskOptionEnumField>);
   readonly #tasksClient = inject(TasksClient);
-  readonly #tasksIndexService = inject(TasksIndexService);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
@@ -44,9 +44,9 @@ export class TasksGrpcService {
     error: TaskSummaryEnumField.TASK_SUMMARY_ENUM_FIELD_UNSPECIFIED,
   };
 
-  list$(options: TaskSummaryListOptions, filters: TaskSummaryFilters): Observable<ListTasksResponse> {
+  list$(options: TaskSummaryListOptions, filters: TaskSummaryFiltersOr): Observable<ListTasksResponse> {
 
-    const requestFilters = this.#utilsService.createFilters<TaskFilterField.AsObject>(filters, this.#tasksIndexService.filtersDefinitions, this.#buildFilterField);
+    const requestFilters = this.#utilsService.createFilters<TaskFilterField.AsObject>(filters, this.#tasksFiltersService.retriveFiltersDefinitions(), this.#buildFilterField);
 
     const listTasksRequest = new ListTasksRequest({
       page: options.pageIndex,
@@ -91,13 +91,13 @@ export class TasksGrpcService {
     return this.#tasksClient.countTasksByStatus(request);
   }
 
-  #buildFilterField(filter: Filter<TaskSummary>) {
+  #buildFilterField(filter: Filter<TaskSummaryEnumField, TaskOptionEnumField>) {
     return (type: FilterType, field: TaskSummaryField) => {
 
 
       const filterField: TaskFilterField.AsObject['field'] = {};
 
-      if(filter.key?.startsWith('options.')) {
+      if(filter.for === 'options') {
         filterField['taskOptionField'] = {
           field: field as TaskOptionEnumField
         };

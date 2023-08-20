@@ -1,15 +1,14 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewContainerRef, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ColumnKey } from '@app/types/data';
 import { FiltersDialogData, FiltersDialogResult } from '@app/types/dialog';
-import { FiltersAnd, FiltersDefinition, FiltersOr } from '@app/types/filters';
-import { FiltersChipsComponent } from '@components/filters-chips.component';
-import { FiltersDialogComponent } from '@components/filters-dialog.component';
+import { FiltersAnd, FiltersOr } from '@app/types/filters';
+import { FiltersChipsComponent } from '@components/filters/filters-chips.component';
 import { IconsService } from '@services/icons.service';
+import { FiltersDialogComponent } from './filters-dialog.component';
 
 @Component({
   selector: 'app-filters-toolbar',
@@ -23,7 +22,7 @@ import { IconsService } from '@services/icons.service';
       <span class="filters-toolbar-text" *ngIf="!first">
         OR
       </span>
-      <app-filters-chips [filtersAnd]="filtersAnd" [filtersFields]="filtersFields" [columnsLabels]="columnsLabels"></app-filters-chips>
+      <app-filters-chips [filtersAnd]="filtersAnd"></app-filters-chips>
     </div>
   </ng-container>
 
@@ -62,7 +61,6 @@ button {
 }
   `],
   standalone: true,
-  providers: [],
   imports: [
     NgIf,
     NgFor,
@@ -72,17 +70,16 @@ button {
     MatIconModule,
     MatDialogModule,
     MatTooltipModule,
-  ]
+  ],
 })
-export class FiltersToolbarComponent<T extends object, R extends string, U = null> {
+export class FiltersToolbarComponent<T extends number, U extends number | null = null> {
   #iconsService = inject(IconsService);
   #dialog = inject(MatDialog);
+  #viewContainerRef = inject(ViewContainerRef);
 
-  @Input({ required: true }) filters: FiltersOr<T> = [];
-  @Input({ required: true }) filtersFields: FiltersDefinition<R, U>[] = [];
-  @Input({ required: true }) columnsLabels: Record<R, string>;
+  @Input({ required: true }) filters: FiltersOr<T, U> = [];
 
-  @Output() filtersChange: EventEmitter<FiltersOr<T>> = new EventEmitter<FiltersOr<T>>();
+  @Output() filtersChange: EventEmitter<FiltersOr<T, U>> = new EventEmitter<FiltersOr<T, U>>();
 
   getIcon(name: string): string {
     return this.#iconsService.getIcon(name);
@@ -94,12 +91,12 @@ export class FiltersToolbarComponent<T extends object, R extends string, U = nul
   }
 
   openFiltersDialog(): void {
-    const dialogRef = this.#dialog.open<FiltersDialogComponent<T, R, U>, FiltersDialogData<T, R, U>, FiltersDialogResult<T>>(FiltersDialogComponent, {
+    const dialogRef = this.#dialog.open<FiltersDialogComponent<T, U>, FiltersDialogData<T, U>, FiltersDialogResult<T, U>>(FiltersDialogComponent, {
       data: {
         filtersOr: Array.from(this.filters),
-        filtersDefinitions: Array.from(this.filtersFields),
-        columnsLabels: this.columnsLabels,
-      }
+      },
+      // @see https://www.jeffryhouser.com/index.cfm/2021/9/28/Why-wont-my-MatDialog-Inject-my-Service to understand issue solved here.
+      viewContainerRef: this.#viewContainerRef,
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -111,7 +108,7 @@ export class FiltersToolbarComponent<T extends object, R extends string, U = nul
     });
   }
 
-  trackByFilter(index: number, filtersAnd: FiltersAnd<T>) {
+  trackByFilter(index: number, filtersAnd: FiltersAnd<T, U>) {
     return index + filtersAnd.length;
   }
 }

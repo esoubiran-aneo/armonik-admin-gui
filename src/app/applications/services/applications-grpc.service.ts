@@ -2,17 +2,16 @@ import { ApplicationFilterField, ApplicationRawEnumField, ApplicationsClient, So
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
 import { Filter, FilterType } from '@app/types/filters';
-import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
-import { ApplicationsIndexService } from './applications-index.service';
-import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions } from '../types';
+import { ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions } from '../types';
 
 @Injectable()
-export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
-  readonly #applicationsIndexService = inject(ApplicationsIndexService);
+export class ApplicationsGrpcService {
+  readonly #applicationsFiltersService = inject(DATA_FILTERS_SERVICE);
   readonly #applicationsClient = inject(ApplicationsClient);
-  readonly #utilsService = inject(UtilsService<ApplicationRaw, ApplicationRawColumnKey,ApplicationRawEnumField>);
+  readonly #utilsService = inject(UtilsService<ApplicationRawEnumField>);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
@@ -29,7 +28,7 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
 
   list$(options: ApplicationRawListOptions, filters: ApplicationRawFilter): Observable<ListApplicationsResponse> {
 
-    const requestFilters = this.#utilsService.createFilters<ApplicationFilterField.AsObject>(filters, this.#applicationsIndexService.filtersDefinitions, this.#buildFilterField);
+    const requestFilters = this.#utilsService.createFilters<ApplicationFilterField.AsObject>(filters, this.#applicationsFiltersService.retriveFiltersDefinitions(), this.#buildFilterField);
 
     const request = new ListApplicationsRequest({
       page: options.pageIndex,
@@ -52,7 +51,7 @@ export class ApplicationsGrpcService implements AppGrpcService<ApplicationRaw> {
     throw new Error('This method must never be called.');
   }
 
-  #buildFilterField(filter: Filter<ApplicationRaw>) {
+  #buildFilterField(filter: Filter<ApplicationRawEnumField>) {
     return (type: FilterType, field: ApplicationRawEnumField) => {
 
       const filterField = {

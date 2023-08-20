@@ -2,18 +2,17 @@ import { SortDirection as ArmoniKSortDirection, FilterArrayOperator, FilterNumbe
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
-import { Filter, FilterType } from '@app/types/filters';
-import { AppGrpcService } from '@app/types/services';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
+import { FilterType } from '@app/types/filters';
 import { UtilsService } from '@services/utils.service';
-import { PartitionsIndexService } from './partitions-index.service';
-import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRawFilter, PartitionRawListOptions } from '../types';
+import { PartitionRawFieldKey, PartitionRawFilter, PartitionRawFiltersOr, PartitionRawListOptions } from '../types';
 
 
 @Injectable()
-export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
-  #partitionsIndexService = inject(PartitionsIndexService);
+export class PartitionsGrpcService {
+  #partitionsFiltersService = inject(DATA_FILTERS_SERVICE);
   #partitionsClient = inject(PartitionsClient);
-  #utilsService = inject(UtilsService<PartitionRaw, PartitionRawColumnKey,PartitionRawEnumField>);
+  #utilsService = inject(UtilsService<PartitionRawEnumField>);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
@@ -31,8 +30,8 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
     'priority': PartitionRawEnumField.PARTITION_RAW_ENUM_FIELD_PRIORITY,
   };
 
-  list$(options: PartitionRawListOptions, filters: PartitionRawFilter): Observable<ListPartitionsResponse> {
-    const requestFilters = this.#utilsService.createFilters<PartitionFilterField.AsObject>(filters, this.#partitionsIndexService.filtersDefinitions, this.#buildFilterField);
+  list$(options: PartitionRawListOptions, filters: PartitionRawFiltersOr): Observable<ListPartitionsResponse> {
+    const requestFilters = this.#utilsService.createFilters<PartitionFilterField.AsObject>(filters, this.#partitionsFiltersService.retriveFiltersDefinitions(), this.#buildFilterField);
 
     const listPartitionsRequest = new ListPartitionsRequest({
       page: options.pageIndex,
@@ -59,7 +58,7 @@ export class PartitionsGrpcService implements AppGrpcService<PartitionRaw> {
     return this.#partitionsClient.getPartition(getPartitionRequest);
   }
 
-  #buildFilterField(filter: Filter<PartitionRaw>) {
+  #buildFilterField(filter: PartitionRawFilter) {
     return (type: FilterType, field: PartitionRawEnumField) => {
 
       const filterField = {

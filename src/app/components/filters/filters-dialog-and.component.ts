@@ -2,8 +2,7 @@ import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { ColumnKey } from '@app/types/data';
-import { Filter, FiltersDefinition } from '@app/types/filters';
+import { Filter } from '@app/types/filters';
 import { IconsService } from '@services/icons.service';
 import { FiltersDialogFilterFieldComponent } from './filters-dialog-filter-field.component';
 
@@ -13,8 +12,6 @@ import { FiltersDialogFilterFieldComponent } from './filters-dialog-filter-field
 <app-filters-dialog-filter-field
   [first]="first"
   [filter]="filter"
-  [filtersDefinitions]="filtersDefinitions"
-  [columnsLabels]="columnsLabels"
   >
 </app-filters-dialog-filter-field>
 
@@ -53,13 +50,11 @@ import { FiltersDialogFilterFieldComponent } from './filters-dialog-filter-field
     IconsService,
   ],
 })
-export class FiltersDialogAndComponent<T extends object, R extends string, U = null> {
+export class FiltersDialogAndComponent<T extends number, U extends number | null = null> {
   @Input({ required: true }) first: boolean;
-  @Input({ required: true }) filter: Filter<T>;
-  @Input({ required: true }) filtersDefinitions: FiltersDefinition<R, U>[];
-  @Input({ required: true }) columnsLabels: Record<R, string> | null;
+  @Input({ required: true }) filter: Filter<T, U>;
 
-  @Output() removeChange: EventEmitter<Filter<T>> = new EventEmitter<Filter<T>>();
+  @Output() removeChange: EventEmitter<Filter<T, U>> = new EventEmitter<Filter<T, U>>();
 
   #iconsService = inject(IconsService);
 

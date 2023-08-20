@@ -14,8 +14,9 @@ import { RouterLink } from '@angular/router';
 import { Timestamp } from '@ngx-grpc/well-known-types';
 import { Observable, Subject, Subscription, catchError, map, merge, of, startWith, switchMap } from 'rxjs';
 import { NoWrapDirective } from '@app/directives/no-wrap.directive';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
 import { Page } from '@app/types/pages';
-import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
+import { FiltersToolbarComponent } from '@components/filters/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
 import { TableActionsToolbarComponent } from '@components/table-actions-toolbar.component';
@@ -31,10 +32,11 @@ import { TableStorageService } from '@services/table-storage.service';
 import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { UtilsService } from '@services/utils.service';
+import { ResultsFiltersService } from './services/results-filters.service';
 import { ResultsGrpcService } from './services/results-grpc.service';
 import { ResultsIndexService } from './services/results-index.service';
 import { ResultsStatusesService } from './services/results-statuses.service';
-import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, ResultRawListOptions, ResultsFiltersDefinition } from './types';
+import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFiltersOr, ResultRawListOptions } from './types';
 
 
 @Component({
@@ -63,7 +65,7 @@ import { ResultRaw, ResultRawColumnKey, ResultRawFieldKey, ResultRawFilter, Resu
   </mat-toolbar-row>
 
   <mat-toolbar-row class="filters">
-    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -164,6 +166,10 @@ app-table-actions-toolbar {
     ResultsGrpcService,
     AutoRefreshService,
     NotificationService,
+    {
+      provide: DATA_FILTERS_SERVICE,
+      useClass: ResultsFiltersService,
+    }
   ],
   imports: [
     NoWrapDirective,
@@ -189,8 +195,9 @@ app-table-actions-toolbar {
   ]
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
-  #notificationService = inject(NotificationService);
-  #iconsService = inject(IconsService);
+  readonly #notificationService = inject(NotificationService);
+  readonly #iconsService = inject(IconsService);
+  readonly #resultsFiltersService = inject(DATA_FILTERS_SERVICE);
 
   displayedColumns: ResultRawColumnKey[] = [];
   availableColumns: ResultRawColumnKey[] = [];
@@ -201,8 +208,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   options: ResultRawListOptions;
 
-  filters: ResultRawFilter = [];
-  filtersDefinitions: ResultsFiltersDefinition[] = [];
+  filters: ResultRawFiltersOr = [];
 
   intervalValue = 0;
   sharableURL = '';
@@ -230,8 +236,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this._resultsIndexService.restoreOptions();
 
-    this.filtersDefinitions = this._resultsIndexService.filtersDefinitions;
-    this.filters = this._resultsIndexService.restoreFilters();
+    this.filters = this.#resultsFiltersService.restoreFilters();
 
     this.intervalValue = this._resultsIndexService.restoreIntervalValue();
 
@@ -374,15 +379,15 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFiltersChange(value: unknown[]) {
-    this.filters = value as ResultRawFilter;
+    this.filters = value as ResultRawFiltersOr;
 
-    this._resultsIndexService.saveFilters(value as ResultRawFilter);
+    this.#resultsFiltersService.saveFilters(value as ResultRawFiltersOr);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   onFiltersReset(): void {
-    this.filters = this._resultsIndexService.resetFilters();
+    this.filters = this.#resultsFiltersService.resetFilters();
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

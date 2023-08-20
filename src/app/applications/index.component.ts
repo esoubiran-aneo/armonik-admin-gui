@@ -1,4 +1,4 @@
-import { FilterString, FilterStringOperator, TaskFilters, TaskOptionEnumField, TaskOptions, TaskRaw, TaskSummary } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterStringOperator, TaskFilters, TaskOptionEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
@@ -17,11 +17,11 @@ import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { TaskSummaryColumnKey } from '@app/tasks/types';
-import { ColumnKey } from '@app/types/data';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
 import { TaskStatusColored, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
 import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
-import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
+import { FiltersToolbarComponent } from '@components/filters/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
 import { TableActionsToolbarComponent } from '@components/table-actions-toolbar.component';
@@ -40,9 +40,10 @@ import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
+import { ApplicationsFiltersService } from './services/applications-filters.service';
 import { ApplicationsGrpcService } from './services/applications-grpc.service';
 import { ApplicationsIndexService } from './services/applications-index.service';
-import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions, ApplicationsFiltersDefinition } from './types';
+import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, ApplicationRawFilter, ApplicationRawListOptions } from './types';
 
 @Component({
   selector: 'app-applications-index',
@@ -79,7 +80,7 @@ import { ApplicationRaw, ApplicationRawColumnKey, ApplicationRawFieldKey, Applic
   </mat-toolbar-row>
 
   <mat-toolbar-row class="filters">
-    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -169,6 +170,10 @@ app-table-actions-toolbar {
     TasksIndexService,
     TasksStatusesService,
     FiltersService,
+    {
+      provide: DATA_FILTERS_SERVICE,
+      useClass: ApplicationsFiltersService
+    }
   ],
   imports: [
     NoWrapDirective,
@@ -196,15 +201,15 @@ app-table-actions-toolbar {
   ]
 })
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
-  #tasksByStatusService = inject(TasksByStatusService);
-  #notificationService = inject(NotificationService);
-  #dialog = inject(MatDialog);
-  #iconsService = inject(IconsService);
-  #filtersService = inject(FiltersService);
+  readonly #tasksByStatusService = inject(TasksByStatusService);
+  readonly #notificationService = inject(NotificationService);
+  readonly #dialog = inject(MatDialog);
+  readonly #iconsService = inject(IconsService);
+  readonly #filtersService = inject(FiltersService);
+  readonly #applicationsFiltersService = inject(DATA_FILTERS_SERVICE);
 
   displayedColumns: ApplicationRawColumnKey[] = [];
   availableColumns: ApplicationRawColumnKey[] = [];
-
 
   isLoading = true;
   data: ApplicationRaw[] = [];
@@ -213,8 +218,6 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   options: ApplicationRawListOptions;
 
   filters: ApplicationRawFilter = [];
-  filtersDefinitions: ApplicationsFiltersDefinition[] = [];
-
 
   intervalValue = 0;
   sharableURL = '';
@@ -243,8 +246,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this._applicationsIndexService.restoreOptions();
 
-    this.filtersDefinitions = this._applicationsIndexService.filtersDefinitions;
-    this.filters = this._applicationsIndexService.restoreFilters();
+    this.filters = this.#applicationsFiltersService.restoreFilters();
 
     this.intervalValue = this._applicationsIndexService.restoreIntervalValue();
 
@@ -367,13 +369,13 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   onFiltersChange(filters: unknown[]) {
     this.filters = filters as ApplicationRawFilter;
 
-    this._applicationsIndexService.saveFilters(filters as ApplicationRawFilter);
+    this.#applicationsFiltersService.saveFilters(filters as ApplicationRawFilter);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   onFiltersReset() {
-    this.filters = this._applicationsIndexService.resetFilters();
+    this.filters = this.#applicationsFiltersService.resetFilters();
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

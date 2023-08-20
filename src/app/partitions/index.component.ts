@@ -1,4 +1,4 @@
-import { FilterString, FilterStringOperator, TaskFilters, TaskOptionEnumField, TaskStatus, TaskSummaryEnumField } from '@aneoconsultingfr/armonik.api.angular';
+import { FilterStringOperator, TaskFilters, TaskOptionEnumField } from '@aneoconsultingfr/armonik.api.angular';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgFor, NgIf } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
@@ -17,10 +17,11 @@ import { NoWrapDirective } from '@app/directives/no-wrap.directive';
 import { TasksIndexService } from '@app/tasks/services/tasks-index.service';
 import { TasksStatusesService } from '@app/tasks/services/tasks-status.service';
 import { TaskSummaryColumnKey } from '@app/tasks/types';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
 import { TaskStatusColored, ViewTasksByStatusDialogData } from '@app/types/dialog';
 import { Page } from '@app/types/pages';
 import { CountTasksByStatusComponent } from '@components/count-tasks-by-status.component';
-import { FiltersToolbarComponent } from '@components/filters-toolbar.component';
+import { FiltersToolbarComponent } from '@components/filters/filters-toolbar.component';
 import { PageHeaderComponent } from '@components/page-header.component';
 import { TableEmptyDataComponent } from '@components/table/table-empty-data.component';
 import { TableInspectObjectComponent } from '@components/table/table-inspect-object.component';
@@ -40,9 +41,10 @@ import { TableURLService } from '@services/table-url.service';
 import { TableService } from '@services/table.service';
 import { TasksByStatusService } from '@services/tasks-by-status.service';
 import { UtilsService } from '@services/utils.service';
+import { PartitionsFiltersService } from './services/partitions-filters.service';
 import { PartitionsGrpcService } from './services/partitions-grpc.service';
 import { PartitionsIndexService } from './services/partitions-index.service';
-import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRawFilter, PartitionRawFilterField, PartitionRawListOptions } from './types';
+import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRawFiltersOr, PartitionRawListOptions } from './types';
 
 @Component({
   selector: 'app-partitions-index',
@@ -78,7 +80,7 @@ import { PartitionRaw, PartitionRawColumnKey, PartitionRawFieldKey, PartitionRaw
   </mat-toolbar-row>
 
   <mat-toolbar-row class="filters">
-    <app-filters-toolbar [filters]="filters" [filtersFields]="filtersDefinitions" [columnsLabels]="columnsLabels()" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
+    <app-filters-toolbar [filters]="filters" (filtersChange)="onFiltersChange($event)"></app-filters-toolbar>
   </mat-toolbar-row>
 </mat-toolbar>
 
@@ -181,20 +183,24 @@ app-table-actions-toolbar {
     TasksStatusesService,
     TasksIndexService,
     FiltersService,
+    {
+      provide: DATA_FILTERS_SERVICE,
+      useClass: PartitionsFiltersService,
+    }
   ],
   imports: [
-    EmptyCellPipe,
     NoWrapDirective,
+    EmptyCellPipe,
     NgIf,
     NgFor,
     RouterLink,
     DragDropModule,
-    PageHeaderComponent,
     CountTasksByStatusComponent,
+    PageHeaderComponent,
     TableActionsToolbarComponent,
-    TableInspectObjectComponent,
     FiltersToolbarComponent,
     TableContainerComponent,
+    TableInspectObjectComponent,
     MatTableModule,
     MatToolbarModule,
     MatPaginatorModule,
@@ -208,7 +214,6 @@ app-table-actions-toolbar {
     TableEmptyDataComponent,
   ]
 })
-// TODO: add app-index-component
 export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly #notificationService = inject(NotificationService);
   readonly #iconsService = inject(IconsService);
@@ -219,6 +224,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly #autoRefreshService = inject(AutoRefreshService);
   readonly #dialog = inject(MatDialog);
   readonly #filtersService = inject(FiltersService);
+  readonly #partitionsFiltersService = inject(DATA_FILTERS_SERVICE);
 
   displayedColumns: PartitionRawColumnKey[] = [];
   availableColumns: PartitionRawColumnKey[] = [];
@@ -229,8 +235,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
   options: PartitionRawListOptions;
 
-  filters: PartitionRawFilter = [];
-  filtersDefinitions: PartitionRawFilterField[] = [];
+  filters: PartitionRawFiltersOr = [];
 
   intervalValue = 0;
   sharableURL = '';
@@ -252,8 +257,7 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.options = this.#partitionsIndexService.restoreOptions();
 
-    this.filtersDefinitions = this.#partitionsIndexService.filtersDefinitions;
-    this.filters = this.#partitionsIndexService.restoreFilters();
+    this.filters = this.#partitionsFiltersService.restoreFilters();
 
     this.intervalValue = this.#partitionsIndexService.restoreIntervalValue();
 
@@ -382,15 +386,15 @@ export class IndexComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFiltersChange(filters: unknown[]) {
-    this.filters = filters as PartitionRawFilter;
+    this.filters = filters as PartitionRawFiltersOr;
 
-    this.#partitionsIndexService.saveFilters(filters as PartitionRawFilter);
+    this.#partitionsFiltersService.saveFilters(filters as PartitionRawFiltersOr);
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }
 
   onFiltersReset() {
-    this.filters = this.#partitionsIndexService.resetFilters();
+    this.filters = this.#partitionsFiltersService.resetFilters();
     this.paginator.pageIndex = 0;
     this.refresh.next();
   }

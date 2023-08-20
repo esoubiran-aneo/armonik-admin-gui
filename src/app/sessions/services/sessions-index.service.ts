@@ -1,13 +1,10 @@
-import { SessionRawEnumField, SessionStatus } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { DefaultConfigService } from '@services/default-config.service';
 import { TableService } from '@services/table.service';
-import { SessionsStatusesService } from './sessions-statuses.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawField, SessionRawFilter, SessionRawListOptions, SessionsFiltersDefinition } from '../types';
+import { SessionRaw, SessionRawColumnKey, SessionRawListOptions } from '../types';
 
 @Injectable()
 export class SessionsIndexService {
-  #sessionsStatusesService = inject(SessionsStatusesService);
   #defaultConfigService = inject(DefaultConfigService);
   #tableService = inject(TableService);
 
@@ -41,61 +38,6 @@ export class SessionsIndexService {
   };
 
   readonly defaultOptions: SessionRawListOptions = this.#defaultConfigService.defaultSessions.options;
-
-  readonly defaultFilters: SessionRawFilter = this.#defaultConfigService.defaultSessions.filters;
-  readonly filtersDefinitions: SessionsFiltersDefinition[] = [
-    // Do not filter object fields
-    {
-      key: 'sessionId',
-      field: SessionRawEnumField.SESSION_RAW_ENUM_FIELD_SESSION_ID,
-      type: 'string',
-    },
-    {
-      key: 'partitionIds',
-      field: SessionRawEnumField.SESSION_RAW_ENUM_FIELD_PARTITION_IDS,
-      type: 'array'
-    },
-    {
-      key: 'status',
-      field: SessionRawEnumField.SESSION_RAW_ENUM_FIELD_STATUS,
-      type: 'status',
-      statuses: Object.keys(this.#sessionsStatusesService.statuses).map(status => {
-        return {
-          key: status,
-          value: this.#sessionsStatusesService.statuses[Number(status) as SessionStatus],
-        };
-      }),
-    }
-    // TODO: ajouter le support des dates dans les filtres
-    // TODO: ajouter les durations dans les api (avec le support des filtres dans les groupes by)
-    // {
-    //   field: 'partitionIds',
-    //   type: 'text',
-    // },
-    // {
-    //   field: 'createdAt',
-    //   type: 'date',
-    // },
-    // {
-    //   field: 'cancelledAt',
-    //   type: 'date',
-    // },
-    // {
-    //   field: 'status',
-    //   type: 'select',
-    //   options: Object.keys(this.#sessionsStatusesService.statuses).map(status => {
-    //     return {
-    //       value: status,
-    //       label: this.#sessionsStatusesService.statuses[Number(status) as SessionStatus],
-    //     };
-    //   }),
-    // },
-    // FIXME: Not implemented yet in Core
-    // {
-    //   field: 'duration',
-    //   type: 'number'
-    // }
-  ];
 
   readonly defaultIntervalValue: number = this.#defaultConfigService.defaultSessions.interval;
 
@@ -187,23 +129,5 @@ export class SessionsIndexService {
     this.#tableService.resetColumns('sessions-columns');
 
     return Array.from(this.defaultColumns);
-  }
-
-  /**
-   * Filters
-   */
-
-  saveFilters(filters: SessionRawFilter): void {
-    this.#tableService.saveFilters('sessions-filters', filters);
-  }
-
-  restoreFilters(): SessionRawFilter {
-    return this.#tableService.restoreFilters<SessionRaw, SessionRawColumnKey, SessionRawField>('sessions-filters', this.filtersDefinitions) ?? this.defaultFilters;
-  }
-
-  resetFilters(): SessionRawFilter {
-    this.#tableService.resetFilters('sessions-filters');
-
-    return this.defaultFilters;
   }
 }

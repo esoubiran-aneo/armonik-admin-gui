@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FieldKey } from '@app/types/data';
-import { Filter, FiltersDefinition, FiltersOr } from '@app/types/filters';
+import { FilterDefinition, FilterFor } from '@app/sessions/services/sessions-filters.service';
+import { Filter, FiltersOr } from '@app/types/filters';
 import { QueryParamsOptionsKey } from '@app/types/query-params';
 
 /**
@@ -16,37 +16,39 @@ export class TableURLService {
     return this.getQueryParam<T>(key, false);
   }
 
-  getQueryParamsFilters<T extends object, R, U = null>(filtersDefinitions: FiltersDefinition<R, U>[]): FiltersOr<T> {
-    const params: Map<string, Filter<T>[]>  = new Map();
-    const filters: FiltersOr<T> = [];
+  // TODO: update this function to support for
+  getQueryParamsFilters<T extends number, U extends number | null>(filtersDefinitions: FilterDefinition<T, U>[]): FiltersOr<T, U> {
+    const params: Map<string, Filter<T, U>[]>  = new Map();
+    const filters: FiltersOr<T, U> = [];
 
-    const extractValues = /or-(?<order>\d)-operator-(?<operator>\d)-(?<field>.*)/;
+    const extractValues = /(?<order>\d)-(?<for>.*)-(?<field>.*)-(?<operator>\d)/;
     const keys = this.getQueryParamKeys();
 
     for (const key of keys) {
       const match = key.match(extractValues);
       const order = match?.groups?.['order'];
-      const field = match?.groups?.['field'];
+      const for_ = match?.groups?.['for'] as FilterFor<T, U> | undefined;
+      const field = Number(match?.groups?.['field']) as T | U | undefined;
       const operator = match?.groups?.['operator'];
 
       if (!order || !field || !operator) {
-        console.error('Invalid key', key);
         continue;
       }
 
-      const isInDefinition = filtersDefinitions.some(definition => definition.key === field);
+      const isInDefinition = filtersDefinitions.some(definition => definition.field === field && definition.for === for_);
 
       if (!isInDefinition) {
-        console.error('Unknown field', field);
+        console.log('Unknown filter', field);
         continue;
       }
 
-      const currentParams = params.get(order) ?? [] as Filter<T>[];
+      const currentParams = params.get(order) ?? [] as Filter<T, U>[];
 
       currentParams.push({
-        key: field as FieldKey<T>,
+        field: field as T | U,
         operator: Number(operator),
-        value: this.getQueryParam(key, false)
+        value: this.getQueryParam(key, false),
+        for: for_ ?? null
       });
 
       params.set(order, currentParams);

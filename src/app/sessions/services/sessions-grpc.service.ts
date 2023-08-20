@@ -1,18 +1,17 @@
-import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, FilterStatusOperator, FilterStringOperator, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionFilterField, SessionRawEnumField, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
+import { SortDirection as ArmoniKSortDirection, CancelSessionRequest, CancelSessionResponse, FilterStatusOperator, FilterStringOperator, GetSessionRequest, GetSessionResponse, ListSessionsRequest, ListSessionsResponse, SessionFilterField, SessionRawEnumField, SessionTaskOptionEnumField, SessionsClient } from '@aneoconsultingfr/armonik.api.angular';
 import { Injectable, inject } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
+import { DATA_FILTERS_SERVICE } from '@app/tokens/filters.token';
 import { Filter, FilterType } from '@app/types/filters';
-import { AppGrpcService } from '@app/types/services';
 import { UtilsService } from '@services/utils.service';
-import { SessionsIndexService } from './sessions-index.service';
-import { SessionRaw, SessionRawColumnKey, SessionRawField, SessionRawFieldKey, SessionRawFilter, SessionRawListOptions } from '../types';
+import { SessionRawField, SessionRawFieldKey, SessionRawFiltersOr, SessionRawListOptions } from '../types';
 
 @Injectable()
-export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
-  readonly #sessionsIndexService = inject(SessionsIndexService);
+export class SessionsGrpcService{
+  readonly #sessionsFiltersService = inject(DATA_FILTERS_SERVICE);
   readonly #sessionsClient = inject(SessionsClient);
-  readonly #utilsService = inject(UtilsService<SessionRaw, SessionRawColumnKey, SessionRawField>);
+  readonly #utilsService = inject(UtilsService<SessionRawEnumField, SessionTaskOptionEnumField>);
 
   readonly sortDirections: Record<SortDirection, ArmoniKSortDirection> = {
     'asc': ArmoniKSortDirection.SORT_DIRECTION_ASC,
@@ -30,9 +29,9 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
     'duration': SessionRawEnumField.SESSION_RAW_ENUM_FIELD_DURATION,
   };
 
-  list$(options: SessionRawListOptions, filters: SessionRawFilter): Observable<ListSessionsResponse> {
+  list$(options: SessionRawListOptions, filters: SessionRawFiltersOr): Observable<ListSessionsResponse> {
 
-    const requestFilters = this.#utilsService.createFilters<SessionFilterField.AsObject>(filters, this.#sessionsIndexService.filtersDefinitions, this.#buildFilterField);
+    const requestFilters = this.#utilsService.createFilters<SessionFilterField.AsObject>(filters, this.#sessionsFiltersService.retriveFiltersDefinitions(), this.#buildFilterField);
 
     const listSessionsRequest = new ListSessionsRequest({
       page: options.pageIndex,
@@ -67,7 +66,7 @@ export class SessionsGrpcService implements AppGrpcService<SessionRaw> {
     return this.#sessionsClient.cancelSession(cancelSessionRequest);
   }
 
-  #buildFilterField(filter: Filter<SessionRaw>) {
+  #buildFilterField(filter: Filter<SessionRawEnumField, SessionTaskOptionEnumField>) {
     return (type: FilterType, field: SessionRawField) => {
 
       const filterField = {

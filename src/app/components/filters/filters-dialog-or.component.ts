@@ -3,8 +3,7 @@ import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { ColumnKey } from '@app/types/data';
-import { Filter, FiltersDefinition } from '@app/types/filters';
+import { Filter } from '@app/types/filters';
 import { IconsService } from '@services/icons.service';
 import { FiltersDialogAndComponent } from './filters-dialog-and.component';
 
@@ -20,8 +19,6 @@ import { FiltersDialogAndComponent } from './filters-dialog-and.component';
       <app-filters-dialog-and
         [first]="index === 0"
         [filter]="filtersAnd"
-        [filtersDefinitions]="filtersDefinitions"
-        [columnsLabels]="columnsLabels"
         (removeChange)="onRemoveAnd($event)"
       >
       </app-filters-dialog-and>
@@ -87,13 +84,11 @@ span {
     IconsService
   ],
 })
-export class FiltersDialogOrComponent<T extends object, R extends string, U> {
+export class FiltersDialogOrComponent<T extends number, U extends number | null = null> {
   @Input({ required: true }) first: boolean;
-  @Input({ required: true }) filtersOr: Filter<T>[];
-  @Input({ required: true }) filtersDefinitions: FiltersDefinition<R, U>[];
-  @Input({ required: true }) columnsLabels: Record<R, string> | null;
+  @Input({ required: true }) filtersOr: Filter<T, U>[];
 
-  @Output() removeChange: EventEmitter<Filter<T>[]> = new EventEmitter<Filter<T>[]>();
+  @Output() removeChange: EventEmitter<Filter<T, U>[]> = new EventEmitter<Filter<T, U>[]>();
 
   #iconsService = inject(IconsService);
 
@@ -103,13 +98,14 @@ export class FiltersDialogOrComponent<T extends object, R extends string, U> {
 
   onAdd() {
     this.filtersOr.push({
-      key: null,
+      for: null,
+      field: null,
       operator: null,
       value: null,
     });
   }
 
-  onRemoveAnd(filter: Filter<T>) {
+  onRemoveAnd(filter: Filter<T, U>) {
     const index = this.filtersOr.indexOf(filter);
     if (index > -1) {
       this.filtersOr.splice(index, 1);
